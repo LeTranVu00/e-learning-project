@@ -1,0 +1,2 @@
+/* Ẩn các thành phần của Alpine.js trước khi load xong để tránh giật hình */
+[x-cloak] { display: none !important; }
