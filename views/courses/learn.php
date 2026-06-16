@@ -33,24 +33,24 @@
                                 <ul class="space-y-3 mt-3">
                                     <?php foreach ($chapter['materials'] as $material): ?>
                                         <li x-data="{ 
-                                                done: <?= $is_done ?>, 
+                                                done: <?= isset($material['is_done']) && $material['is_done'] ? 'true' : 'false' ?>, 
                                                 loading: false, 
                                                 markDone() {
-                                                    if(this.done) return; // Nếu done rồi thì bấm không có tác dụng
-                                                    this.loading = true;  // Bật icon xoay xoay
+                                                    if(this.done) return;
+                                                    this.loading = true;
                                                     
                                                     let formData = new FormData();
-                                                    formData.append('material_id', <?= $material['id'] ?>);
+                                                    formData.append('material_id', <?= (int)$material['id'] ?>);
                                                     
-                                                    // Gửi dữ liệu ngầm lên Controller
                                                     fetch('?action=mark_done', { method: 'POST', body: formData })
                                                     .then(res => res.json())
                                                     .then(data => {
                                                         if(data.success) { 
-                                                            this.done = true; // Đổi trạng thái thành Xanh
+                                                            this.done = true;
                                                         }
-                                                        this.loading = false; // Tắt icon xoay xoay
-                                                    });
+                                                        this.loading = false;
+                                                    })
+                                                    .catch(() => { this.loading = false; });
                                                 }
                                             }" 
                                             class="flex flex-col sm:flex-row sm:items-center justify-between border border-gray-200 p-4 rounded-xl hover:border-primary/50 hover:shadow-md transition bg-white group">
@@ -74,14 +74,16 @@
                                                 :class="done ? 'bg-green-100 text-green-700 border-green-200 cursor-default' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 cursor-pointer'"
                                                 class="text-sm font-medium border px-4 py-2 rounded-lg transition whitespace-nowrap flex items-center justify-center min-w-[140px]">
                                                 
-                                                <svg x-show="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="display: none;">
+                                                <svg x-show="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" x-cloak>
                                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
 
                                                 <span x-show="!loading && !done">Mark as done</span>
                                                 
-                                                <span x-show="!loading && done" style="display: none;"><i class="fa-solid fa-check mr-1"></i> Done</span>
+                                                <span x-show="!loading && done" x-cloak>
+                                                    <i class="fa-solid fa-check mr-1"></i> Done
+                                                </span>
                                             </button>
                                         </li>
                                     <?php endforeach; ?>

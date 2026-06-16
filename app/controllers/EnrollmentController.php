@@ -53,6 +53,12 @@ class EnrollmentController {
         // Hứng danh sách khóa học vào biến $courses
         $courses = $enrollmentModel->getEnrolledCourses($user_id);
 
+        // --- ĐOẠN MỚI THÊM: Tính % cho từng khóa học ---
+        $progressModel = new Progress($db);
+        foreach ($courses as $key => $course) {
+            $courses[$key]['progress_percent'] = $progressModel->calculateProgress($user_id, $course['id']);
+        }
+
         // Gọi View để hiển thị
         require_once __DIR__ . '/../../views/layouts/header.php';
         require_once __DIR__ . '/../../views/courses/my_courses.php';

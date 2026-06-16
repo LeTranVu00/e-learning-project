@@ -4,9 +4,10 @@
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/Enrollment.php';
 require_once __DIR__ . '/../models/Curriculum.php';
+require_once __DIR__ . '/../models/Progress.php';
 
 class LearningController {
-    
+
     public function index() {
         // 1. Phải đăng nhập mới được vào
         if (!isset($_SESSION['user_id'])) {

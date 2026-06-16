@@ -36,10 +36,12 @@
                     <div class="mt-auto">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-sm font-semibold text-gray-700">Tiến độ học tập</span>
-                            <span class="text-sm font-bold text-primary">0%</span>
+                            <span class="text-sm font-bold text-primary"><?= $course['progress_percent'] ?>%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
-                            <div class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
+                            <div class="bg-primary h-2.5 rounded-full transition-all duration-1000 ease-out" 
+                                 style="width: <?= $course['progress_percent'] ?>%">
+                            </div>
                         </div>
 
                         <a href="?action=learn&id=<?= $course['id'] ?>" class="block w-full text-center border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold py-2.5 rounded-xl transition">

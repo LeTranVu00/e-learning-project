@@ -38,5 +38,32 @@ class Progress {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute(['uid' => $user_id, 'mid' => $material_id]);
     }
+
+    // Hàm tính % hoàn thành khóa học của một User
+    public function calculateProgress($user_id, $course_id) {
+        // 1. Đếm TỔNG SỐ tài liệu có trong khóa học này
+        $q_total = "SELECT COUNT(m.id) FROM materials m 
+                    JOIN chapters c ON m.chapter_id = c.id 
+                    WHERE c.course_id = :course_id";
+        $stmt_total = $this->conn->prepare($q_total);
+        $stmt_total->execute(['course_id' => $course_id]);
+        $total_materials = $stmt_total->fetchColumn();
+
+        // Tránh lỗi chia cho 0 nếu khóa học chưa có tài liệu nào
+        if ($total_materials == 0) return 0; 
+
+        // 2. Đếm SỐ TÀI LIỆU ĐÃ HOÀN THÀNH của User này trong khóa đó
+        $q_done = "SELECT COUNT(mc.id) FROM material_completions mc 
+                   JOIN materials m ON mc.material_id = m.id 
+                   JOIN chapters c ON m.chapter_id = c.id 
+                   WHERE c.course_id = :course_id AND mc.user_id = :user_id";
+        $stmt_done = $this->conn->prepare($q_done);
+        $stmt_done->execute(['course_id' => $course_id, 'user_id' => $user_id]);
+        $done_materials = $stmt_done->fetchColumn();
+
+        // 3. Tính % và làm tròn số
+        $percent = ($done_materials / $total_materials) * 100;
+        return round($percent);
+    }
 }
 ?>
