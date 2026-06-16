@@ -10,6 +10,10 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 require_once __DIR__ . '/../app/controllers/CourseController.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php'; // Kéo thêm AuthController
+require_once __DIR__ . '/../app/controllers/EnrollmentController.php';
+$enrollmentController = new EnrollmentController();
+require_once __DIR__ . '/../app/controllers/LearningController.php';
+$learningController = new LearningController();
 
 $courseController = new CourseController();
 $authController = new AuthController(); // Khởi tạo AuthController
@@ -46,7 +50,27 @@ switch ($action) {
     case 'logout':
         $authController->logout();
         break;
-        
+
+    //-----------------------------------
+    // ----- ROUTE CHO GHI DANH KHÓA HỌC -----
+    case 'enroll_course':
+        $enrollmentController->enroll();
+        break;
+    
+    // ----- ROUTE CHO TRANG KHÓA HỌC CỦA TÔI -----
+    case 'my_courses':
+        $enrollmentController->myCourses();
+        break;
+    
+    // ----- ROUTE CHO TRANG HỌC KHÓA HỌC -----
+    case 'learn':
+        $learningController->index();
+        break;
+
+    case 'mark_done':
+        $learningController->markDone();
+        break;
+
     default:
         echo "<h1 style='text-align:center; margin-top:50px;'>404 - Không tìm thấy trang</h1>";
         break;

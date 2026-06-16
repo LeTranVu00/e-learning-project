@@ -21,8 +21,10 @@
                     <?= $course['price'] > 0 ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
                 </span>
                 
-                <button onclick="alert('Chức năng ghi danh sẽ được thực hiện sau khi có hệ thống User!')" class="bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition transform hover:-translate-y-1">
-                    Đăng ký học ngay
+                <button>
+                    <a href="?action=enroll_course&id=<?= $course['id'] ?>" class="block text-center bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg w-full">
+                        Đăng ký học ngay
+                    </a>
                 </button>
             </div>
         </div>

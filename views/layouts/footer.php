@@ -34,6 +34,34 @@
     </div>
 </footer>
 
-<script src="/public/js/main.js"></script>
+
+<?php if (isset($_SESSION['success'])): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tuyệt vời!',
+                    text: '<?= $_SESSION['success'] ?>',
+                    confirmButtonColor: '#f59e0b'
+                });
+            });
+        </script>
+    <?php unset($_SESSION['success']); endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: '<?= $_SESSION['error'] ?>',
+                    confirmButtonColor: '#ef4444'
+                });
+            });
+        </script>
+    <?php unset($_SESSION['error']); endif; ?>
+
+
+    <script src="/public/js/main.js"></script>
 </body>
 </html>
