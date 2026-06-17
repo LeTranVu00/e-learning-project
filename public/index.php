@@ -87,8 +87,43 @@ switch ($action) {
         $adminController = new AdminController();
         $adminController->storeCourse();
         break;
+    
+    //Route cho trang quản lý nội dung khóa học (Chương & Bài học)
+    case 'admin_manage_content':
+        $adminController = new AdminController();
+        $adminController->manageContent();
+        break;
 
-        
+    //Route cho xử lý lưu Chương mới
+    case 'admin_store_chapter':
+        $adminController = new AdminController();
+        $adminController->storeChapter();
+        break;
+
+    //Route cho xử lý lưu Tài liệu/Bài học mới
+    case 'admin_store_material':
+        $adminController = new AdminController();
+        $adminController->storeMaterial();
+        break;
+
+    //Route cho trang quản lý danh sách khóa học
+    case 'admin_manage_courses':
+        $adminController = new AdminController();
+        $adminController->manageCoursesList();
+        break;
+    
+    //Route cho xử lý cập nhật khóa học
+    case 'admin_update_course':
+        $adminController = new AdminController();
+        $adminController->updateCourse();
+        break;
+    
+    //Route cho xử lý xóa khóa học
+    case 'admin_delete_course':
+        $adminController = new AdminController();
+        $adminController->deleteCourse();
+        break;
+
     default:
         echo "<h1 style='text-align:center; margin-top:50px;'>404 - Không tìm thấy trang</h1>";
         break;

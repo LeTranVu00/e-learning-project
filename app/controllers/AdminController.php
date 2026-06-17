@@ -15,10 +15,14 @@ class AdminController {
 
     // Hiển thị trang Tổng quan (Dashboard)
     public function dashboard() {
-        // Giao diện Admin thường có cấu trúc khác hẳn (Sidebar, Topbar)
-        // Nên mình sẽ gọi thẳng một file giao diện riêng cho nó
+        require_once __DIR__ . '/../config/Database.php';
+        $db = (new Database())->getConnection();
+        $stmt = $db->query("SELECT * FROM courses ORDER BY id DESC");
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
         require_once __DIR__ . '/../../views/admin/dashboard.php';
     }
+
     // Hàm hiển thị Form thêm khóa học mới
     public function createCourse() {
         // Phải gọi kèm header/footer riêng của Admin (nếu có), 
@@ -69,6 +73,114 @@ class AdminController {
 
             // Quay lại trang Dashboard
             header('Location: ?action=admin_dashboard');
+            exit();
+        }
+    }
+
+    // 2. Hàm hiển thị trang Quản lý nội dung (Chương & Bài) của 1 khóa học cụ thể
+    public function manageContent() {
+        if (!isset($_GET['id'])) { header('Location: ?action=admin_dashboard'); exit; }
+        $course_id = $_GET['id'];
+        
+        require_once __DIR__ . '/../config/Database.php';
+        require_once __DIR__ . '/../models/Curriculum.php';
+        $db = (new Database())->getConnection();
+        
+        // Lấy thông tin khóa học (để hiển thị tên)
+        $stmt = $db->prepare("SELECT id, title FROM courses WHERE id = ?");
+        $stmt->execute([$course_id]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Lấy cấu trúc bài giảng hiện tại (Giống y hệt luồng Học viên lúc nãy)
+        $curriculumModel = new Curriculum($db);
+        $curriculum = $curriculumModel->getCourseCurriculum($course_id);
+        
+        require_once __DIR__ . '/../../views/admin/manage_content.php';
+    }
+
+    // 3. Hàm xử lý lưu Chương mới
+    public function storeChapter() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            $stmt = $db->prepare("INSERT INTO chapters (course_id, title) VALUES (?, ?)");
+            $stmt->execute([$_POST['course_id'], $_POST['title']]);
+            
+            $_SESSION['success'] = "Đã thêm Chương học mới!";
+            header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
+            exit();
+        }
+    }
+
+    // 4. Hàm xử lý lưu Tài liệu/Bài giảng mới
+    public function storeMaterial() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            $stmt = $db->prepare("INSERT INTO materials (chapter_id, title, type, file_url) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$_POST['chapter_id'], $_POST['title'], $_POST['type'], $_POST['file_url']]);
+            
+            $_SESSION['success'] = "Đã thêm Tài liệu mới vào chương!";
+            header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
+            exit();
+        }
+    }
+
+    // Hàm hiển thị trang Tab Quản lý Khóa học
+    public function manageCoursesList() {
+        require_once __DIR__ . '/../config/Database.php';
+        $db = (new Database())->getConnection();
+        
+        // Lấy danh sách khóa học
+        $stmt = $db->query("SELECT * FROM courses ORDER BY id DESC");
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Gọi file giao diện mới
+        require_once __DIR__ . '/../../views/admin/manage_courses.php';
+    }
+
+    // Hàm xử lý CẬP NHẬT khóa học
+    public function updateCourse() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $id = $_POST['id'];
+            $title = $_POST['title'];
+            $description = $_POST['description'];
+            $thumbnail_path = $_POST['old_thumbnail']; // Mặc định giữ lại ảnh cũ
+
+            // Nếu admin có chọn upload ảnh mới
+            if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = __DIR__ . '/../../public/uploads/courses/';
+                $file_extension = pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION);
+                $new_file_name = 'course_' . time() . '_' . uniqid() . '.' . $file_extension;
+                $target_file = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($_FILES['thumbnail']['tmp_name'], $target_file)) {
+                    $thumbnail_path = '/public/uploads/courses/' . $new_file_name;
+                }
+            }
+
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            $stmt = $db->prepare("UPDATE courses SET title = ?, description = ?, thumbnail = ? WHERE id = ?");
+            $stmt->execute([$title, $description, $thumbnail_path, $id]);
+
+            $_SESSION['success'] = "Đã cập nhật khóa học thành công!";
+            header('Location: ?action=admin_manage_courses');
+            exit();
+        }
+    }
+
+    // Hàm xử lý XÓA khóa học
+    public function deleteCourse() {
+        if (isset($_GET['id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            
+            $stmt = $db->prepare("DELETE FROM courses WHERE id = ?");
+            $stmt->execute([$_GET['id']]);
+
+            $_SESSION['success'] = "Khóa học đã được xóa khỏi hệ thống!";
+            header('Location: ?action=admin_manage_courses');
             exit();
         }
     }
