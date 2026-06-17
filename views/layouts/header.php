@@ -57,6 +57,13 @@
                                     <p class="text-sm text-gray-500">Vai trò:</p>
                                     <p class="text-sm font-bold text-gray-900 truncate"><?= $_SESSION['user_role'] === 'admin' ? 'Quản trị viên' : 'Học viên' ?></p>
                                 </div>
+
+                                <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                                    <a href="?action=admin_dashboard" class="block px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 transition border-b border-gray-100 pb-2 mb-1">
+                                        <i class="fa-solid fa-shield-halved w-5"></i> Vào Trang Quản Trị
+                                    </a>
+                                <?php endif; ?>
+
                                 <a href="?action=my_courses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-primary transition">
                                     <i class="fa-solid fa-book w-5"></i> Khóa học của tôi
                                 </a>
@@ -100,6 +107,13 @@
                         <p class="text-xs text-gray-400"><?= $_SESSION['user_role'] === 'admin' ? 'Quản trị viên' : 'Học viên' ?></p>
                     </div>
                 </div>
+
+                <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                    <a href="?action=admin_dashboard" class="block text-blue-400 hover:text-blue-300 hover:bg-gray-700 px-3 py-2 rounded-md font-bold mb-1 border-b border-gray-700 pb-3">
+                        <i class="fa-solid fa-shield-halved w-5 mr-1"></i> Vào Trang Quản Trị
+                    </a>
+                <?php endif; ?>
+
                 <a href="?action=my_courses" class="block text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md font-medium">
                     <i class="fa-solid fa-book w-5 mr-1"></i> Khóa học của tôi
                 </a>

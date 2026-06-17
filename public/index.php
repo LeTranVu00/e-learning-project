@@ -14,7 +14,7 @@ require_once __DIR__ . '/../app/controllers/EnrollmentController.php';
 $enrollmentController = new EnrollmentController();
 require_once __DIR__ . '/../app/controllers/LearningController.php';
 $learningController = new LearningController();
-
+require_once __DIR__ . '/../app/controllers/AdminController.php';
 $courseController = new CourseController();
 $authController = new AuthController(); // Khởi tạo AuthController
 
@@ -66,11 +66,29 @@ switch ($action) {
     case 'learn':
         $learningController->index();
         break;
-
+    // ----- ROUTE CHO MARK DONE -----
     case 'mark_done':
         $learningController->markDone();
         break;
+    //Route cho trang Dashboard Admin
+    case 'admin_dashboard':
+        $adminController = new AdminController();
+        $adminController->dashboard();
+        break;
+    
+    //Route cho trang tạo khóa học mới
+    case 'admin_create_course':
+        $adminController = new AdminController();
+        $adminController->createCourse();
+        break;
+    
+    //Route cho xử lý lưu khóa học mới (Có upload ảnh)
+    case 'admin_store_course':
+        $adminController = new AdminController();
+        $adminController->storeCourse();
+        break;
 
+        
     default:
         echo "<h1 style='text-align:center; margin-top:50px;'>404 - Không tìm thấy trang</h1>";
         break;
