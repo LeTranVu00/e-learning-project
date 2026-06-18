@@ -42,8 +42,10 @@
               this.editData.title = course.title;
               this.editData.old_thumbnail = course.thumbnail;
               this.showEditModal = true;
-              // Bơm nội dung vào CKEditor Sửa
+              
               if(window.editorEdit) { window.editorEdit.setData(course.description || ''); }
+              if(window.editorEditBenefits) { window.editorEditBenefits.setData(course.benefits || ''); }
+              if(window.editorEditReqs) { window.editorEditReqs.setData(course.requirements || ''); }
           }
       }">
 
@@ -150,6 +152,14 @@
                             <label class="block text-sm font-semibold mb-2">Mô tả</label>
                             <textarea name="description" id="editor_add"></textarea>
                         </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold mb-2">Bạn sẽ học được gì?</label>
+                            <textarea name="benefits" id="editor_add_benefits"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold mb-2">Yêu cầu khóa học</label>
+                            <textarea name="requirements" id="editor_add_reqs"></textarea>
+                        </div>
                     </form>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 border-t flex justify-end gap-3 shrink-0">
@@ -185,6 +195,14 @@
                             <label class="block text-sm font-semibold mb-2">Mô tả</label>
                             <textarea name="description" id="editor_edit"></textarea>
                         </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold mb-2 text-gray-700">Bạn sẽ học được gì?</label>
+                            <textarea name="benefits" id="editor_edit_benefits"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold mb-2 text-gray-700">Yêu cầu khóa học</label>
+                            <textarea name="requirements" id="editor_edit_reqs"></textarea>
+                        </div>
                     </form>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 border-t flex justify-end gap-3 shrink-0">
@@ -194,18 +212,20 @@
             </div>
         </div>
     </div>
-
+    
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function() {
             const config = { toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo' ] };
             
-            // Khởi tạo CKEditor 1 (Modal Thêm)
+            // Khởi tạo cho Form Thêm
             ClassicEditor.create(document.querySelector('#editor_add'), config).catch(err => console.error(err));
+            ClassicEditor.create(document.querySelector('#editor_add_benefits'), config).catch(err => console.error(err));
+            ClassicEditor.create(document.querySelector('#editor_add_reqs'), config).catch(err => console.error(err));
             
-            // Khởi tạo CKEditor 2 (Modal Sửa) & Lưu ra biến toàn cục để Alpine chèn text vào
-            ClassicEditor.create(document.querySelector('#editor_edit'), config)
-                .then(editor => { window.editorEdit = editor; })
-                .catch(err => console.error(err));
+            // Khởi tạo cho Form Sửa
+            ClassicEditor.create(document.querySelector('#editor_edit'), config).then(editor => { window.editorEdit = editor; }).catch(err => console.error(err));
+            ClassicEditor.create(document.querySelector('#editor_edit_benefits'), config).then(editor => { window.editorEditBenefits = editor; }).catch(err => console.error(err));
+            ClassicEditor.create(document.querySelector('#editor_edit_reqs'), config).then(editor => { window.editorEditReqs = editor; }).catch(err => console.error(err));
         });
     </script>
 </body>

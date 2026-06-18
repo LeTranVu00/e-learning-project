@@ -24,6 +24,30 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
+    <style>
+    /* Ma thuật ẩn phần tử trước khi Alpine load xong */
+    [x-cloak] { display: none !important; }
+    </style>
+    <style>
+        /* 1. CHỐNG NHẢY LỆCH NGANG: Ép trình duyệt luôn giữ chỗ cho thanh cuộn */
+        html { 
+            overflow-y: scroll !important; 
+        }
+
+        /* 2. KÍCH HOẠT X-CLOAK: Bắt buộc phải có dòng này thì Alpine mới giấu được Modal/Dropdown lúc load */
+        [x-cloak] { 
+            display: none !important; 
+        }
+
+        /* 3. CHE GIẤU NHÁY TAILWIND: Thêm hiệu ứng mờ ảo (Fade-in) 0.2s để che đi độ trễ của CDN */
+        body { 
+            animation: smoothLoad 0.2s ease-in-out; 
+        }
+        @keyframes smoothLoad {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    </style>
     <link rel="stylesheet" href="/public/css/style.css">
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
@@ -39,6 +63,9 @@
             <div class="hidden md:flex space-x-8 items-center">
                 <a href="?action=home" class="text-gray-300 hover:text-primary transition px-3 py-2 font-medium">Trang chủ</a>
                 <a href="#" class="text-gray-300 hover:text-primary transition px-3 py-2 font-medium">Khóa học</a>
+                <a href="?action=forum" class="text-gray-700 hover:text-primary font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-comments"></i> Diễn đàn
+                </a>
                 
                 <div class="flex items-center ml-4 border-l border-gray-700 pl-6">
                     <?php if(isset($_SESSION['user_id'])): ?>

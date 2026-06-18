@@ -35,6 +35,12 @@ class CourseController {
             echo "<script>alert('Khóa học không tồn tại!'); window.location.href='/public/index.php';</script>";
             return;
         }
+        
+        // THÊM ĐOẠN NÀY ĐỂ LẤY DANH SÁCH CHƯƠNG & BÀI GIẢNG:
+        require_once __DIR__ . '/../models/Curriculum.php';
+        $curriculumModel = new Curriculum($db);
+        $curriculum = $curriculumModel->getCourseCurriculum($course['id']);
+        
 
         // Đưa dữ liệu ra View chi tiết
         require_once __DIR__ . '/../../views/layouts/header.php';

@@ -1,7 +1,7 @@
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-8 mb-16">
     <div class="flex flex-col md:flex-row">
         <div class="md:w-1/2">
-            <img src="<?= htmlspecialchars($course['image_url']) ?>" alt="<?= htmlspecialchars($course['title']) ?>" class="w-full h-full object-cover">
+            <img src="<?= htmlspecialchars($course['thumbnail'] ?? 'https://placehold.co/800x600?text=No+Image') ?>" alt="<?= htmlspecialchars($course['title']) ?>" class="w-full h-full object-cover">
         </div>
         
         <div class="md:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
@@ -12,116 +12,96 @@
                 <span><i class="fa-solid fa-clock text-primary mr-1"></i> 15 giờ học</span>
             </div>
             
-            <p class="text-gray-600 text-lg mb-8 leading-relaxed">
-                <?= nl2br(htmlspecialchars($course['description'])) ?>
-            </p>
+            <div class="text-gray-600 text-lg mb-8 leading-relaxed prose max-w-none">
+                <?= $course['description'] ?? 'Chưa có mô tả chi tiết cho khóa học này.' ?>
+            </div>
             
             <div class="flex items-center gap-6 mt-auto">
-                <span class="text-3xl font-extrabold <?= $course['price'] > 0 ? 'text-primary' : 'text-green-500' ?>">
-                    <?= $course['price'] > 0 ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
-                </span>
+                <span class="text-3xl font-extrabold text-green-500">Miễn phí</span>
                 
-                <button>
-                    <a href="?action=enroll_course&id=<?= $course['id'] ?>" class="block text-center bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg w-full">
-                        Đăng ký học ngay
-                    </a>
-                </button>
+                <a href="?action=enroll_course&id=<?= $course['id'] ?>" class="block text-center bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg w-full">
+                    Đăng ký học ngay
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-
-<div class="flex flex-col lg:flex-row gap-10 mt-10">
+<div class="flex flex-col lg:flex-row gap-10 mt-10 mb-16">
     
     <div class="lg:w-2/3 space-y-10">
         
         <div class="bg-gray-50 border border-gray-200 rounded-xl p-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Bạn sẽ học được gì?</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex items-start gap-3">
-                    <i class="fa-solid fa-check text-green-500 mt-1"></i>
-                    <span class="text-gray-700">Hiểu và áp dụng thuần thục mô hình MVC</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <i class="fa-solid fa-check text-green-500 mt-1"></i>
-                    <span class="text-gray-700">Tương tác Database bằng PHP Data Objects (PDO)</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <i class="fa-solid fa-check text-green-500 mt-1"></i>
-                    <span class="text-gray-700">Xây dựng hệ thống đăng nhập, phân quyền user</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <i class="fa-solid fa-check text-green-500 mt-1"></i>
-                    <span class="text-gray-700">Bảo mật website chống SQL Injection, XSS</span>
-                </div>
+            <div class="prose max-w-none text-gray-700 prose-ul:list-disc prose-ul:ml-5 prose-li:marker:text-green-500">
+                <?= $course['benefits'] ?? '<p class="italic text-gray-500">Thông tin đang được cập nhật...</p>' ?>
             </div>
         </div>
 
         <div class="mt-12">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Nội dung khóa học</h2>
-    <div class="flex justify-between items-center mb-6">
-        <p class="text-sm text-gray-500">Bao gồm 3 chương • 12 bài giảng • Tổng thời lượng 15 giờ</p>
-        <button class="text-primary text-sm font-semibold hover:underline">Mở rộng tất cả</button>
-    </div>
-    
-    <div class="flex flex-col gap-3">
-        
-        <div x-data="{ expanded: true }" class="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Nội dung khóa học</h2>
+            <div class="flex justify-between items-center mb-6">
+                <?php 
+                    $total_chapters = count($curriculum ?? []);
+                    $total_materials = 0;
+                    if(!empty($curriculum)) {
+                        foreach($curriculum as $c) { $total_materials += count($c['materials']); }
+                    }
+                ?>
+                <p class="text-sm text-gray-500">Bao gồm <?= $total_chapters ?> chương • <?= $total_materials ?> bài giảng</p>
+            </div>
             
-            <button @click="expanded = !expanded" class="w-full px-5 py-4 flex justify-between items-center text-left bg-gray-50 hover:bg-gray-100 transition duration-200">
-                <span class="font-bold text-gray-800">Chương 1: Khởi động với PHP OOP</span>
-                <i class="fa-solid fa-chevron-down text-gray-500 transition-transform duration-300" :class="expanded ? 'rotate-180' : ''"></i>
-            </button>
-            
-            <div x-show="expanded" x-collapse class="px-5 py-2 divide-y divide-gray-100">
-                <div class="py-3 flex justify-between items-center group cursor-pointer">
-                    <span class="text-gray-600 group-hover:text-primary transition">
-                        <i class="fa-solid fa-circle-play mr-2 text-primary/70"></i> 
-                        Bài 1: Lập trình hướng đối tượng là gì?
-                    </span>
-                    <span class="text-sm text-gray-400">10:30</span>
-                </div>
-                <div class="py-3 flex justify-between items-center group cursor-pointer">
-                    <span class="text-gray-600 group-hover:text-primary transition">
-                        <i class="fa-solid fa-circle-play mr-2 text-primary/70"></i> 
-                        Bài 2: Class, Object và các tính chất
-                    </span>
-                    <span class="text-sm text-gray-400">15:45</span>
-                </div>
+            <div class="flex flex-col gap-3">
+                <?php if (empty($curriculum)): ?>
+                    <div class="border border-gray-200 text-gray-500 px-6 py-8 rounded-xl text-center italic bg-white shadow-sm">
+                        Nội dung đang được cập nhật...
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($curriculum as $index => $chapter): ?>
+                        <div x-data="{ expanded: <?= $index == 0 ? 'true' : 'false' ?> }" class="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                            
+                            <button @click="expanded = !expanded" class="w-full px-5 py-4 flex justify-between items-center text-left bg-gray-50 hover:bg-gray-100 transition duration-200">
+                                <span class="font-bold text-gray-800"><?= htmlspecialchars($chapter['title']) ?></span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs text-gray-500 font-medium"><?= count($chapter['materials']) ?> bài</span>
+                                    <i class="fa-solid fa-chevron-down text-gray-500 transition-transform duration-300" :class="expanded ? 'rotate-180' : ''"></i>
+                                </div>
+                            </button>
+                            
+                            <div x-show="expanded" x-collapse x-cloak class="px-5 py-2 divide-y divide-gray-100">
+                                <?php if (empty($chapter['materials'])): ?>
+                                    <div class="py-3 text-sm text-gray-400 italic">Chưa có bài giảng.</div>
+                                <?php else: ?>
+                                    <?php foreach ($chapter['materials'] as $material): ?>
+                                        <div class="py-3 flex justify-between items-center group cursor-default">
+                                            <span class="text-gray-600 transition flex items-center gap-2">
+                                                <?php if($material['type'] == 'video'): ?>
+                                                    <i class="fa-solid fa-circle-play text-primary/70"></i>
+                                                <?php elseif($material['type'] == 'file'): ?>
+                                                    <i class="fa-solid fa-file-pdf text-red-400"></i>
+                                                <?php else: ?>
+                                                    <i class="fa-solid fa-link text-blue-400"></i>
+                                                <?php endif; ?>
+                                                <?= htmlspecialchars($material['title']) ?>
+                                            </span>
+                                            <span class="text-xs font-bold text-gray-400 uppercase bg-gray-100 px-2 py-1 rounded"><?= $material['type'] ?></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
-
-        <div x-data="{ expanded: false }" class="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
-            <button @click="expanded = !expanded" class="w-full px-5 py-4 flex justify-between items-center text-left bg-gray-50 hover:bg-gray-100 transition duration-200">
-                <span class="font-bold text-gray-800">Chương 2: Cấu trúc Database & PDO</span>
-                <i class="fa-solid fa-chevron-down text-gray-500 transition-transform duration-300" :class="expanded ? 'rotate-180' : ''"></i>
-            </button>
-            
-            <div x-show="expanded" x-collapse x-cloak class="px-5 py-2 divide-y divide-gray-100">
-                <div class="py-3 flex justify-between items-center group cursor-pointer">
-                    <span class="text-gray-600 group-hover:text-primary transition">
-                        <i class="fa-solid fa-circle-play mr-2 text-primary/70"></i> 
-                        Bài 3: Thiết kế Database E-learning
-                    </span>
-                    <span class="text-sm text-gray-400">20:15</span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
     </div>
 
     <div class="lg:w-1/3 space-y-8">
-        <div>
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Yêu cầu</h3>
-            <ul class="list-disc list-inside text-gray-600 space-y-2">
-                <li>Máy tính có kết nối Internet</li>
-                <li>Đã cài đặt XAMPP hoặc Laragon</li>
-                <li>Hiểu biết cơ bản về HTML & CSS</li>
-            </ul>
+        <div class="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Yêu cầu khóa học</h3>
+            <div class="prose max-w-none text-gray-600 prose-ul:list-disc prose-ul:ml-5 prose-li:marker:text-gray-400">
+                <?= $course['requirements'] ?? '<p class="italic text-gray-500 text-sm">Không có yêu cầu đặc biệt.</p>' ?>
+            </div>
         </div>
     </div>
 </div>

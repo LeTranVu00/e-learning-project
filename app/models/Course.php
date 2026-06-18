@@ -38,14 +38,18 @@ class Course {
     }
 
     // Hàm thêm khóa học mới vào DB
-    public function createCourse($title, $description, $thumbnail) {
-        $query = "INSERT INTO courses (title, description, thumbnail) VALUES (:title, :description, :thumbnail)";
+    // Hàm thêm khóa học mới vào DB (Đã cập nhật)
+    public function createCourse($title, $description, $thumbnail, $benefits, $requirements) {
+        $query = "INSERT INTO courses (title, description, thumbnail, benefits, requirements) 
+                  VALUES (:title, :description, :thumbnail, :benefits, :requirements)";
         $stmt = $this->conn->prepare($query);
         
         return $stmt->execute([
             ':title' => $title,
             ':description' => $description,
-            ':thumbnail' => $thumbnail
+            ':thumbnail' => $thumbnail,
+            ':benefits' => $benefits,
+            ':requirements' => $requirements
         ]);
     }
 }

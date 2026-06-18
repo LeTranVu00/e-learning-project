@@ -44,7 +44,8 @@ class AdminController {
                 
                 // Lấy đuôi file (ví dụ: .jpg, .png)
                 $file_extension = pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION);
-                
+                $benefits = $_POST['benefits'] ?? '';
+                $requirements = $_POST['requirements'] ?? '';
                 // Đổi tên file thành chuỗi ngẫu nhiên + thời gian để không bao giờ bị trùng
                 $new_file_name = 'course_' . time() . '_' . uniqid() . '.' . $file_extension;
                 
@@ -64,11 +65,10 @@ class AdminController {
             $db = (new Database())->getConnection();
             $courseModel = new Course($db);
 
-            if ($courseModel->createCourse($title, $description, $thumbnail_path)) {
-                // Dùng session success để kích hoạt SweetAlert2
+            if ($courseModel->createCourse($title, $description, $thumbnail_path, $benefits, $requirements)) {
                 $_SESSION['success'] = "Tuyệt vời! Khóa học đã được tạo thành công.";
             } else {
-                $_SESSION['error'] = "Đã xảy ra lỗi khi lưu vào cơ sở dữ liệu.";
+                $_SESSION['error'] = "Xin lỗi! Có lỗi xảy ra khi tạo khóa học.";
             }
 
             // Quay lại trang Dashboard
@@ -140,14 +140,16 @@ class AdminController {
     }
 
     // Hàm xử lý CẬP NHẬT khóa học
+    // Hàm xử lý CẬP NHẬT khóa học (Đã nâng cấp)
     public function updateCourse() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
             $title = $_POST['title'];
             $description = $_POST['description'];
-            $thumbnail_path = $_POST['old_thumbnail']; // Mặc định giữ lại ảnh cũ
+            $benefits = $_POST['benefits'] ?? '';
+            $requirements = $_POST['requirements'] ?? '';
+            $thumbnail_path = $_POST['old_thumbnail'];
 
-            // Nếu admin có chọn upload ảnh mới
             if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
                 $upload_dir = __DIR__ . '/../../public/uploads/courses/';
                 $file_extension = pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION);
@@ -161,8 +163,8 @@ class AdminController {
 
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
-            $stmt = $db->prepare("UPDATE courses SET title = ?, description = ?, thumbnail = ? WHERE id = ?");
-            $stmt->execute([$title, $description, $thumbnail_path, $id]);
+            $stmt = $db->prepare("UPDATE courses SET title = ?, description = ?, benefits = ?, requirements = ?, thumbnail = ? WHERE id = ?");
+            $stmt->execute([$title, $description, $benefits, $requirements, $thumbnail_path, $id]);
 
             $_SESSION['success'] = "Đã cập nhật khóa học thành công!";
             header('Location: ?action=admin_manage_courses');
@@ -181,6 +183,67 @@ class AdminController {
 
             $_SESSION['success'] = "Khóa học đã được xóa khỏi hệ thống!";
             header('Location: ?action=admin_manage_courses');
+            exit();
+        }
+    }
+
+    // ==========================================
+    // KHU VỰC QUẢN LÝ CHƯƠNG & BÀI GIẢNG (CRUD)
+    // ==========================================
+
+    // Cập nhật Chương
+    public function updateChapter() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            $stmt = $db->prepare("UPDATE chapters SET title = ? WHERE id = ?");
+            $stmt->execute([$_POST['title'], $_POST['id']]);
+            
+            $_SESSION['success'] = "Đã cập nhật tên Chương!";
+            header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
+            exit();
+        }
+    }
+
+    // Xóa Chương
+    public function deleteChapter() {
+        if (isset($_GET['id']) && isset($_GET['course_id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            // Xóa chương (Lưu ý: Nếu set khóa ngoại ON DELETE CASCADE trong DB thì bài giảng tự mất theo)
+            $stmt = $db->prepare("DELETE FROM chapters WHERE id = ?");
+            $stmt->execute([$_GET['id']]);
+
+            $_SESSION['success'] = "Đã xóa Chương học!";
+            header('Location: ?action=admin_manage_content&id=' . $_GET['course_id']);
+            exit();
+        }
+    }
+
+    // Cập nhật Bài giảng
+    public function updateMaterial() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            $stmt = $db->prepare("UPDATE materials SET title = ?, type = ?, file_url = ? WHERE id = ?");
+            $stmt->execute([$_POST['title'], $_POST['type'], $_POST['file_url'], $_POST['id']]);
+            
+            $_SESSION['success'] = "Đã cập nhật Bài giảng!";
+            header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
+            exit();
+        }
+    }
+
+    // Xóa Bài giảng
+    public function deleteMaterial() {
+        if (isset($_GET['id']) && isset($_GET['course_id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            $stmt = $db->prepare("DELETE FROM materials WHERE id = ?");
+            $stmt->execute([$_GET['id']]);
+
+            $_SESSION['success'] = "Đã xóa Bài giảng!";
+            header('Location: ?action=admin_manage_content&id=' . $_GET['course_id']);
             exit();
         }
     }

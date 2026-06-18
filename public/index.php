@@ -17,6 +17,11 @@ $learningController = new LearningController();
 require_once __DIR__ . '/../app/controllers/AdminController.php';
 $courseController = new CourseController();
 $authController = new AuthController(); // Khởi tạo AuthController
+// Thêm ở phần require trên cùng
+require_once __DIR__ . '/../app/controllers/ForumController.php';
+$forumController = new ForumController();
+
+
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'home';
 
@@ -123,7 +128,50 @@ switch ($action) {
         $adminController = new AdminController();
         $adminController->deleteCourse();
         break;
+    
+    //Route cho xử lý cập nhật Chương
+    case 'admin_update_chapter':
+        $adminController = new AdminController();
+        $adminController->updateChapter();
+        break;
+    case 'admin_delete_chapter':
+        $adminController = new AdminController();
+        $adminController->deleteChapter();
+        break;
+    case 'admin_update_material':
+        $adminController = new AdminController();
+        $adminController->updateMaterial();
+        break;
+    case 'admin_delete_material':
+        $adminController = new AdminController();
+        $adminController->deleteMaterial();
+        break;
+    
+    //Route cho trang quản lý danh sách bài viết thảo luận
+    case 'forum':
+        $forumController->index();
+        break;
+    case 'forum_store_post':
+        $forumController->storePost();
+        break;
 
+    // route cho xử lý cập nhật bài viết
+    case 'forum_update_post':
+        $forumController->updatePost();
+        break;
+    case 'forum_delete_post':
+        $forumController->deletePost();
+        break;
+
+
+    //Route cho trang chi tiết bài viết thảo luận
+    case 'forum_detail':
+        $forumController->detail();
+        break;
+    case 'forum_store_comment':
+        $forumController->storeComment();
+        break;
+        
     default:
         echo "<h1 style='text-align:center; margin-top:50px;'>404 - Không tìm thấy trang</h1>";
         break;
