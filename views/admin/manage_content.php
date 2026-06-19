@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script> tailwind.config = { theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } } </script>
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="bg-gray-100 font-sans p-8">
 
@@ -16,6 +17,7 @@
         showEditChapterModal: false,
         showEditMaterialModal: false,
         currentChapterId: null,
+        newMaterialType: 'video', 
         editChapterData: { id: '', title: '' },
         editMaterialData: { id: '', title: '', type: '', file_url: '' },
 
@@ -59,7 +61,7 @@
                             </h2>
                             
                             <div class="flex items-center gap-2">
-                                <button @click="currentChapterId = <?= $chapter['id'] ?>; showMaterialModal = true" title="Thêm bài giảng" class="text-sm bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg transition font-medium">
+                                <button @click="currentChapterId = <?= $chapter['id'] ?>; newMaterialType = 'video'; showMaterialModal = true" title="Thêm bài giảng" class="text-sm bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg transition font-medium">
                                     <i class="fa-solid fa-plus mr-1"></i> Thêm bài
                                 </button>
                                 <button @click="openEditChapter(<?= $chapter['id'] ?>, '<?= htmlspecialchars(addslashes($chapter['title'])) ?>')" title="Sửa Chương" class="w-8 h-8 rounded-full flex items-center justify-center bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition">
@@ -78,10 +80,10 @@
                                 <ul class="space-y-3">
                                     <?php foreach ($chapter['materials'] as $material): ?>
                                         <li class="flex items-center justify-between border border-gray-100 p-3 rounded-xl bg-gray-50 hover:bg-white hover:border-gray-300 transition group">
-                                            <span class="font-medium text-gray-700 flex items-center gap-2 truncate pr-4">
-                                                <i class="fa-solid fa-file-lines text-blue-500"></i> 
+                                            <a href="<?= htmlspecialchars($material['file_url']) ?>" target="_blank" class="font-medium text-gray-700 hover:text-primary flex items-center gap-2 truncate pr-4 transition cursor-pointer">
+                                                <i class="fa-solid <?= $material['type'] == 'file' ? 'fa-file-pdf text-red-500' : 'fa-circle-play text-blue-500' ?>"></i> 
                                                 <span class="truncate"><?= htmlspecialchars($material['title']) ?></span>
-                                            </span>
+                                            </a>
                                             
                                             <div class="flex items-center gap-2 shrink-0">
                                                 <span class="text-[10px] uppercase bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold mr-2"><?= $material['type'] ?></span>
@@ -102,7 +104,7 @@
             </div>
         <?php endif; ?>
 
-        <div x-show="showChapterModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4">
+        <div x-show="showChapterModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4">
             <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6" @click.away="showChapterModal = false">
                 <h3 class="text-xl font-bold mb-4">Thêm Chương mới</h3>
                 <form action="?action=admin_store_chapter" method="POST">
@@ -119,7 +121,7 @@
             </div>
         </div>
 
-        <div x-show="showEditChapterModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4">
+        <div x-show="showEditChapterModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4">
             <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6" @click.away="showEditChapterModal = false">
                 <h3 class="text-xl font-bold mb-4">Sửa tên Chương</h3>
                 <form action="?action=admin_update_chapter" method="POST">
@@ -137,10 +139,11 @@
             </div>
         </div>
 
-        <div x-show="showMaterialModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4">
+        <div x-show="showMaterialModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4">
             <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6" @click.away="showMaterialModal = false">
                 <h3 class="text-xl font-bold mb-4">Thêm Bài giảng</h3>
-                <form action="?action=admin_store_material" method="POST" class="space-y-4">
+                
+                <form action="?action=admin_store_material" method="POST" enctype="multipart/form-data" class="space-y-4">
                     <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                     <input type="hidden" name="chapter_id" :value="currentChapterId">
                     
@@ -148,18 +151,35 @@
                         <label class="block text-sm font-semibold mb-2">Tên bài giảng</label>
                         <input type="text" name="title" required class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
                     </div>
+                    
                     <div>
                         <label class="block text-sm font-semibold mb-2">Loại định dạng</label>
-                        <select name="type" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
-                            <option value="video">Video (YouTube/Drive)</option>
-                            <option value="file">File (PDF/PPT/ZIP)</option>
-                            <option value="link">Đường dẫn ngoài</option>
+                        <select name="type" x-model="newMaterialType" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                            <option value="video">🎥 Video (YouTube/Drive)</option>
+                            <option value="link">🔗 Đường dẫn ngoài</option>
+                            <option value="file">📂 Slide / File (Tải lên)</option>
                         </select>
                     </div>
-                    <div>
+                    
+                    <div x-show="newMaterialType === 'video' || newMaterialType === 'link'" x-collapse>
                         <label class="block text-sm font-semibold mb-2">Đường dẫn (URL)</label>
-                        <input type="text" name="file_url" required class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                        <input type="url" name="file_url" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
                     </div>
+
+                    <div x-show="newMaterialType === 'file'" x-collapse>
+                        <label class="block text-sm font-semibold mb-2">Tải file lên</label>
+                        <div class="flex items-center justify-center w-full">
+                            <label for="dropzone-file-add" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500">
+                                    <i class="fa-solid fa-cloud-arrow-up text-2xl mb-2 text-primary"></i>
+                                    <p class="text-sm"><span class="font-semibold">Nhấn để chọn file</span></p>
+                                    <p class="text-[10px] text-gray-400 mt-1">PDF, PPT, ZIP (Max: 10MB)</p>
+                                </div>
+                                <input id="dropzone-file-add" type="file" name="slide_file" accept=".pdf,.ppt,.pptx,.zip,.rar" class="hidden" />
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="flex justify-end gap-2 mt-4">
                         <button type="button" @click="showMaterialModal = false" class="px-4 py-2 bg-gray-200 rounded-xl font-medium">Hủy</button>
                         <button type="submit" class="px-4 py-2 bg-dark text-white rounded-xl font-medium">Lưu Bài giảng</button>
@@ -168,10 +188,11 @@
             </div>
         </div>
 
-        <div x-show="showEditMaterialModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4">
+        <div x-show="showEditMaterialModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4">
             <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6" @click.away="showEditMaterialModal = false">
                 <h3 class="text-xl font-bold mb-4">Sửa Bài giảng</h3>
-                <form action="?action=admin_update_material" method="POST" class="space-y-4">
+                
+                <form action="?action=admin_update_material" method="POST" enctype="multipart/form-data" class="space-y-4">
                     <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                     <input type="hidden" name="id" :value="editMaterialData.id">
                     
@@ -179,18 +200,39 @@
                         <label class="block text-sm font-semibold mb-2">Tên bài giảng</label>
                         <input type="text" name="title" x-model="editMaterialData.title" required class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
                     </div>
+                    
                     <div>
                         <label class="block text-sm font-semibold mb-2">Loại định dạng</label>
                         <select name="type" x-model="editMaterialData.type" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
-                            <option value="video">Video</option>
-                            <option value="file">File</option>
-                            <option value="link">Link</option>
+                            <option value="video">🎥 Video</option>
+                            <option value="link">🔗 Link</option>
+                            <option value="file">📂 Slide / File tải lên</option>
                         </select>
                     </div>
-                    <div>
+                    
+                    <div x-show="editMaterialData.type === 'video' || editMaterialData.type === 'link'" x-collapse>
                         <label class="block text-sm font-semibold mb-2">Đường dẫn (URL)</label>
-                        <input type="text" name="file_url" x-model="editMaterialData.file_url" required class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                        <input type="text" name="file_url" x-model="editMaterialData.file_url" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
                     </div>
+
+                    <div x-show="editMaterialData.type === 'file'" x-collapse>
+                        <label class="block text-sm font-semibold mb-2">File hiện tại:</label>
+                        <a :href="editMaterialData.file_url" target="_blank" class="text-sm text-blue-500 hover:underline mb-3 block truncate">
+                            <i class="fa-solid fa-download mr-1"></i> <span x-text="editMaterialData.file_url"></span>
+                        </a>
+                        
+                        <label class="block text-sm font-semibold mb-2 text-gray-600">Tải file mới (Bỏ qua nếu giữ nguyên)</label>
+                        <div class="flex items-center justify-center w-full">
+                            <label for="dropzone-file-edit" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500">
+                                    <i class="fa-solid fa-arrow-up-from-bracket mb-1 text-primary"></i>
+                                    <p class="text-xs">Nhấn để chọn file thay thế</p>
+                                </div>
+                                <input id="dropzone-file-edit" type="file" name="slide_file" accept=".pdf,.ppt,.pptx,.zip,.rar" class="hidden" />
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="flex justify-end gap-2 mt-4">
                         <button type="button" @click="showEditMaterialModal = false" class="px-4 py-2 bg-gray-200 rounded-xl font-medium">Hủy</button>
                         <button type="submit" class="px-4 py-2 bg-primary text-white rounded-xl font-medium">Lưu thay đổi</button>

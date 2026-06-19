@@ -111,5 +111,22 @@ class Forum {
         return $stmt->execute([$post_id, $user_id, $parent_id, $content]);
     }
     
+
+    // Lấy Top bài viết nổi bật (Nhiều bình luận nhất) cho Trang chủ
+    public function getTopPosts($limit = 3) {
+        $query = "SELECT p.*, u.fullname as author_name, u.avatar as author_avatar, u.role as author_role,
+                 (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count 
+                 FROM posts p 
+                 JOIN users u ON p.user_id = u.id 
+                 ORDER BY comment_count DESC, p.created_at DESC 
+                 LIMIT :limit";
+                 
+        $stmt = $this->conn->prepare($query);
+        // Bắt buộc dùng PDO::PARAM_INT khi bind giá trị cho LIMIT
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

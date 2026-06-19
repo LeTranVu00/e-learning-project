@@ -87,7 +87,78 @@
         <?php endforeach; ?>
     </div>
 </section>
+<?php
+require_once __DIR__ . '/../app/models/Forum.php'; 
+        
+        // 2. Khởi tạo Model và lấy Top 3 bài viết
+        $forumModel = new Forum($db);
+        $topPosts = $forumModel->getTopPosts(3);
+?>
+<section class="py-16 bg-gray-50 border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="flex justify-between items-end mb-10">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Thảo luận nổi bật</h2>
+                <p class="text-gray-600">Những chủ đề đang được quan tâm và bình luận nhiều nhất.</p>
+            </div>
+            <a href="?action=forum" class="text-primary hover:text-yellow-600 font-bold hidden sm:flex items-center gap-2 transition">
+                Xem diễn đàn <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <?php if(!empty($topPosts)): ?>
+                <?php foreach($topPosts as $post): ?>
+                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 p-6 transition duration-300 flex flex-col h-full group">
+                        
+                        <div class="flex items-center gap-3 mb-4">
+                            <?php 
+                                // Logic Avatar thông minh giống hệt trang Diễn đàn
+                                $postAvatar = !empty($post['author_avatar']) 
+                                    ? $post['author_avatar'] 
+                                    : 'https://ui-avatars.com/api/?name=' . urlencode($post['author_name']) . '&background=random';
+                            ?>
+                            <img src="<?= htmlspecialchars($postAvatar) ?>" class="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900"><?= htmlspecialchars($post['author_name']) ?></h4>
+                                <p class="text-xs text-gray-500"><i class="fa-regular fa-clock mr-1"></i> <?= date('d/m/Y', strtotime($post['created_at'])) ?></p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-grow mb-6">
+                            <a href="?action=forum_detail&id=<?= $post['id'] ?>" class="font-bold text-xl text-gray-900 group-hover:text-primary transition line-clamp-2 mb-3">
+                                <?= htmlspecialchars($post['title']) ?>
+                            </a>
+                            <p class="text-gray-600 text-sm line-clamp-3 leading-relaxed">
+                                <?= strip_tags($post['content']) ?>
+                            </p>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-100 flex justify-between items-center mt-auto">
+                            <span class="text-sm font-bold bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                                <i class="fa-regular fa-comment-dots"></i> <?= $post['comment_count'] ?>
+                            </span>
+                            <a href="?action=forum_detail&id=<?= $post['id'] ?>" class="text-sm font-bold text-gray-400 hover:text-primary transition">Đọc chi tiết &rarr;</a>
+                        </div>
+                        
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-gray-100 border-dashed">
+                    <p class="text-gray-500 italic">Chưa có bài thảo luận nào sôi nổi.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <div class="mt-8 text-center sm:hidden">
+            <a href="?action=forum" class="inline-flex justify-center items-center gap-2 bg-gray-900 text-white font-bold py-3 px-6 rounded-xl hover:bg-gray-800 transition w-full">
+                Vào Diễn đàn <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+    </div>
+</section>
 <!-- CALL TO ACTION (BOTTOM) -->
 <section class="bg-gray-900 rounded-2xl p-10 text-center relative overflow-hidden mb-10">
     <div class="relative z-10 max-w-2xl mx-auto">

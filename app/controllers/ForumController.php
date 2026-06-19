@@ -7,8 +7,6 @@ require_once __DIR__ . '/../models/Forum.php';
 class ForumController {
     
     // Trang chủ Diễn đàn
-    // Trang chủ Diễn đàn
-    // Trang chủ Diễn đàn
     public function index() {
         if (!isset($_SESSION['user_id'])) {
             $_SESSION['error'] = "Vui lòng đăng nhập để tham gia diễn đàn!";
