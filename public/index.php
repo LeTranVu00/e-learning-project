@@ -6,19 +6,24 @@ session_start();
 // Gọi autoload để tự động nạp toàn bộ thư viện trong folder vendor
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Load biến môi trường từ file .env
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
 // ... (Các dòng require Controller cũ ở dưới giữ nguyên)
 
 require_once __DIR__ . '/../app/controllers/CourseController.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php'; // Kéo thêm AuthController
 require_once __DIR__ . '/../app/controllers/EnrollmentController.php';
-$enrollmentController = new EnrollmentController();
 require_once __DIR__ . '/../app/controllers/LearningController.php';
-$learningController = new LearningController();
 require_once __DIR__ . '/../app/controllers/AdminController.php';
+require_once __DIR__ . '/../app/controllers/ForumController.php';
+require_once __DIR__ . '/../app/controllers/PaymentController.php';
+
 $courseController = new CourseController();
 $authController = new AuthController(); // Khởi tạo AuthController
-// Thêm ở phần require trên cùng
-require_once __DIR__ . '/../app/controllers/ForumController.php';
+$enrollmentController = new EnrollmentController();
+$learningController = new LearningController();
 $forumController = new ForumController();
 
 
@@ -41,6 +46,13 @@ switch ($action) {
     case 'register':
         $authController->showRegister();
         break;
+    // Route xử lý form POST đăng nhập / đăng ký thường
+    case 'handle_login':
+        $authController->handleLogin();
+        break;
+    case 'handle_register':
+        $authController->handleRegister();
+        break;
     // ----------------------------------
 
     // ----- ROUTE CHO GOOGLE SSO -----
@@ -57,6 +69,17 @@ switch ($action) {
         break;
 
     //-----------------------------------
+    // ----- ROUTE CHO THANH TOÁN VNPAY -----
+    case 'pay':
+        $paymentController = new PaymentController();
+        $paymentController->createPayment();
+        break;
+    case 'vnpay_return':
+        $paymentController = new PaymentController();
+        $paymentController->vnpayReturn();
+        break;
+    // ------------------------------------
+
     // ----- ROUTE CHO GHI DANH KHÓA HỌC -----
     case 'enroll_course':
         $enrollmentController->enroll();

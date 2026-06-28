@@ -67,7 +67,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Tổng Khóa Học</p>
-                        <p class="text-2xl font-bold text-gray-800">12</p>
+                        <p class="text-2xl font-bold text-gray-800"><?= $total_courses ?? 0 ?></p>
                     </div>
                 </div>
                 
@@ -77,7 +77,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Tổng Học Viên</p>
-                        <p class="text-2xl font-bold text-gray-800">1,250</p>
+                        <p class="text-2xl font-bold text-gray-800"><?= number_format($total_users ?? 0) ?></p>
                     </div>
                 </div>
 
@@ -87,7 +87,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Lượt Ghi Danh</p>
-                        <p class="text-2xl font-bold text-gray-800">3,480</p>
+                        <p class="text-2xl font-bold text-gray-800"><?= number_format($total_enrollments ?? 0) ?></p>
                     </div>
                 </div>
             </div>

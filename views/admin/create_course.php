@@ -27,15 +27,32 @@
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h1 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Tạo khóa học mới 🚀</h1>
 
-            <form action="?action=admin_store_course" method="POST" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tên khóa học <span class="text-red-500">*</span></label>
-                    <input type="text" name="title" required placeholder="VD: Lập trình PHP & MySQL từ con số 0" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+            <form action="?action=admin_store_course" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tên khóa học <span class="text-red-500">*</span></label>
+                        <input type="text" name="title" required placeholder="VD: Lập trình PHP & MySQL từ con số 0" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Giá khóa học (VNĐ) <span class="text-red-500">*</span></label>
+                        <input type="number" name="price" required min="0" value="0" step="1000" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Đường dẫn ảnh bìa (Thumbnail URL)</label>
-                    <input type="url" name="thumbnail" placeholder="VD: https://domain.com/image.jpg" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Ảnh bìa (Thumbnail)</label>
+                    <input type="file" name="thumbnail" accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Bạn sẽ học được gì? (Benefits)</label>
+                    <textarea name="benefits" id="course_benefits"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Yêu cầu khóa học (Requirements)</label>
+                    <textarea name="requirements" id="course_requirements"></textarea>
                 </div>
 
                 <div>
@@ -53,13 +70,13 @@
     </div>
 
     <script>
-        ClassicEditor
-            .create(document.querySelector('#course_description'), {
-                toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo' ]
-            })
-            .catch(error => {
-                console.error(error);
-            });
+        const editorConfig = {
+            toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo' ]
+        };
+        
+        ClassicEditor.create(document.querySelector('#course_description'), editorConfig).catch(error => console.error(error));
+        ClassicEditor.create(document.querySelector('#course_benefits'), editorConfig).catch(error => console.error(error));
+        ClassicEditor.create(document.querySelector('#course_requirements'), editorConfig).catch(error => console.error(error));
     </script>
 </body>
 </html>

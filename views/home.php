@@ -66,19 +66,25 @@
         <?php foreach($courses as $course): ?>
         <div class="bg-white rounded-xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition duration-300 flex flex-col group">
             <div class="relative overflow-hidden">
-                <img src="<?= htmlspecialchars($course['image_url']) ?>" alt="<?= htmlspecialchars($course['title']) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
+                <?php
+                    // Sử dụng ảnh mặc định nếu khóa học chưa có thumbnail
+                    $thumbnail = !empty($course['thumbnail'])
+                        ? htmlspecialchars($course['thumbnail'])
+                        : 'https://placehold.co/600x400/f59e0b/white?text=E-Learning';
+                ?>
+                <img src="<?= $thumbnail ?>" alt="<?= htmlspecialchars($course['title']) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
             </div>
             <div class="p-5 flex-grow flex flex-col justify-between">
                 <div>
                     <div class="text-xs text-primary font-bold tracking-wider uppercase mb-2">Khóa học</div>
                     <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2"><?= htmlspecialchars($course['title']) ?></h3>
                     <div class="text-sm text-gray-500 mb-4 line-clamp-2">
-                        <?= htmlspecialchars($course['description']) ?>
+                        <?= htmlspecialchars(strip_tags($course['description'])) ?>
                     </div>
                 </div>
                 <div class="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
-                    <span class="text-xl font-bold <?= $course['price'] > 0 ? 'text-primary' : 'text-green-500' ?>">
-                        <?= $course['price'] > 0 ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
+                    <span class="text-xl font-bold <?= (isset($course['price']) && $course['price'] > 0) ? 'text-primary' : 'text-green-500' ?>">
+                        <?= (isset($course['price']) && $course['price'] > 0) ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
                     </span>
                     <a href="?action=detail&id=<?= $course['id'] ?>" class="text-primary hover:text-white border border-primary hover:bg-primary font-medium py-1.5 px-4 rounded transition">Xem chi tiết</a>
                 </div>

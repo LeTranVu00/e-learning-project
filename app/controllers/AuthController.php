@@ -12,12 +12,12 @@ class AuthController {
         // Khởi tạo đối tượng Google Client
         $this->client = new Google\Client();
         
-        // ⚠️ BỎ CLIENT ID VÀ SECRET CỦA BRO VÀO ĐÂY ⚠️
-        $this->client->setClientId('251298581512-qhta5ksrk1urn4lc0cai82kuj95lnsh1.apps.googleusercontent.com');
-        $this->client->setClientSecret('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');
+        // Đọc credentials từ biến môi trường (.env)
+        $this->client->setClientId($_ENV['GOOGLE_CLIENT_ID']);
+        $this->client->setClientSecret($_ENV['GOOGLE_CLIENT_SECRET']);
         
         // Đường dẫn Google sẽ trả dữ liệu về
-        $this->client->setRedirectUri('http://localhost/e-learning-project/public/index.php?action=google_callback');
+        $this->client->setRedirectUri($_ENV['GOOGLE_REDIRECT_URI']);
         
         // Yêu cầu Google cung cấp Email và Profile
         $this->client->addScope("email");
@@ -34,10 +34,98 @@ class AuthController {
         require_once __DIR__ . '/../../views/layouts/footer.php';
     }
 
+    // Xử lý đăng nhập thường bằng email + mật khẩu
+    public function handleLogin() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?action=login');
+            exit();
+        }
+
+        $email    = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (empty($email) || empty($password)) {
+            $_SESSION['error'] = 'Vui lòng nhập đầy đủ email và mật khẩu!';
+            header('Location: ?action=login');
+            exit();
+        }
+
+        $db = (new Database())->getConnection();
+        $userModel = new User($db);
+        $user = $userModel->findByEmail($email);
+
+        // Kiểm tra user tồn tại và mật khẩu khớp
+        if ($user && !empty($user['password']) && password_verify($password, $user['password'])) {
+            $_SESSION['user_id']     = $user['id'];
+            $_SESSION['user_name']   = $user['fullname'];
+            $_SESSION['user_role']   = $user['role'];
+            $_SESSION['user_avatar'] = $user['avatar'] ?? '';
+            header('Location: ?action=home');
+        } else {
+            $_SESSION['error'] = 'Email hoặc mật khẩu không đúng!';
+            header('Location: ?action=login');
+        }
+        exit();
+    }
+
     public function showRegister() {
         require_once __DIR__ . '/../../views/layouts/header.php';
         require_once __DIR__ . '/../../views/auth/register.php';
         require_once __DIR__ . '/../../views/layouts/footer.php';
+    }
+
+    // Xử lý đăng ký tài khoản mới bằng email + mật khẩu
+    public function handleRegister() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?action=register');
+            exit();
+        }
+
+        $fullname        = trim($_POST['fullname'] ?? '');
+        $email           = trim($_POST['email'] ?? '');
+        $password        = $_POST['password'] ?? '';
+        $password_confirm = $_POST['password_confirm'] ?? '';
+
+        // Kiểm tra dữ liệu đầu vào
+        if (empty($fullname) || empty($email) || empty($password)) {
+            $_SESSION['error'] = 'Vui lòng nhập đầy đủ thông tin!';
+            header('Location: ?action=register');
+            exit();
+        }
+        if ($password !== $password_confirm) {
+            $_SESSION['error'] = 'Mật khẩu xác nhận không khớp!';
+            header('Location: ?action=register');
+            exit();
+        }
+
+        $db = (new Database())->getConnection();
+        $userModel = new User($db);
+
+        // Kiểm tra email đã tồn tại chưa
+        $existingUser = $userModel->findByEmail($email);
+        if ($existingUser) {
+            // Phân biệt rõ: tài khoản Google SSO vs tài khoản thường
+            if (!empty($existingUser['google_id'])) {
+                $_SESSION['error'] = 'Email này đã đăng ký bằng Google! Vui lòng đăng nhập bằng nút “Tiếp tục với Google”.';
+            } else {
+                $_SESSION['error'] = 'Email này đã được sử dụng! Vui lòng đăng nhập hoặc dùng email khác.';
+            }
+            header('Location: ?action=register');
+            exit();
+        }
+
+        // Hash mật khẩu an toàn rồi mới lưu
+        $hashed = password_hash($password, PASSWORD_BCRYPT);
+        $userId = $userModel->createUser($fullname, $email, $hashed);
+
+        if ($userId) {
+            $_SESSION['success'] = 'Tạo tài khoản thành công! Hãy đăng nhập.';
+            header('Location: ?action=login');
+        } else {
+            $_SESSION['error'] = 'Có lỗi xảy ra, vui lòng thử lại!';
+            header('Location: ?action=register');
+        }
+        exit();
     }
 
     // ==========================================
@@ -45,6 +133,7 @@ class AuthController {
     // ==========================================
 
     public function googleLogin() {
+        $_SESSION['google_intent'] = $_GET['intent'] ?? 'login';
         $authUrl = $this->client->createAuthUrl();
         header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
         exit();
@@ -74,10 +163,30 @@ class AuthController {
             // Kiểm tra xem User này đã tồn tại chưa
             $user = $userModel->findByEmail($email);
 
+            $intent = $_SESSION['google_intent'] ?? 'login';
+
             if (!$user) {
-                // Nếu chưa có, tự động đăng ký tài khoản mới
-                $userModel->createGoogleUser($name, $email, $google_id);
-                $user = $userModel->findByEmail($email);
+                if ($intent === 'register') {
+                    // Cập nhật: Tự động tạo tài khoản mới nếu bấm "Tiếp tục với Google" bên trang Đăng ký
+                    $userId = $userModel->createGoogleUser($name, $email, $google_id, $avatar);
+                    if ($userId) {
+                        $_SESSION['user_id'] = $userId;
+                        $_SESSION['user_name'] = $name;
+                        $_SESSION['user_role'] = 'student';
+                        $_SESSION['user_avatar'] = $avatar;
+                        header('Location: index.php?action=home');
+                        exit();
+                    } else {
+                        $_SESSION['error'] = 'Lỗi tạo tài khoản từ Google.';
+                        header('Location: ?action=register');
+                        exit();
+                    }
+                } else {
+                    // Gmail chưa có tài khoản → Yêu cầu đăng ký trước
+                    $_SESSION['error'] = 'Tài khoản Google “' . htmlspecialchars($email) . '” chưa được đăng ký. Vui lòng đăng ký tài khoản trước!';
+                    header('Location: ?action=register');
+                    exit();
+                }
             }
 
             // Lưu thông tin vào Session

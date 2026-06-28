@@ -1,0 +1,9 @@
+﻿# Biến môi trường - KHÔNG bao giờ commit file này!
+.env
+
+# Thư viện Composer
+/vendor/
+
+# Upload của người dùng
+/public/uploads/*
+!/public/uploads/.gitkeep

@@ -17,6 +17,12 @@ class AdminController {
     public function dashboard() {
         require_once __DIR__ . '/../config/Database.php';
         $db = (new Database())->getConnection();
+
+        // Lấy số liệu thật từ DB
+        $total_courses    = $db->query("SELECT COUNT(*) FROM courses")->fetchColumn();
+        $total_users      = $db->query("SELECT COUNT(*) FROM users WHERE role = 'student'")->fetchColumn();
+        $total_enrollments = $db->query("SELECT COUNT(*) FROM enrollments")->fetchColumn();
+
         $stmt = $db->query("SELECT * FROM courses ORDER BY id DESC");
         $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
@@ -34,7 +40,11 @@ class AdminController {
     public function storeCourse() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $title = $_POST['title'];
+            $price = isset($_POST['price']) ? intval($_POST['price']) : 0;
             $description = $_POST['description']; // CKEditor tự động gom nội dung HTML vào đây
+            // BUG FIX: Khai báo trước khối if upload để không bị undefined khi không có file
+            $benefits = $_POST['benefits'] ?? '';
+            $requirements = $_POST['requirements'] ?? '';
             $thumbnail_path = '';
 
             // XỬ LÝ UPLOAD ẢNH
@@ -44,8 +54,6 @@ class AdminController {
                 
                 // Lấy đuôi file (ví dụ: .jpg, .png)
                 $file_extension = pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION);
-                $benefits = $_POST['benefits'] ?? '';
-                $requirements = $_POST['requirements'] ?? '';
                 // Đổi tên file thành chuỗi ngẫu nhiên + thời gian để không bao giờ bị trùng
                 $new_file_name = 'course_' . time() . '_' . uniqid() . '.' . $file_extension;
                 
@@ -54,8 +62,8 @@ class AdminController {
 
                 // Thực hiện di chuyển file từ bộ nhớ tạm vào thư mục
                 if (move_uploaded_file($_FILES['thumbnail']['tmp_name'], $target_file)) {
-                    // Đường dẫn tương đối để lưu vào Database và hiển thị ra Web
-                    $thumbnail_path = '/public/uploads/courses/' . $new_file_name;
+                    // Đường dẫn tương đối từ public/index.php
+                    $thumbnail_path = 'uploads/courses/' . $new_file_name;
                 }
             }
 
@@ -65,7 +73,7 @@ class AdminController {
             $db = (new Database())->getConnection();
             $courseModel = new Course($db);
 
-            if ($courseModel->createCourse($title, $description, $thumbnail_path, $benefits, $requirements)) {
+            if ($courseModel->createCourse($title, $description, $thumbnail_path, $benefits, $requirements, $price)) {
                 $_SESSION['success'] = "Tuyệt vời! Khóa học đã được tạo thành công.";
             } else {
                 $_SESSION['error'] = "Xin lỗi! Có lỗi xảy ra khi tạo khóa học.";
@@ -103,8 +111,10 @@ class AdminController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
-            $stmt = $db->prepare("INSERT INTO chapters (course_id, title) VALUES (?, ?)");
-            $stmt->execute([$_POST['course_id'], $_POST['title']]);
+            // BUG FIX: Thêm order_num để có thể sắp xếp chương học
+            $stmt = $db->prepare("INSERT INTO chapters (course_id, title, order_num) VALUES (?, ?, ?)");
+            $order_num = $_POST['order_num'] ?? 0;
+            $stmt->execute([$_POST['course_id'], $_POST['title'], $order_num]);
             
             $_SESSION['success'] = "Đã thêm Chương học mới!";
             header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
@@ -115,10 +125,36 @@ class AdminController {
     // 4. Hàm xử lý lưu Tài liệu/Bài giảng mới
     public function storeMaterial() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Kiểm tra xem POST request có bị huỷ do vượt quá giới hạn dung lượng không
+            if (empty($_POST)) {
+                $_SESSION['error'] = "File tải lên quá lớn! Vui lòng chọn file nhỏ hơn hoặc cấu hình lại server.";
+                header('Location: ?action=admin_manage_courses'); // Hoặc lấy referer nếu có
+                exit();
+            }
+
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
-            $stmt = $db->prepare("INSERT INTO materials (chapter_id, title, type, file_url) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$_POST['chapter_id'], $_POST['title'], $_POST['type'], $_POST['file_url']]);
+            
+            $content = $_POST['content'] ?? '';
+            
+            // Xử lý upload file nếu người dùng chọn loại "file"
+            if ($_POST['type'] === 'file' && isset($_FILES['slide_file']) && $_FILES['slide_file']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = __DIR__ . '/../../public/uploads/materials/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+                
+                $file_extension = pathinfo($_FILES['slide_file']['name'], PATHINFO_EXTENSION);
+                $new_file_name = 'mat_' . time() . '_' . uniqid() . '.' . $file_extension;
+                $target_file = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($_FILES['slide_file']['tmp_name'], $target_file)) {
+                    $content = 'uploads/materials/' . $new_file_name;
+                }
+            }
+
+            $stmt = $db->prepare("INSERT INTO materials (chapter_id, title, type, content) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$_POST['chapter_id'], $_POST['title'], $_POST['type'], $content]);
             
             $_SESSION['success'] = "Đã thêm Tài liệu mới vào chương!";
             header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
@@ -145,6 +181,7 @@ class AdminController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
             $title = $_POST['title'];
+            $price = isset($_POST['price']) ? intval($_POST['price']) : 0;
             $description = $_POST['description'];
             $benefits = $_POST['benefits'] ?? '';
             $requirements = $_POST['requirements'] ?? '';
@@ -157,14 +194,14 @@ class AdminController {
                 $target_file = $upload_dir . $new_file_name;
 
                 if (move_uploaded_file($_FILES['thumbnail']['tmp_name'], $target_file)) {
-                    $thumbnail_path = '/public/uploads/courses/' . $new_file_name;
+                    $thumbnail_path = 'uploads/courses/' . $new_file_name;
                 }
             }
 
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
-            $stmt = $db->prepare("UPDATE courses SET title = ?, description = ?, benefits = ?, requirements = ?, thumbnail = ? WHERE id = ?");
-            $stmt->execute([$title, $description, $benefits, $requirements, $thumbnail_path, $id]);
+            $stmt = $db->prepare("UPDATE courses SET title = ?, price = ?, description = ?, benefits = ?, requirements = ?, thumbnail = ? WHERE id = ?");
+            $stmt->execute([$title, $price, $description, $benefits, $requirements, $thumbnail_path, $id]);
 
             $_SESSION['success'] = "Đã cập nhật khóa học thành công!";
             header('Location: ?action=admin_manage_courses');
@@ -223,10 +260,35 @@ class AdminController {
     // Cập nhật Bài giảng
     public function updateMaterial() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (empty($_POST)) {
+                $_SESSION['error'] = "File tải lên quá lớn! Vui lòng chọn file nhỏ hơn hoặc cấu hình lại server.";
+                header('Location: ?action=admin_manage_courses');
+                exit();
+            }
+
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
-            $stmt = $db->prepare("UPDATE materials SET title = ?, type = ?, file_url = ? WHERE id = ?");
-            $stmt->execute([$_POST['title'], $_POST['type'], $_POST['file_url'], $_POST['id']]);
+            
+            $content = $_POST['content'] ?? '';
+            
+            // Xử lý upload file mới nếu người dùng chọn loại "file" và có file tải lên
+            if ($_POST['type'] === 'file' && isset($_FILES['slide_file']) && $_FILES['slide_file']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = __DIR__ . '/../../public/uploads/materials/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+                
+                $file_extension = pathinfo($_FILES['slide_file']['name'], PATHINFO_EXTENSION);
+                $new_file_name = 'mat_' . time() . '_' . uniqid() . '.' . $file_extension;
+                $target_file = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($_FILES['slide_file']['tmp_name'], $target_file)) {
+                    $content = 'uploads/materials/' . $new_file_name;
+                }
+            }
+
+            $stmt = $db->prepare("UPDATE materials SET title = ?, type = ?, content = ? WHERE id = ?");
+            $stmt->execute([$_POST['title'], $_POST['type'], $content, $_POST['id']]);
             
             $_SESSION['success'] = "Đã cập nhật Bài giảng!";
             header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);

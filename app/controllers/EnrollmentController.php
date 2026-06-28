@@ -3,6 +3,8 @@
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/Enrollment.php';
+// BUG FIX: Thêm require Progress.php vì myCourses() dùng class Progress
+require_once __DIR__ . '/../models/Progress.php';
 
 class EnrollmentController {
     

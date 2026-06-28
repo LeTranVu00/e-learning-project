@@ -19,18 +19,18 @@
         currentChapterId: null,
         newMaterialType: 'video', 
         editChapterData: { id: '', title: '' },
-        editMaterialData: { id: '', title: '', type: '', file_url: '' },
+        editMaterialData: { id: '', title: '', type: '', content: '' },
 
         openEditChapter(id, title) {
             this.editChapterData.id = id;
             this.editChapterData.title = title;
             this.showEditChapterModal = true;
         },
-        openEditMaterial(id, title, type, file_url) {
+        openEditMaterial(id, title, type, content) {
             this.editMaterialData.id = id;
             this.editMaterialData.title = title;
             this.editMaterialData.type = type;
-            this.editMaterialData.file_url = file_url;
+            this.editMaterialData.content = content;
             this.showEditMaterialModal = true;
         }
     }">
@@ -80,14 +80,14 @@
                                 <ul class="space-y-3">
                                     <?php foreach ($chapter['materials'] as $material): ?>
                                         <li class="flex items-center justify-between border border-gray-100 p-3 rounded-xl bg-gray-50 hover:bg-white hover:border-gray-300 transition group">
-                                            <a href="<?= htmlspecialchars($material['file_url']) ?>" target="_blank" class="font-medium text-gray-700 hover:text-primary flex items-center gap-2 truncate pr-4 transition cursor-pointer">
+                                            <a href="<?= htmlspecialchars($material['content']) ?>" target="_blank" class="font-medium text-gray-700 hover:text-primary flex items-center gap-2 truncate pr-4 transition cursor-pointer">
                                                 <i class="fa-solid <?= $material['type'] == 'file' ? 'fa-file-pdf text-red-500' : 'fa-circle-play text-blue-500' ?>"></i> 
                                                 <span class="truncate"><?= htmlspecialchars($material['title']) ?></span>
                                             </a>
                                             
                                             <div class="flex items-center gap-2 shrink-0">
                                                 <span class="text-[10px] uppercase bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold mr-2"><?= $material['type'] ?></span>
-                                                <button @click="openEditMaterial(<?= $material['id'] ?>, '<?= htmlspecialchars(addslashes($material['title'])) ?>', '<?= $material['type'] ?>', '<?= htmlspecialchars(addslashes($material['file_url'])) ?>')" title="Sửa bài" class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-yellow-500 hover:text-white transition opacity-0 group-hover:opacity-100">
+                                                <button @click="openEditMaterial(<?= $material['id'] ?>, '<?= htmlspecialchars(addslashes($material['title'])) ?>', '<?= $material['type'] ?>', '<?= htmlspecialchars(addslashes($material['content'])) ?>')" title="Sửa bài" class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-yellow-500 hover:text-white transition opacity-0 group-hover:opacity-100">
                                                     <i class="fa-solid fa-pen-to-square text-[10px]"></i>
                                                 </button>
                                                 <a href="?action=admin_delete_material&id=<?= $material['id'] ?>&course_id=<?= $course['id'] ?>" onclick="return confirm('Xóa bài giảng này?');" title="Xóa bài" class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white transition opacity-0 group-hover:opacity-100">
@@ -163,7 +163,7 @@
                     
                     <div x-show="newMaterialType === 'video' || newMaterialType === 'link'" x-collapse>
                         <label class="block text-sm font-semibold mb-2">Đường dẫn (URL)</label>
-                        <input type="url" name="file_url" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                        <input type="url" name="content" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
                     </div>
 
                     <div x-show="newMaterialType === 'file'" x-collapse>
@@ -212,13 +212,13 @@
                     
                     <div x-show="editMaterialData.type === 'video' || editMaterialData.type === 'link'" x-collapse>
                         <label class="block text-sm font-semibold mb-2">Đường dẫn (URL)</label>
-                        <input type="text" name="file_url" x-model="editMaterialData.file_url" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                        <input type="text" name="content" x-model="editMaterialData.content" class="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary">
                     </div>
 
                     <div x-show="editMaterialData.type === 'file'" x-collapse>
                         <label class="block text-sm font-semibold mb-2">File hiện tại:</label>
-                        <a :href="editMaterialData.file_url" target="_blank" class="text-sm text-blue-500 hover:underline mb-3 block truncate">
-                            <i class="fa-solid fa-download mr-1"></i> <span x-text="editMaterialData.file_url"></span>
+                        <a :href="editMaterialData.content" target="_blank" class="text-sm text-blue-500 hover:underline mb-3 block truncate">
+                            <i class="fa-solid fa-download mr-1"></i> <span x-text="editMaterialData.content"></span>
                         </a>
                         
                         <label class="block text-sm font-semibold mb-2 text-gray-600">Tải file mới (Bỏ qua nếu giữ nguyên)</label>

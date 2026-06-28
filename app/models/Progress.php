@@ -25,18 +25,23 @@ class Progress {
         return $stmt->fetchAll(PDO::FETCH_COLUMN); 
     }
 
-    // Đánh dấu hoàn thành (Insert vào DB)
-    public function markAsDone($user_id, $material_id) {
-        // Kiểm tra xem đã click trước đó chưa (chống spam)
+    // Bật/Tắt trạng thái hoàn thành (Toggle)
+    public function toggleDone($user_id, $material_id) {
         $check = "SELECT id FROM material_completions WHERE user_id = :uid AND material_id = :mid";
         $stmt = $this->conn->prepare($check);
         $stmt->execute(['uid' => $user_id, 'mid' => $material_id]);
-        if($stmt->rowCount() > 0) return true;
-
-        // Nếu chưa thì chèn dòng mới
-        $query = "INSERT INTO material_completions (user_id, material_id) VALUES (:uid, :mid)";
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute(['uid' => $user_id, 'mid' => $material_id]);
+        
+        if($stmt->rowCount() > 0) {
+            // Đã có -> Xóa đi
+            $del = "DELETE FROM material_completions WHERE user_id = :uid AND material_id = :mid";
+            $this->conn->prepare($del)->execute(['uid' => $user_id, 'mid' => $material_id]);
+            return 'removed';
+        } else {
+            // Chưa có -> Thêm vào
+            $insert = "INSERT INTO material_completions (user_id, material_id) VALUES (:uid, :mid)";
+            $this->conn->prepare($insert)->execute(['uid' => $user_id, 'mid' => $material_id]);
+            return 'added';
+        }
     }
 
     // Hàm tính % hoàn thành khóa học của một User

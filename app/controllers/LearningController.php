@@ -49,6 +49,8 @@ class LearningController {
 
     // Hàm xử lý khi bấm nút Mark as done (Gọi ngầm bằng AJAX)
     public function markDone() {
+        // BUG FIX: Set header JSON để JS có thể parse đúng kiểu
+        header('Content-Type: application/json');
         if (!isset($_SESSION['user_id']) || !isset($_POST['material_id'])) {
             // Trả về JSON thông báo lỗi
             echo json_encode(['success' => false, 'message' => 'Lỗi xác thực']);
@@ -58,11 +60,11 @@ class LearningController {
         $db = (new Database())->getConnection();
         $progressModel = new Progress($db);
         
-        // Lưu vào DB
-        $success = $progressModel->markAsDone($_SESSION['user_id'], $_POST['material_id']);
+        // Lưu vào DB (hoặc xóa nếu đã tồn tại)
+        $action = $progressModel->toggleDone($_SESSION['user_id'], $_POST['material_id']);
         
-        // Trả về JSON báo thành công
-        echo json_encode(['success' => $success]);
+        // Trả về JSON báo thành công và hành động
+        echo json_encode(['success' => true, 'action' => $action]);
         exit();
     }
 }

@@ -32,7 +32,8 @@ class CourseController {
 
         // Nếu người dùng nhập bậy ID không có thật -> Báo lỗi hoặc quay về trang chủ
         if(!$course) {
-            echo "<script>alert('Khóa học không tồn tại!'); window.location.href='/public/index.php';</script>";
+            // BUG FIX: Dùng ?action=home thay vì /public/index.php để tránh 404
+            echo "<script>alert('Khóa học không tồn tại!'); window.location.href='?action=home';</script>";
             return;
         }
         

@@ -19,16 +19,32 @@ class User {
     }
 
     // Tạo tài khoản mới bằng dữ liệu từ Google (Không cần mật khẩu)
-    public function createGoogleUser($fullname, $email, $google_id) {
-        $query = "INSERT INTO users (fullname, email, google_id, role) VALUES (:fullname, :email, :google_id, 'student')";
+    public function createGoogleUser($fullname, $email, $google_id, $avatar = null) {
+        $query = "INSERT INTO users (fullname, email, google_id, avatar, role) VALUES (:fullname, :email, :google_id, :avatar, 'student')";
         $stmt = $this->conn->prepare($query);
         
         $stmt->bindParam(':fullname', $fullname);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':google_id', $google_id);
+        $stmt->bindParam(':avatar', $avatar);
         
         if($stmt->execute()) {
             return $this->conn->lastInsertId(); // Trả về ID vừa tạo
+        }
+        return false;
+    }
+
+    // Tạo tài khoản mới bằng email + mật khẩu thường
+    public function createUser($fullname, $email, $hashed_password) {
+        $query = "INSERT INTO users (fullname, email, password, role) VALUES (:fullname, :email, :password, 'student')";
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(':fullname', $fullname);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $hashed_password);
+
+        if ($stmt->execute()) {
+            return $this->conn->lastInsertId();
         }
         return false;
     }

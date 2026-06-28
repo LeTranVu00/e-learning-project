@@ -17,11 +17,19 @@
             </div>
             
             <div class="flex items-center gap-6 mt-auto">
-                <span class="text-3xl font-extrabold text-green-500">Miễn phí</span>
+                <span class="text-3xl font-extrabold <?= (isset($course['price']) && $course['price'] > 0) ? 'text-primary' : 'text-green-500' ?>">
+                    <?= (isset($course['price']) && $course['price'] > 0) ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
+                </span>
                 
-                <a href="?action=enroll_course&id=<?= $course['id'] ?>" class="block text-center bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg w-full">
-                    Đăng ký học ngay
-                </a>
+                <?php if (isset($course['price']) && $course['price'] > 0): ?>
+                    <a href="?action=pay&id=<?= $course['id'] ?>" class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg w-full flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-credit-card"></i> Thanh toán qua VNPAY
+                    </a>
+                <?php else: ?>
+                    <a href="?action=enroll_course&id=<?= $course['id'] ?>" class="block text-center bg-primary hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg w-full">
+                        Đăng ký học ngay
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
     </div>

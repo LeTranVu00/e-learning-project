@@ -62,7 +62,7 @@
             
             <div class="hidden md:flex space-x-8 items-center">
                 <a href="?action=home" class="text-gray-300 hover:text-primary transition px-3 py-2 font-medium">Trang chủ</a>
-                <a href="#" class="text-gray-300 hover:text-primary transition px-3 py-2 font-medium">Khóa học</a>
+                <a href="?action=home" class="text-gray-300 hover:text-primary transition px-3 py-2 font-medium">Khóa học</a>
                 <a href="?action=forum" class="text-gray-700 hover:text-primary font-medium transition flex items-center gap-2">
                     <i class="fa-solid fa-comments"></i> Diễn đàn
                 </a>
@@ -122,7 +122,7 @@
     <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" class="md:hidden bg-gray-800 border-t border-gray-700" x-collapse x-cloak>
         <div class="px-4 pt-2 pb-4 space-y-2">
             <a href="?action=home" class="block text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md font-medium">Trang chủ</a>
-            <a href="#" class="block text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md font-medium">Khóa học</a>
+            <a href="?action=home" class="block text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md font-medium">Khóa học</a>
             <hr class="border-gray-700 my-2">
 
             <?php if(isset($_SESSION['user_id'])): ?>

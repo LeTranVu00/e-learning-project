@@ -2,19 +2,27 @@
 // File: app/config/Database.php
 
 class Database {
-    private $host = "127.0.0.1"; 
-    private $port = "3307"; // Thêm khai báo port 3307 ở đây
-    private $db_name = "e_learning_db";
-    private $username = "root";
-    private $password = ""; 
+    private $host;
+    private $port;
+    private $db_name;
+    private $username;
+    private $password;
     
     public $conn;
+
+    public function __construct() {
+        // Đọc thông tin kết nối từ biến môi trường (.env)
+        $this->host     = $_ENV['DB_HOST']     ?? '127.0.0.1';
+        $this->port     = $_ENV['DB_PORT']     ?? '3306';
+        $this->db_name  = $_ENV['DB_NAME']     ?? 'e_learning_db';
+        $this->username = $_ENV['DB_USERNAME'] ?? 'root';
+        $this->password = $_ENV['DB_PASSWORD'] ?? '';
+    }
 
     public function getConnection() {
         $this->conn = null;
 
         try {
-            // Đưa thêm biến port vào chuỗi DSN kết nối
             $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name;
             
             $this->conn = new PDO($dsn, $this->username, $this->password);
@@ -28,4 +36,4 @@ class Database {
         return $this->conn;
     }
 }
-?>
+?>

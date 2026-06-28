@@ -35,11 +35,12 @@
           sidebarOpen: true, 
           showAddModal: false, 
           showEditModal: false,
-          editData: { id: '', title: '', old_thumbnail: '' },
+          editData: { id: '', title: '', price: 0, old_thumbnail: '' },
           // Hàm này chạy khi bấm nút Sửa
           openEdit(course) {
               this.editData.id = course.id;
               this.editData.title = course.title;
+              this.editData.price = course.price || 0;
               this.editData.old_thumbnail = course.thumbnail;
               this.showEditModal = true;
               
@@ -140,9 +141,15 @@
                 </div>
                 <div class="px-6 py-6 overflow-y-auto grow">
                     <form action="?action=admin_store_course" method="POST" id="formAdd" class="space-y-6" enctype="multipart/form-data">
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold mb-2">Tên khóa học <span class="text-red-500">*</span></label>
-                            <input type="text" name="title" required class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:col-span-2">
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Tên khóa học <span class="text-red-500">*</span></label>
+                                <input type="text" name="title" required class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Giá khóa học (VNĐ) <span class="text-red-500">*</span></label>
+                                <input type="number" name="price" required min="0" value="0" step="1000" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                            </div>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-semibold mb-2">Ảnh bìa khóa học <span class="text-red-500">*</span></label>
@@ -183,9 +190,15 @@
                         <input type="hidden" name="id" :value="editData.id">
                         <input type="hidden" name="old_thumbnail" :value="editData.old_thumbnail">
 
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold mb-2">Tên khóa học <span class="text-red-500">*</span></label>
-                            <input type="text" name="title" x-model="editData.title" required class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:col-span-2">
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Tên khóa học <span class="text-red-500">*</span></label>
+                                <input type="text" name="title" x-model="editData.title" required class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Giá khóa học (VNĐ) <span class="text-red-500">*</span></label>
+                                <input type="number" name="price" x-model="editData.price" required min="0" step="1000" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                            </div>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-semibold mb-2">Ảnh bìa (Bỏ trống nếu không muốn đổi)</label>

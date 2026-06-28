@@ -4,7 +4,20 @@
         <p class="text-gray-500 mt-2">Bắt đầu hành trình học tập của bạn ngay hôm nay</p>
     </div>
 
-    <form action="?action=process_register" method="POST" class="space-y-5">
+    <?php if (!empty($_SESSION['error'])): ?>
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+            <?= htmlspecialchars($_SESSION['error']) ?>
+            <?php unset($_SESSION['error']); ?>
+        </div>
+    <?php endif; ?>
+    <?php if (!empty($_SESSION['success'])): ?>
+        <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+            <?= htmlspecialchars($_SESSION['success']) ?>
+            <?php unset($_SESSION['success']); ?>
+        </div>
+    <?php endif; ?>
+
+    <form action="?action=handle_register" method="POST" class="space-y-5">
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
             <input type="text" name="fullname" required placeholder="ví dụ: Lê Trần" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
@@ -20,6 +33,11 @@
             <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Xác nhận mật khẩu</label>
+            <input type="password" name="password_confirm" required placeholder="••••••••" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+        </div>
+
         <button type="submit" class="w-full bg-primary hover:bg-yellow-600 text-white font-bold py-2.5 rounded-lg transition shadow-md">
             Đăng ký tài khoản
         </button>
@@ -32,7 +50,7 @@
     </div>
 
     <div class="mt-6">
-        <a href="?action=google_login" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition shadow-sm">
+        <a href="?action=google_login&intent=register" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition shadow-sm">
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google Logo">
             Tiếp tục với Google
         </a>
