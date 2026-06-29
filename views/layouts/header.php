@@ -47,10 +47,13 @@
             0% { opacity: 0; }
             100% { opacity: 1; }
         }
+        /* Hide scrollbar for tab overflow on mobile */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
     <link rel="stylesheet" href="/public/css/style.css">
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen overflow-x-hidden">
 
 <nav x-data="{ mobileMenuOpen: false }" class="bg-dark text-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

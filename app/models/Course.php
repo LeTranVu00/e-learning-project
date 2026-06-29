@@ -37,21 +37,31 @@ class Course {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Hàm thêm khóa học mới vào DB
-    // Hàm thêm khóa học mới vào DB (Đã cập nhật)
-    public function createCourse($title, $description, $thumbnail, $benefits, $requirements, $price = 0) {
-        $query = "INSERT INTO courses (title, price, description, thumbnail, benefits, requirements) 
-                  VALUES (:title, :price, :description, :thumbnail, :benefits, :requirements)";
+    // Hàm thêm khóa học mới vào DB (Đã cập nhật đầy đủ fields)
+    public function createCourse($title, $description, $thumbnail, $benefits, $requirements, $price = 0, $original_price = 0, $instructor = '', $level = 'Sơ cấp', $duration_hours = 0, $total_lessons = 0, $language = 'Tiếng Việt', $start_date = null, $schedule = null, $study_time = null, $contact_phone = null) {
+        $query = "INSERT INTO courses (title, price, original_price, description, thumbnail, benefits, requirements, instructor, level, duration_hours, total_lessons, language, start_date, schedule, study_time, contact_phone) 
+                  VALUES (:title, :price, :original_price, :description, :thumbnail, :benefits, :requirements, :instructor, :level, :duration_hours, :total_lessons, :language, :start_date, :schedule, :study_time, :contact_phone)";
         $stmt = $this->conn->prepare($query);
         
         return $stmt->execute([
-            ':title' => $title,
-            ':price' => $price,
-            ':description' => $description,
-            ':thumbnail' => $thumbnail,
-            ':benefits' => $benefits,
-            ':requirements' => $requirements
+            ':title'          => $title,
+            ':price'          => $price,
+            ':original_price' => $original_price,
+            ':description'    => $description,
+            ':thumbnail'      => $thumbnail,
+            ':benefits'       => $benefits,
+            ':requirements'   => $requirements,
+            ':instructor'     => $instructor,
+            ':level'          => $level,
+            ':duration_hours' => $duration_hours,
+            ':total_lessons'  => $total_lessons,
+            ':language'       => $language,
+            ':start_date'     => $start_date,
+            ':schedule'       => $schedule,
+            ':study_time'     => $study_time,
+            ':contact_phone'  => $contact_phone,
         ]);
     }
 }
+
 ?>

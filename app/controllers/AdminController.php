@@ -39,12 +39,23 @@ class AdminController {
     // Hàm xử lý lưu khóa học mới (Có upload ảnh)
     public function storeCourse() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $title = $_POST['title'];
-            $price = isset($_POST['price']) ? intval($_POST['price']) : 0;
-            $description = $_POST['description']; // CKEditor tự động gom nội dung HTML vào đây
+            $title          = $_POST['title'];
+            $price          = isset($_POST['price']) ? intval($_POST['price']) : 0;
+            $original_price = isset($_POST['original_price']) ? intval($_POST['original_price']) : 0;
+            $description    = $_POST['description'];
             // BUG FIX: Khai báo trước khối if upload để không bị undefined khi không có file
-            $benefits = $_POST['benefits'] ?? '';
-            $requirements = $_POST['requirements'] ?? '';
+            $benefits       = $_POST['benefits'] ?? '';
+            $requirements   = $_POST['requirements'] ?? '';
+            $instructor     = $_POST['instructor']     ?? '';
+            $level          = $_POST['level']          ?? 'Sơ cấp';
+            $duration_hours = isset($_POST['duration_hours']) ? intval($_POST['duration_hours']) : 0;
+            $total_lessons  = isset($_POST['total_lessons'])  ? intval($_POST['total_lessons'])  : 0;
+            $language       = $_POST['language']       ?? 'Tiếng Việt';
+            // Card sidebar fields
+            $start_date     = !empty($_POST['start_date'])    ? $_POST['start_date']    : null;
+            $schedule       = $_POST['schedule']       ?? null;
+            $study_time     = $_POST['study_time']     ?? null;
+            $contact_phone  = $_POST['contact_phone']  ?? null;
             $thumbnail_path = '';
 
             // XỬ LÝ UPLOAD ẢNH
@@ -73,7 +84,7 @@ class AdminController {
             $db = (new Database())->getConnection();
             $courseModel = new Course($db);
 
-            if ($courseModel->createCourse($title, $description, $thumbnail_path, $benefits, $requirements, $price)) {
+            if ($courseModel->createCourse($title, $description, $thumbnail_path, $benefits, $requirements, $price, $original_price, $instructor, $level, $duration_hours, $total_lessons, $language, $start_date, $schedule, $study_time, $contact_phone)) {
                 $_SESSION['success'] = "Tuyệt vời! Khóa học đã được tạo thành công.";
             } else {
                 $_SESSION['error'] = "Xin lỗi! Có lỗi xảy ra khi tạo khóa học.";
@@ -175,16 +186,26 @@ class AdminController {
         require_once __DIR__ . '/../../views/admin/manage_courses.php';
     }
 
-    // Hàm xử lý CẬP NHẬT khóa học
-    // Hàm xử lý CẬP NHẬT khóa học (Đã nâng cấp)
+    // Hàm xử lý CẬP NHẬT khóa học (Đã nâng cấp với fields mới)
     public function updateCourse() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id = $_POST['id'];
-            $title = $_POST['title'];
-            $price = isset($_POST['price']) ? intval($_POST['price']) : 0;
-            $description = $_POST['description'];
-            $benefits = $_POST['benefits'] ?? '';
-            $requirements = $_POST['requirements'] ?? '';
+            $id             = $_POST['id'];
+            $title          = $_POST['title'];
+            $price          = isset($_POST['price']) ? intval($_POST['price']) : 0;
+            $original_price = isset($_POST['original_price']) ? intval($_POST['original_price']) : 0;
+            $description    = $_POST['description'];
+            $benefits       = $_POST['benefits'] ?? '';
+            $requirements   = $_POST['requirements'] ?? '';
+            $instructor     = $_POST['instructor']     ?? '';
+            $level          = $_POST['level']          ?? 'Sơ cấp';
+            $duration_hours = isset($_POST['duration_hours']) ? intval($_POST['duration_hours']) : 0;
+            $total_lessons  = isset($_POST['total_lessons'])  ? intval($_POST['total_lessons'])  : 0;
+            $language       = $_POST['language']       ?? 'Tiếng Việt';
+            // Card sidebar fields
+            $start_date     = !empty($_POST['start_date'])    ? $_POST['start_date']    : null;
+            $schedule       = $_POST['schedule']       ?? null;
+            $study_time     = $_POST['study_time']     ?? null;
+            $contact_phone  = $_POST['contact_phone']  ?? null;
             $thumbnail_path = $_POST['old_thumbnail'];
 
             if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
@@ -200,8 +221,8 @@ class AdminController {
 
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
-            $stmt = $db->prepare("UPDATE courses SET title = ?, price = ?, description = ?, benefits = ?, requirements = ?, thumbnail = ? WHERE id = ?");
-            $stmt->execute([$title, $price, $description, $benefits, $requirements, $thumbnail_path, $id]);
+            $stmt = $db->prepare("UPDATE courses SET title = ?, price = ?, original_price = ?, description = ?, benefits = ?, requirements = ?, thumbnail = ?, instructor = ?, level = ?, duration_hours = ?, total_lessons = ?, language = ?, start_date = ?, schedule = ?, study_time = ?, contact_phone = ? WHERE id = ?");
+            $stmt->execute([$title, $price, $original_price, $description, $benefits, $requirements, $thumbnail_path, $instructor, $level, $duration_hours, $total_lessons, $language, $start_date, $schedule, $study_time, $contact_phone, $id]);
 
             $_SESSION['success'] = "Đã cập nhật khóa học thành công!";
             header('Location: ?action=admin_manage_courses');
