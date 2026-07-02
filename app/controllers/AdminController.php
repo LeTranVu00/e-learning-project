@@ -23,7 +23,70 @@ class AdminController {
         $total_users      = $db->query("SELECT COUNT(*) FROM users WHERE role = 'student'")->fetchColumn();
         $total_enrollments = $db->query("SELECT COUNT(*) FROM enrollments")->fetchColumn();
 
-        $stmt = $db->query("SELECT * FROM courses ORDER BY id DESC");
+        // Tổng doanh thu
+        $total_revenue = $db->query("SELECT SUM(c.price) FROM enrollments e JOIN courses c ON e.course_id = c.id")->fetchColumn() ?: 0;
+
+        // Dữ liệu biểu đồ Doanh thu & Học viên theo tháng (Năm hiện tại)
+        $monthly_stats = $db->query("
+            SELECT MONTH(e.enrolled_at) as month, SUM(c.price) as revenue, COUNT(e.id) as enrollments
+            FROM enrollments e 
+            JOIN courses c ON e.course_id = c.id
+            WHERE YEAR(e.enrolled_at) = YEAR(CURRENT_DATE())
+            GROUP BY MONTH(e.enrolled_at)
+            ORDER BY month ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // Khởi tạo mảng 12 tháng với giá trị 0
+        $chart_months = ['Th 1', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7', 'Th 8', 'Th 9', 'Th 10', 'Th 11', 'Th 12'];
+        $chart_revenue = array_fill(0, 12, 0);
+        $chart_enrollments = array_fill(0, 12, 0);
+
+        foreach ($monthly_stats as $stat) {
+            $idx = $stat['month'] - 1;
+            $chart_revenue[$idx] = (int) $stat['revenue'];
+            $chart_enrollments[$idx] = (int) $stat['enrollments'];
+        }
+
+        // Dữ liệu biểu đồ Khóa học nổi bật (Top 5)
+        $top_courses = $db->query("
+            SELECT c.title, COUNT(e.id) as count
+            FROM enrollments e
+            JOIN courses c ON e.course_id = c.id
+            GROUP BY c.id
+            ORDER BY count DESC
+            LIMIT 5
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        $chart_course_labels = [];
+        $chart_course_series = [];
+        foreach ($top_courses as $tc) {
+            $chart_course_labels[] = $tc['title'];
+            $chart_course_series[] = (int) $tc['count'];
+        }
+
+        $search = $_GET['search'] ?? '';
+        $sort   = $_GET['sort'] ?? 'latest';
+        $query  = "SELECT * FROM courses WHERE 1=1";
+        $params = [];
+        
+        if (!empty($search)) {
+            $query .= " AND (title LIKE ? OR instructor LIKE ?)";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+        }
+        
+        if ($sort === 'oldest') {
+            $query .= " ORDER BY id ASC";
+        } elseif ($sort === 'price_high') {
+            $query .= " ORDER BY price DESC";
+        } elseif ($sort === 'price_low') {
+            $query .= " ORDER BY price ASC";
+        } else {
+            $query .= " ORDER BY id DESC"; // latest
+        }
+        
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
         $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         require_once __DIR__ . '/../../views/admin/dashboard.php';
@@ -176,14 +239,47 @@ class AdminController {
     // Hàm hiển thị trang Tab Quản lý Khóa học
     public function manageCoursesList() {
         require_once __DIR__ . '/../config/Database.php';
+        require_once __DIR__ . '/../models/Course.php';
         $db = (new Database())->getConnection();
         
-        // Lấy danh sách khóa học
-        $stmt = $db->query("SELECT * FROM courses ORDER BY id DESC");
-        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $courseModel = new Course($db);
+        
+        // Cấu hình phân trang
+        $limit = 10;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $offset = ($page - 1) * $limit;
+        
+        // Lấy query string filters
+        $search = $_GET['search'] ?? '';
+        $sort   = $_GET['sort'] ?? 'latest';
+        $date   = $_GET['date'] ?? '';
+
+        $totalCourses = $courseModel->getTotalCoursesCount($search, $date);
+        $totalPages = ceil($totalCourses / $limit);
+
+        // Lấy danh sách khóa học có phân trang & lọc
+        $courses = $courseModel->getAllCourses($limit, $offset, $search, $sort, $date);
         
         // Gọi file giao diện mới
         require_once __DIR__ . '/../../views/admin/manage_courses.php';
+    }
+
+    // Đánh dấu khóa học nổi bật
+    public function toggleCourseFeatured() {
+        if (isset($_GET['id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../models/Course.php';
+            $db = (new Database())->getConnection();
+            
+            $courseModel = new Course($db);
+            $courseModel->toggleFeatured($_GET['id']);
+            
+            $_SESSION['success'] = "Đã cập nhật trạng thái khóa học nổi bật!";
+        }
+        $page = isset($_GET['page']) ? '&page=' . $_GET['page'] : '';
+        header('Location: ?action=admin_manage_courses' . $page);
+        exit();
     }
 
     // Hàm xử lý CẬP NHẬT khóa học (Đã nâng cấp với fields mới)
@@ -327,6 +423,196 @@ class AdminController {
 
             $_SESSION['success'] = "Đã xóa Bài giảng!";
             header('Location: ?action=admin_manage_content&id=' . $_GET['course_id']);
+            exit();
+        }
+    }
+
+    // ==========================================
+    // KHU VỰC QUẢN LÝ BÌNH LUẬN
+    // ==========================================
+
+    // Hiển thị danh sách bài viết để quản lý bình luận
+    public function manageCommentsList() {
+        require_once __DIR__ . '/../config/Database.php';
+        require_once __DIR__ . '/../models/Forum.php';
+        $db = (new Database())->getConnection();
+        
+        $forumModel = new Forum($db);
+        
+        $search = $_GET['search'] ?? '';
+        $sort   = $_GET['sort'] ?? 'latest';
+        $date   = $_GET['date'] ?? '';
+        
+        // Lấy danh sách posts thay vì comments
+        $posts = $forumModel->getAllPosts($search, $sort, null, $date);
+        
+        require_once __DIR__ . '/../../views/admin/manage_comments.php';
+    }
+
+    // Hiển thị iframe chi tiết bài viết và bình luận cho Modal
+    public function adminPostComments() {
+        if (!isset($_GET['id'])) {
+            exit('Không tìm thấy bài viết');
+        }
+        $post_id = $_GET['id'];
+        require_once __DIR__ . '/../config/Database.php';
+        require_once __DIR__ . '/../models/Forum.php';
+        $db = (new Database())->getConnection();
+        $forumModel = new Forum($db);
+
+        $post = $forumModel->getPostById($post_id);
+        if (!$post) exit('Bài viết đã bị xóa');
+
+        $comment_sort = 'latest';
+        $all_comments = $forumModel->getComments($post_id, $_SESSION['user_id'] ?? null, $comment_sort);
+        $commentTree = [];
+        // Hàm này $getFlatReplies ở view sẽ tự xử lý mảng
+        foreach ($all_comments as $c) {
+            $parentId = $c['parent_id'] ?: 0;
+            $commentTree[$parentId][] = $c;
+        }
+
+        require_once __DIR__ . '/../../views/admin/blank_layout_header.php';
+        // Biến này giúp detail.php nhận biết đang ở chế độ admin modal
+        $isAdminMode = true;
+        // Ẩn nút trở về diễn đàn vì đang ở trong iframe modal
+        echo '<style> a[href="?action=forum"] { display: none !important; } </style>';
+        // Hiển thị thông báo JS (vì đang dùng _buildCommentHtml cần biến showToast)
+        echo '<script>
+        window.showToast = function(msg, type) { 
+            window.parent.postMessage({action: "toast", msg: msg, type: type}, "*"); 
+        };
+        const CURRENT_USER = {
+            id: ' . ($_SESSION['user_id'] ?? 'null') . ',
+            fullname: "' . htmlspecialchars($_SESSION['user_name'] ?? '') . '",
+            avatar: "' . htmlspecialchars($_SESSION['user_avatar'] ?? '') . '",
+            role: "' . htmlspecialchars($_SESSION['user_role'] ?? 'user') . '"
+        };
+        </script>';
+        require_once __DIR__ . '/../../views/forum/detail.php';
+        require_once __DIR__ . '/../../views/admin/blank_layout_footer.php';
+    }
+
+    // Cập nhật nội dung bình luận
+    public function updateComment() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../models/Forum.php';
+            $db = (new Database())->getConnection();
+            
+            $forumModel = new Forum($db);
+            $forumModel->updateComment($_POST['id'], $_POST['content']);
+            
+            $_SESSION['success'] = "Đã cập nhật bình luận thành công!";
+            header('Location: ?action=admin_manage_comments');
+            exit();
+        }
+    }
+
+    // Xóa bình luận
+    public function deleteComment() {
+        if (isset($_GET['id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../models/Forum.php';
+            $db = (new Database())->getConnection();
+            
+            $forumModel = new Forum($db);
+            $forumModel->deleteComment($_GET['id']);
+
+            $_SESSION['success'] = "Bình luận đã được xóa khỏi hệ thống!";
+            header('Location: ?action=admin_manage_comments');
+            exit();
+        }
+    }
+
+    // ==========================================
+    // KHU VỰC QUẢN LÝ NGƯỜI DÙNG (USERS)
+    // ==========================================
+    
+    public function manageUsersList() {
+        require_once __DIR__ . '/../config/Database.php';
+        require_once __DIR__ . '/../Models/User.php';
+        $db = (new Database())->getConnection();
+        
+        $userModel = new User($db);
+        
+        $search = $_GET['search'] ?? '';
+        $role   = $_GET['role'] ?? 'all';
+        $sort   = $_GET['sort'] ?? 'latest';
+        
+        // Phân trang
+        $limit = 10;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $offset = ($page - 1) * $limit;
+        
+        $totalUsers = $userModel->getTotalUsersCount($search, $role);
+        $totalPages = ceil($totalUsers / $limit);
+        
+        $users = $userModel->getAllUsers($limit, $offset, $search, $role, $sort);
+        
+        require_once __DIR__ . '/../Models/Enrollment.php';
+        $enrollmentModel = new Enrollment($db);
+        foreach ($users as &$user) {
+            $user['enrolled_courses'] = $enrollmentModel->getEnrolledCourses($user['id']);
+        }
+        unset($user); // Fix PHP bug with references
+
+        
+        require_once __DIR__ . '/../../views/admin/manage_users.php';
+    }
+
+    public function updateUser() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../Models/User.php';
+            $db = (new Database())->getConnection();
+            
+            $userModel = new User($db);
+            $userModel->updateUser($_POST['id'], $_POST['fullname'], $_POST['role']);
+            
+            $_SESSION['success'] = "Cập nhật người dùng thành công!";
+            header('Location: ?action=admin_manage_users');
+            exit();
+        }
+    }
+
+    public function deleteUser() {
+        if (isset($_GET['id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../Models/User.php';
+            $db = (new Database())->getConnection();
+            
+            // Không cho phép xóa chính mình (nếu cần thì thêm check $_SESSION['user_id'] != $_GET['id'])
+            if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $_GET['id']) {
+                $_SESSION['error'] = "Bạn không thể xóa chính mình!";
+                header('Location: ?action=admin_manage_users');
+                exit();
+            }
+            
+            $userModel = new User($db);
+            $userModel->deleteUser($_GET['id']);
+            
+            $_SESSION['success'] = "Đã xóa người dùng thành công!";
+            header('Location: ?action=admin_manage_users');
+            exit();
+        }
+    }
+
+    public function toggleFeaturedPost() {
+        if (isset($_GET['id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../Models/Forum.php';
+            $db = (new Database())->getConnection();
+            $forumModel = new Forum($db);
+            
+            if ($forumModel->toggleFeaturedPost($_GET['id'])) {
+                $_SESSION['success'] = "Cập nhật trạng thái nổi bật thành công!";
+            } else {
+                $_SESSION['error'] = "Không thể cập nhật trạng thái nổi bật!";
+            }
+            
+            header('Location: ?action=admin_manage_comments');
             exit();
         }
     }

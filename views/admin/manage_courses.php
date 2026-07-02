@@ -13,11 +13,13 @@
     </style>
     <script> tailwind.config = { theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } } </script>
 </head>
-<body class="bg-gray-100 font-sans flex min-h-screen" 
+<body class="bg-gray-100 font-sans flex h-screen overflow-hidden" 
       x-data="{ 
           sidebarOpen: true, 
           showAddModal: false, 
           showEditModal: false,
+          showDetailModal: false,
+          detailData: {},
           editData: {},
           openEdit(course) {
               this.editData = { ...course };
@@ -47,9 +49,13 @@
             <a href="?action=admin_manage_courses" class="flex items-center px-4 py-3 bg-gray-800 text-primary rounded-xl transition group">
                 <i class="fa-solid fa-book-open w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Khóa học</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
+            <a href="?action=admin_manage_comments" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
+                <i class="fa-solid fa-comments w-6 text-center"></i>
+                <span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Bình luận</span>
+            </a>
+            <a href="?action=admin_manage_users" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
                 <i class="fa-solid fa-users w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Học viên</span>
+                <span x-show="sidebarOpen" class="ml-3 font-medium">Người dùng</span>
             </a>
         </nav>
         <div class="p-4 border-t border-gray-800">
@@ -64,6 +70,7 @@
             <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-primary focus:outline-none"><i class="fa-solid fa-bars text-xl"></i></button>
             <div class="flex items-center gap-3">
                 <span class="text-sm font-semibold text-gray-700">Xin chào, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
+                <img src="<?= htmlspecialchars($_SESSION['user_avatar'] ?? '') ?>" class="w-9 h-9 rounded-full border-2 border-primary object-cover">
             </div>
         </header>
 
@@ -75,6 +82,42 @@
                 <button @click="showAddModal = true" class="bg-dark hover:bg-gray-800 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-md flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Thêm Khóa Học
                 </button>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+                <form method="GET" action="index.php" class="flex flex-wrap gap-4 items-end">
+                    <input type="hidden" name="action" value="admin_manage_courses">
+                    
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Tìm kiếm</label>
+                        <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Tên khóa học, giảng viên..." class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Ngày tạo</label>
+                        <input type="date" name="date" value="<?= htmlspecialchars($_GET['date'] ?? '') ?>" class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm text-gray-700">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Sắp xếp</label>
+                        <select name="sort" class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm font-medium text-gray-700">
+                            <option value="latest" <?= ($_GET['sort'] ?? '') === 'latest' ? 'selected' : '' ?>>Mới nhất</option>
+                            <option value="oldest" <?= ($_GET['sort'] ?? '') === 'oldest' ? 'selected' : '' ?>>Cũ nhất</option>
+                            <option value="price_high" <?= ($_GET['sort'] ?? '') === 'price_high' ? 'selected' : '' ?>>Giá cao nhất</option>
+                            <option value="price_low" <?= ($_GET['sort'] ?? '') === 'price_low' ? 'selected' : '' ?>>Giá thấp nhất</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-xl transition text-sm">
+                        <i class="fa-solid fa-filter mr-2"></i> Lọc
+                    </button>
+                    
+                    <?php if(!empty($_GET['search']) || !empty($_GET['date']) || (!empty($_GET['sort']) && $_GET['sort'] !== 'latest')): ?>
+                    <a href="?action=admin_manage_courses" class="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition text-sm">
+                        Xóa lọc
+                    </a>
+                    <?php endif; ?>
+                </form>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -112,6 +155,16 @@
                             </td>
                             <td class="p-4 text-center">
                                 <div class="flex items-center justify-center gap-3">
+                                    <button @click="detailData = <?= htmlspecialchars(json_encode($course), ENT_QUOTES, 'UTF-8') ?>; showDetailModal = true" title="Xem chi tiết" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 text-gray-600 hover:bg-gray-800 hover:text-white transition shadow-sm border border-gray-200">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <!-- Nút đánh dấu Nổi bật -->
+                                    <a href="?action=admin_toggle_course_featured&id=<?= $course['id'] ?><?= isset($_GET['page']) ? '&page='.$_GET['page'] : '' ?>" 
+                                       title="<?= !empty($course['is_featured']) ? 'Hủy nổi bật' : 'Đánh dấu nổi bật' ?>" 
+                                       class="w-10 h-10 rounded-full flex items-center justify-center transition shadow-sm border <?= !empty($course['is_featured']) ? 'bg-orange-50 text-orange-500 border-orange-200 hover:bg-orange-100' : 'bg-gray-50 text-gray-400 border-gray-200 hover:bg-gray-200' ?>">
+                                        <i class="fa-solid fa-star"></i>
+                                    </a>
+                                    
                                     <a href="?action=admin_manage_content&id=<?= $course['id'] ?>" title="Nội dung bài giảng" class="w-10 h-10 rounded-full flex items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition shadow-sm border border-blue-100">
                                         <i class="fa-solid fa-list-check"></i>
                                     </a>
@@ -125,11 +178,42 @@
                             </td>
                         </tr>
                         <?php endforeach; else: ?>
-                            <tr><td colspan="5" class="p-8 text-center text-gray-500">Chưa có khóa học nào.</td></tr>
+                            <tr><td colspan="6" class="p-8 text-center text-gray-500">Chưa có khóa học nào.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
+
+            <!-- PHÂN TRANG -->
+            <?php if (isset($totalPages) && $totalPages > 1): ?>
+            <?php 
+                $filterParams = '';
+                if (!empty($_GET['search'])) $filterParams .= '&search=' . urlencode($_GET['search']);
+                if (!empty($_GET['date'])) $filterParams .= '&date=' . urlencode($_GET['date']);
+                if (!empty($_GET['sort'])) $filterParams .= '&sort=' . urlencode($_GET['sort']);
+            ?>
+            <div class="mt-6 flex justify-center">
+                <nav class="flex items-center gap-2">
+                    <?php if ($page > 1): ?>
+                        <a href="?action=admin_manage_courses&page=<?= $page - 1 ?><?= $filterParams ?>" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition">
+                            <i class="fa-solid fa-chevron-left text-sm"></i>
+                        </a>
+                    <?php endif; ?>
+                    
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?action=admin_manage_courses&page=<?= $i ?><?= $filterParams ?>" class="px-4 py-2 <?= $i === $page ? 'bg-primary text-white border-primary' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50' ?> border rounded-lg font-medium transition">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?action=admin_manage_courses&page=<?= $page + 1 ?><?= $filterParams ?>" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition">
+                            <i class="fa-solid fa-chevron-right text-sm"></i>
+                        </a>
+                    <?php endif; ?>
+                </nav>
+            </div>
+            <?php endif; ?>
         </div>
     </main>
 
@@ -378,6 +462,56 @@
                     <button type="submit" form="formEdit" class="bg-primary text-white font-bold py-2.5 px-6 rounded-xl hover:bg-yellow-600 transition">
                         <i class="fa-solid fa-floppy-disk mr-2"></i>Lưu thay đổi
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         MODAL: XEM CHI TIẾT KHÓA HỌC
+    ============================================= -->
+    <div x-show="showDetailModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showDetailModal = false"></div>
+        <div class="flex items-center justify-center min-h-screen px-4 py-8">
+            <div x-show="showDetailModal" class="relative bg-white rounded-2xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col">
+                <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
+                    <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-500"></i> Chi tiết khóa học</h3>
+                    <button @click="showDetailModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="px-6 py-6 overflow-y-auto grow space-y-4">
+                    <div class="flex gap-4">
+                        <img :src="detailData.thumbnail && detailData.thumbnail.startsWith('http') ? detailData.thumbnail : (detailData.thumbnail ? '/e-learning-project/public/' + detailData.thumbnail : 'https://placehold.co/100x70/4f46e5/fff?text=No+Image')" class="w-32 h-24 object-cover rounded-xl border">
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-gray-800 leading-tight" x-text="detailData.title"></h4>
+                            <p class="text-primary font-bold mt-2" x-text="(detailData.price > 0 ? new Intl.NumberFormat('vi-VN').format(detailData.price) + 'đ' : 'Miễn phí')"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-xl p-4 border space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <span class="text-gray-500 font-medium">Người đăng (Giảng viên):</span>
+                            <span class="font-bold text-gray-800" x-text="detailData.instructor || '—'"></span>
+                        </div>
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <span class="text-gray-500 font-medium">Thời gian đăng:</span>
+                            <span class="font-semibold text-gray-700" x-text="detailData.created_at ? new Date(detailData.created_at.replace(' ', 'T')).toLocaleString('vi-VN') : '—'"></span>
+                        </div>
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <span class="text-gray-500 font-medium">Cấp độ:</span>
+                            <span class="font-semibold text-gray-700" x-text="detailData.level || '—'"></span>
+                        </div>
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <span class="text-gray-500 font-medium">Thời lượng:</span>
+                            <span class="font-semibold text-gray-700" x-text="(detailData.duration_hours || 0) + ' giờ'"></span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500 font-medium">Số bài giảng:</span>
+                            <span class="font-semibold text-gray-700" x-text="(detailData.total_lessons || 0) + ' bài'"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 border-t flex justify-end shrink-0">
+                    <button @click="showDetailModal = false" class="px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 transition font-medium">Đóng</button>
                 </div>
             </div>
         </div>

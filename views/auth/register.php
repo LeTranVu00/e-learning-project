@@ -4,18 +4,7 @@
         <p class="text-gray-500 mt-2">Bắt đầu hành trình học tập của bạn ngay hôm nay</p>
     </div>
 
-    <?php if (!empty($_SESSION['error'])): ?>
-        <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            <?= htmlspecialchars($_SESSION['error']) ?>
-            <?php unset($_SESSION['error']); ?>
-        </div>
-    <?php endif; ?>
-    <?php if (!empty($_SESSION['success'])): ?>
-        <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
-            <?= htmlspecialchars($_SESSION['success']) ?>
-            <?php unset($_SESSION['success']); ?>
-        </div>
-    <?php endif; ?>
+
 
     <form action="?action=handle_register" method="POST" class="space-y-5">
         <div>

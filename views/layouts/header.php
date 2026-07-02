@@ -65,7 +65,7 @@
             
             <div class="hidden md:flex space-x-8 items-center">
                 <a href="?action=home" class="text-gray-300 hover:text-primary transition px-3 py-2 font-medium">Trang chủ</a>
-                <a href="?action=home" class="text-gray-300 hover:text-primary transition px-3 py-2 font-medium">Khóa học</a>
+                <a href="?action=courses" class="text-gray-300 hover:text-primary transition px-3 py-2 font-medium">Khóa học</a>
                 <a href="?action=forum" class="text-gray-700 hover:text-primary font-medium transition flex items-center gap-2">
                     <i class="fa-solid fa-comments"></i> Diễn đàn
                 </a>

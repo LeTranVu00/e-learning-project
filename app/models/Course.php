@@ -9,17 +9,88 @@ class Course {
         $this->conn = $db;
     }
 
-    // Hàm lấy tất cả khóa học
-    public function getAllCourses() {
-        // Câu lệnh SQL lấy dữ liệu, sắp xếp mới nhất lên đầu
-        $query = "SELECT * FROM courses ORDER BY created_at DESC";
+    // Hàm lấy tất cả khóa học (Có hỗ trợ phân trang & lọc)
+    public function getAllCourses($limit = null, $offset = null, $search = '', $sort = 'latest', $date = '') {
+        $query = "SELECT * FROM courses WHERE 1=1";
         
-        // Chuẩn bị và thực thi (Dùng prepare để chuẩn PDO)
+        if (!empty($search)) {
+            $query .= " AND (title LIKE :search OR instructor LIKE :search)";
+        }
+        if (!empty($date)) {
+            $query .= " AND DATE(created_at) = :date";
+        }
+        
+        if ($sort === 'oldest') {
+            $query .= " ORDER BY created_at ASC";
+        } elseif ($sort === 'price_high') {
+            $query .= " ORDER BY price DESC";
+        } elseif ($sort === 'price_low') {
+            $query .= " ORDER BY price ASC";
+        } else {
+            // latest
+            $query .= " ORDER BY is_featured DESC, created_at DESC";
+        }
+        
+        if ($limit !== null && $offset !== null) {
+            $query .= " LIMIT :limit OFFSET :offset";
+        }
+        
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
         
-        // Trả về một mảng chứa dữ liệu
+        if (!empty($search)) {
+            $stmt->bindValue(':search', "%$search%");
+        }
+        if (!empty($date)) {
+            $stmt->bindValue(':date', $date);
+        }
+        if ($limit !== null && $offset !== null) {
+            $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+        }
+        
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Lấy tổng số khóa học để phân trang
+    public function getTotalCoursesCount($search = '', $date = '') {
+        $query = "SELECT COUNT(*) FROM courses WHERE 1=1";
+        if (!empty($search)) {
+            $query .= " AND (title LIKE :search OR instructor LIKE :search)";
+        }
+        if (!empty($date)) {
+            $query .= " AND DATE(created_at) = :date";
+        }
+        
+        $stmt = $this->conn->prepare($query);
+        
+        if (!empty($search)) {
+            $stmt->bindValue(':search', "%$search%");
+        }
+        if (!empty($date)) {
+            $stmt->bindValue(':date', $date);
+        }
+        
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
+    }
+
+    // Bật/Tắt trạng thái Nổi bật
+    public function toggleFeatured($id) {
+        // Lấy trạng thái hiện tại
+        $query = "SELECT is_featured FROM courses WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        $current = $stmt->fetchColumn();
+
+        $newStatus = $current ? 0 : 1;
+
+        $updateQuery = "UPDATE courses SET is_featured = :status WHERE id = :id";
+        $updateStmt = $this->conn->prepare($updateQuery);
+        $updateStmt->bindParam(':status', $newStatus);
+        $updateStmt->bindParam(':id', $id);
+        return $updateStmt->execute();
     }
 
     

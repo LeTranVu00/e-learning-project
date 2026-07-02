@@ -34,6 +34,9 @@ switch ($action) {
     case 'home':
         $courseController->index();
         break;
+    case 'courses':
+        $courseController->list();
+        break;
     case 'detail':
         $id = isset($_GET['id']) ? $_GET['id'] : 0;
         $courseController->show($id);
@@ -151,6 +154,10 @@ switch ($action) {
         $adminController = new AdminController();
         $adminController->deleteCourse();
         break;
+    case 'admin_toggle_course_featured':
+        $adminController = new AdminController();
+        $adminController->toggleCourseFeatured();
+        break;
     
     //Route cho xử lý cập nhật Chương
     case 'admin_update_chapter':
@@ -170,6 +177,43 @@ switch ($action) {
         $adminController->deleteMaterial();
         break;
     
+    //Route cho quản lý bình luận
+    case 'admin_manage_comments':
+        $adminController = new AdminController();
+        $adminController->manageCommentsList();
+        break;
+    case 'admin_post_comments':
+        $adminController = new AdminController();
+        $adminController->adminPostComments();
+        break;
+    case 'admin_update_comment':
+        $adminController = new AdminController();
+        $adminController->updateComment();
+        break;
+    case 'admin_delete_comment':
+        $adminController = new AdminController();
+        $adminController->deleteComment();
+        break;
+
+    //Route cho quản lý người dùng
+    case 'admin_manage_users':
+        $adminController = new AdminController();
+        $adminController->manageUsersList();
+        break;
+    case 'admin_update_user':
+        $adminController = new AdminController();
+        $adminController->updateUser();
+        break;
+    case 'admin_delete_user':
+        $adminController = new AdminController();
+        $adminController->deleteUser();
+        break;
+
+    case 'admin_toggle_post_featured':
+        $adminController = new AdminController();
+        $adminController->toggleFeaturedPost();
+        break;
+
     //Route cho trang quản lý danh sách bài viết thảo luận
     case 'forum':
         $forumController->index();
@@ -193,6 +237,26 @@ switch ($action) {
         break;
     case 'forum_store_comment':
         $forumController->storeComment();
+        break;
+
+    // Route cho xử lý xóa bình luận
+    case 'forum_delete_comment':
+        $forumController->deleteComment();
+        break;
+
+    // Route cho xử lý sửa bình luận
+    case 'forum_update_comment':
+        $forumController->updateComment();
+        break;
+
+    // Route cho xử lý Like / Dislike bình luận
+    case 'forum_like_comment':
+        $forumController->likeComment();
+        break;
+
+    // Route cho xử lý ghim bình luận
+    case 'forum_pin_comment':
+        $forumController->pinComment();
         break;
         
     default:

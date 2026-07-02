@@ -14,11 +14,39 @@ class CourseController {
 
         // 2. Gọi Model để lấy danh sách khóa học
         $courseModel = new Course($db);
-        $courses = $courseModel->getAllCourses(); // Biến $courses này giờ đang chứa 1 mảng các khóa học
+        
+        // Trang chủ chỉ lấy 6 khóa học mới nhất (hoặc nổi bật), không phân trang
+        $limit = 6;
+        $courses = $courseModel->getAllCourses($limit, 0);
 
         // 3. Đưa dữ liệu ra View bằng cách nhúng các file giao diện vào
         require_once __DIR__ . '/../../views/layouts/header.php';
         require_once __DIR__ . '/../../views/home.php';
+        require_once __DIR__ . '/../../views/layouts/footer.php';
+    }
+
+    // Hàm hiển thị danh sách tất cả khóa học có phân trang, tìm kiếm
+    public function list() {
+        $database = new Database();
+        $db = $database->getConnection();
+        $courseModel = new Course($db);
+        
+        // Lấy tham số tìm kiếm, lọc
+        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        $sort = isset($_GET['sort']) ? $_GET['sort'] : 'latest';
+        
+        // Phân trang
+        $limit = 6;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $offset = ($page - 1) * $limit;
+        
+        $totalCourses = $courseModel->getTotalCoursesCount($search);
+        $totalPages = ceil($totalCourses / $limit);
+        $courses = $courseModel->getAllCourses($limit, $offset, $search, $sort);
+
+        require_once __DIR__ . '/../../views/layouts/header.php';
+        require_once __DIR__ . '/../../views/courses/index.php';
         require_once __DIR__ . '/../../views/layouts/footer.php';
     }
 

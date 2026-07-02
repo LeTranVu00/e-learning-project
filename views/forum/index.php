@@ -34,7 +34,7 @@
             </button>
         </div>
     </div>
-
+    
     <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6">
         <form action="" method="GET" class="flex flex-col md:flex-row gap-3">
             <input type="hidden" name="action" value="forum">           
@@ -125,6 +125,38 @@
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+
+    <!-- PHÂN TRANG -->
+    <?php if (isset($totalPages) && $totalPages > 1): ?>
+    <div class="mt-10 flex justify-center">
+        <nav class="flex items-center gap-2">
+            <?php 
+                $currentSearch = isset($_GET['search']) ? '&search=' . urlencode($_GET['search']) : '';
+                $currentSort = isset($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
+                $currentFilter = isset($_GET['filter']) ? '&filter=' . urlencode($_GET['filter']) : '';
+                $queryParams = $currentSearch . $currentSort . $currentFilter;
+            ?>
+            
+            <?php if (isset($page) && $page > 1): ?>
+                <a href="?action=forum&page=<?= $page - 1 ?><?= $queryParams ?>" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 text-gray-600 rounded-full hover:bg-primary hover:text-white hover:border-primary transition shadow-sm">
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </a>
+            <?php endif; ?>
+            
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?action=forum&page=<?= $i ?><?= $queryParams ?>" class="w-10 h-10 flex items-center justify-center <?= $i === ($page ?? 1) ? 'bg-primary text-white border-primary shadow-md' : 'bg-white border-gray-200 text-gray-600 hover:bg-primary hover:text-white hover:border-primary shadow-sm' ?> border rounded-full font-bold transition">
+                    <?= $i ?>
+                </a>
+            <?php endfor; ?>
+
+            <?php if (isset($page) && $page < $totalPages): ?>
+                <a href="?action=forum&page=<?= $page + 1 ?><?= $queryParams ?>" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 text-gray-600 rounded-full hover:bg-primary hover:text-white hover:border-primary transition shadow-sm">
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </a>
+            <?php endif; ?>
+        </nav>
+    </div>
+    <?php endif; ?>
 
     <div x-show="showPostModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
         <div x-show="showPostModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity backdrop-blur-sm" @click="showPostModal = false"></div>

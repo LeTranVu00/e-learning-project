@@ -57,7 +57,7 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-2">Khóa học nổi bật</h2>
             <p class="text-gray-500">Những khóa học được đăng ký nhiều nhất tháng qua.</p>
         </div>
-        <a href="#" class="hidden md:inline-block text-primary font-semibold hover:underline">Xem tất cả <i class="fa-solid fa-arrow-right ml-1"></i></a>
+        <a href="?action=courses" class="hidden md:inline-block text-primary font-semibold hover:underline">Xem tất cả <i class="fa-solid fa-arrow-right ml-1"></i></a>
     </div>
 
     <!-- Course Grid (Sau này dùng PHP foreach để in ra chỗ này) -->
@@ -73,6 +73,11 @@
                         : 'https://placehold.co/600x400/f59e0b/white?text=E-Learning';
                 ?>
                 <img src="<?= $thumbnail ?>" alt="<?= htmlspecialchars($course['title']) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
+                <?php if (!empty($course['is_featured'])): ?>
+                    <div class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                        <i class="fa-solid fa-fire text-yellow-300"></i> Nổi bật
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="p-5 flex-grow flex flex-col justify-between">
                 <div>
@@ -96,9 +101,9 @@
 <?php
 require_once __DIR__ . '/../app/models/Forum.php'; 
         
-        // 2. Khởi tạo Model và lấy Top 3 bài viết
+        // 2. Khởi tạo Model và lấy danh sách bài viết nổi bật
         $forumModel = new Forum($db);
-        $topPosts = $forumModel->getTopPosts(3);
+        $topPosts = $forumModel->getFeaturedPosts(3);
 ?>
 <section class="py-16 bg-gray-50 border-t border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
