@@ -95,8 +95,9 @@ $contact_phone  = $course['contact_phone']  ?? null;
 
 /* Sticky sidebar card */
 .sticky-card {
+    position: -webkit-sticky; /* Hỗ trợ trình duyệt Safari */
     position: sticky;
-    top: 24px;
+    top: 100px; /* TĂNG KHOẢNG CÁCH NÀY LÊN. Nếu vẫn bị đè, hãy tăng lên 120px hoặc 150px */
     z-index: 50;
     height: fit-content;
 }
