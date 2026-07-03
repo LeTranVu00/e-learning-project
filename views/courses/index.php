@@ -75,9 +75,14 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between border-t border-gray-100 pt-5 mt-auto">
-                        <span class="text-xl font-black <?= (isset($course['price']) && $course['price'] > 0) ? 'text-primary' : 'text-green-500' ?>">
-                            <?= (isset($course['price']) && $course['price'] > 0) ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
-                        </span>
+                        <div class="flex flex-col">
+                            <span class="text-xl font-black <?= (isset($course['price']) && $course['price'] > 0) ? 'text-primary' : 'text-green-500' ?>">
+                                <?= (isset($course['price']) && $course['price'] > 0) ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
+                            </span>
+                            <?php if (!empty($course['original_price']) && $course['original_price'] > ($course['price'] ?? 0)): ?>
+                                <del class="text-sm text-gray-400 mt-0.5"><?= number_format($course['original_price'], 0, ',', '.') ?>đ</del>
+                            <?php endif; ?>
+                        </div>
                         <a href="?action=detail&id=<?= $course['id'] ?>" class="text-gray-500 hover:text-white border border-gray-200 hover:border-primary hover:bg-primary font-bold py-2 px-5 rounded-xl transition shadow-sm">Chi tiết</a>
                     </div>
                 </div>

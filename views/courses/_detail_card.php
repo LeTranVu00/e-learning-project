@@ -27,6 +27,8 @@ if ($schedule) {
     border-radius: 18px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(80, 80, 160, 0.10);
+    /* Ensure border-radius clipping works across all browsers */
+    transform: translateZ(0);
 }
 
 /* Thumbnail */

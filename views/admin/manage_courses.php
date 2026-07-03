@@ -10,6 +10,31 @@
     <style> 
         .ck-editor__editable_inline { min-height: 200px; } 
         .ck.ck-balloon-panel { z-index: 99999 !important; } 
+        [x-cloak] { display: none !important; }
+        
+        /* Fix mũi tên số (spinner) bị che hoặc không bấm được trên Chrome/Cốc Cốc */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+            height: 100%;
+            cursor: pointer;
+            width: 24px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow: hidden;
+        }
+        .modal-card {
+            will-change: transform, opacity;
+            overscroll-behavior: contain;
+        }
     </style>
     <script> tailwind.config = { theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } } </script>
 </head>
@@ -21,6 +46,27 @@
           showDetailModal: false,
           detailData: {},
           editData: {},
+          openAdd() {
+              this.showAddModal = true;
+              this.$nextTick(() => {
+                  const config = { toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo' ] };
+                  if (!window.editor) {
+                      ClassicEditor.create(document.querySelector('#editor_add'), config)
+                          .then(editor => { window.editor = editor; })
+                          .catch(err => console.error(err));
+                  }
+                  if (!window.editorBenefits) {
+                      ClassicEditor.create(document.querySelector('#editor_add_benefits'), config)
+                          .then(editor => { window.editorBenefits = editor; })
+                          .catch(err => console.error(err));
+                  }
+                  if (!window.editorReqs) {
+                      ClassicEditor.create(document.querySelector('#editor_add_reqs'), config)
+                          .then(editor => { window.editorReqs = editor; })
+                          .catch(err => console.error(err));
+                  }
+              });
+          },
           openEdit(course) {
               this.editData = { ...course };
               this.editData.price          = course.price          || 0;
@@ -29,9 +75,29 @@
               this.editData.total_lessons  = course.total_lessons  || 0;
               this.showEditModal = true;
               this.$nextTick(() => {
-                  if(window.editorEdit)         { window.editorEdit.setData(course.description  || ''); }
-                  if(window.editorEditBenefits) { window.editorEditBenefits.setData(course.benefits || ''); }
-                  if(window.editorEditReqs)     { window.editorEditReqs.setData(course.requirements || ''); }
+                  // Nếu editor chưa được khởi tạo, khởi tạo ngay
+                  const config = { toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo' ] };
+                  if (!window.editorEdit) {
+                      ClassicEditor.create(document.querySelector('#editor_edit'), config)
+                          .then(editor => { window.editorEdit = editor; editor.setData(course.description || ''); })
+                          .catch(err => console.error(err));
+                  } else {
+                      window.editorEdit.setData(course.description || '');
+                  }
+                  if (!window.editorEditBenefits) {
+                      ClassicEditor.create(document.querySelector('#editor_edit_benefits'), config)
+                          .then(editor => { window.editorEditBenefits = editor; editor.setData(course.benefits || ''); })
+                          .catch(err => console.error(err));
+                  } else {
+                      window.editorEditBenefits.setData(course.benefits || '');
+                  }
+                  if (!window.editorEditReqs) {
+                      ClassicEditor.create(document.querySelector('#editor_edit_reqs'), config)
+                          .then(editor => { window.editorEditReqs = editor; editor.setData(course.requirements || ''); })
+                          .catch(err => console.error(err));
+                  } else {
+                      window.editorEditReqs.setData(course.requirements || '');
+                  }
               });
           },
           async submitAddCourse(event) {
@@ -123,7 +189,7 @@
       }">
 
     <!-- SIDEBAR -->
-    <aside class="bg-dark text-white transition-all duration-300 flex flex-col shadow-2xl relative z-20" :class="sidebarOpen ? 'w-64' : 'w-20'">
+    <aside class="w-64 bg-dark text-white transition-all duration-300 flex flex-col shadow-2xl relative z-20" :class="sidebarOpen ? '' : '!w-20'">
         <div class="h-16 flex items-center justify-center border-b border-gray-800">
             <i class="fa-solid fa-graduation-cap text-primary text-2xl"></i>
             <span x-show="sidebarOpen" class="ml-3 font-bold text-lg tracking-wider">ADMIN PANEL</span>
@@ -168,7 +234,7 @@
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800">Quản lý Khóa học</h1>
                 </div>
-                <button @click="showAddModal = true" class="bg-dark hover:bg-gray-800 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-md flex items-center gap-2">
+                <button @click="openAdd()" class="bg-dark hover:bg-gray-800 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-md flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Thêm Khóa Học
                 </button>
             </div>
@@ -243,8 +309,15 @@
                                 <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-semibold"><?= htmlspecialchars($course['category_name'] ?? 'Chưa phân loại') ?></span>
                             </td>
                             <td class="p-4 text-sm text-gray-600"><?= htmlspecialchars($course['instructor'] ?? '—') ?></td>
-                            <td class="p-4 text-sm font-semibold <?= ($course['price'] ?? 0) > 0 ? 'text-red-600' : 'text-green-600' ?>">
-                                <?= ($course['price'] ?? 0) > 0 ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
+                            <td class="p-4 text-sm">
+                                <div class="flex flex-col">
+                                    <span class="font-semibold <?= ($course['price'] ?? 0) > 0 ? 'text-red-600' : 'text-green-600' ?>">
+                                        <?= ($course['price'] ?? 0) > 0 ? number_format($course['price'], 0, ',', '.') . 'đ' : 'Miễn phí' ?>
+                                    </span>
+                                    <?php if (!empty($course['original_price']) && $course['original_price'] > ($course['price'] ?? 0)): ?>
+                                        <del class="text-xs text-gray-400 mt-0.5"><?= number_format($course['original_price'], 0, ',', '.') ?>đ</del>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                             <td class="p-4 text-center">
                                 <div class="flex items-center justify-center gap-3">
@@ -313,15 +386,21 @@
     <!-- =============================================
          MODAL: THÊM KHÓA HỌC MỚI
     ============================================= -->
-    <div x-show="showAddModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
+    <div x-cloak x-show="showAddModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="modal-overlay">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showAddModal = false"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showAddModal" class="relative bg-white rounded-3xl text-left shadow-2xl w-full max-w-4xl z-50 flex flex-col max-h-[92vh] overflow-hidden border border-gray-100">
+        <div class="modal-card relative bg-white rounded-3xl overflow-hidden text-left shadow-2xl w-full max-w-4xl z-50 flex flex-col border border-gray-100" style="max-height: min(92vh, 900px);" @click.stop>
                 <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-plus text-primary"></i> Thêm khóa học mới</h3>
-                    <button @click="showAddModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button type="button" @click="showAddModal = false" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition"><i class="fa-solid fa-xmark text-xl pointer-events-none"></i></button>
                 </div>
-                <div class="px-6 py-6 overflow-y-auto grow">
+                <div class="px-6 py-6 overflow-y-auto grow" style="overscroll-behavior: contain;">
                     <form @submit.prevent="submitAddCourse" id="formAdd" class="space-y-5" enctype="multipart/form-data" novalidate>
 
                         <!-- Row 1: Tên + Danh mục -->
@@ -349,11 +428,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label class="block text-sm font-semibold mb-1.5 text-gray-700">Giá bán (VNĐ)</label>
-                                <input type="number" name="price" min="0" value="0" step="1000" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
+                                <input type="number" name="price" min="0" value="0" step="1000" class="w-full pl-5 pr-2 py-3.5 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1.5 text-gray-700">Giá gốc (VNĐ) <span class="text-xs text-gray-400">(gạch ngang)</span></label>
-                                <input type="number" name="original_price" min="0" value="0" step="1000" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
+                                <input type="number" name="original_price" min="0" value="0" step="1000" class="w-full pl-5 pr-2 py-3.5 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
                             </div>
                         </div>
 
@@ -439,22 +518,27 @@
                         <i class="fa-solid fa-floppy-disk mr-2"></i>Lưu khóa học
                     </button>
                 </div>
-            </div>
         </div>
     </div>
 
     <!-- =============================================
-         MODAL: SỬA KHÓA HỌC
+         MODAL: SỬa KHÓA HỌC
     ============================================= -->
-    <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
+    <div x-cloak x-show="showEditModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="modal-overlay">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showEditModal = false"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showEditModal" class="relative bg-white rounded-3xl text-left shadow-2xl w-full max-w-4xl z-50 flex flex-col max-h-[92vh] overflow-hidden border border-gray-100">
+        <div class="modal-card relative bg-white rounded-3xl overflow-hidden text-left shadow-2xl w-full max-w-4xl z-50 flex flex-col border border-gray-100" style="max-height: min(92vh, 900px);" @click.stop>
                 <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-yellow-500"></i> Sửa khóa học</h3>
-                    <button @click="showEditModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button type="button" @click="showEditModal = false" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition"><i class="fa-solid fa-xmark text-xl pointer-events-none"></i></button>
                 </div>
-                <div class="px-6 py-6 overflow-y-auto grow">
+                <div class="px-6 py-6 overflow-y-auto grow" style="overscroll-behavior: contain;">
                     <form action="?action=admin_update_course" method="POST" id="formEdit" class="space-y-5" enctype="multipart/form-data">
                         <input type="hidden" name="id"            :value="editData.id">
                         <input type="hidden" name="old_thumbnail" :value="editData.thumbnail">
@@ -484,11 +568,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label class="block text-sm font-semibold mb-1.5">Giá bán (VNĐ)</label>
-                                <input type="number" name="price" x-model="editData.price" min="0" step="1000" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <input type="number" name="price" x-model="editData.price" min="0" step="1000" class="w-full pl-4 pr-2 py-3 border rounded-lg outline-none focus:ring-2 focus:ring-primary">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1.5">Giá gốc (VNĐ) <span class="text-xs text-gray-400">(gạch ngang)</span></label>
-                                <input type="number" name="original_price" x-model="editData.original_price" min="0" step="1000" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <input type="number" name="original_price" x-model="editData.original_price" min="0" step="1000" class="w-full pl-4 pr-2 py-3 border rounded-lg outline-none focus:ring-2 focus:ring-primary">
                             </div>
                         </div>
 
@@ -574,74 +658,78 @@
                         <i class="fa-solid fa-floppy-disk mr-2"></i>Lưu thay đổi
                     </button>
                 </div>
-            </div>
         </div>
     </div>
 
     <!-- =============================================
          MODAL: XEM CHI TIẾT KHÓA HỌC
     ============================================= -->
-    <div x-show="showDetailModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
+    <div x-cloak x-show="showDetailModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="modal-overlay">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showDetailModal = false"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showDetailModal" class="relative bg-white rounded-3xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col overflow-hidden border border-gray-100">
-                <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
-                    <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-500"></i> Chi tiết khóa học</h3>
-                    <button @click="showDetailModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <div class="px-6 py-6 overflow-y-auto grow space-y-4">
-                    <div class="flex gap-4">
-                        <img :src="detailData.thumbnail && detailData.thumbnail.startsWith('http') ? detailData.thumbnail : (detailData.thumbnail ? '/e-learning-project/public/' + detailData.thumbnail : 'https://placehold.co/100x70/4f46e5/fff?text=No+Image')" class="w-32 h-24 object-cover rounded-xl border">
-                        <div class="flex-1">
-                            <h4 class="text-lg font-bold text-gray-800 leading-tight" x-text="detailData.title"></h4>
-                            <p class="text-primary font-bold mt-2" x-text="(detailData.price > 0 ? new Intl.NumberFormat('vi-VN').format(detailData.price) + 'đ' : 'Miễn phí')"></p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-xl p-4 border space-y-3">
-                        <div class="flex items-center justify-between border-b pb-2">
-                            <span class="text-gray-500 font-medium">Người đăng (Giảng viên):</span>
-                            <span class="font-bold text-gray-800" x-text="detailData.instructor || '—'"></span>
-                        </div>
-                        <div class="flex items-center justify-between border-b pb-2">
-                            <span class="text-gray-500 font-medium">Thời gian đăng:</span>
-                            <span class="font-semibold text-gray-700" x-text="detailData.created_at ? new Date(detailData.created_at.replace(' ', 'T')).toLocaleString('vi-VN') : '—'"></span>
-                        </div>
-                        <div class="flex items-center justify-between border-b pb-2">
-                            <span class="text-gray-500 font-medium">Cấp độ:</span>
-                            <span class="font-semibold text-gray-700" x-text="detailData.level || '—'"></span>
-                        </div>
-                        <div class="flex items-center justify-between border-b pb-2">
-                            <span class="text-gray-500 font-medium">Thời lượng:</span>
-                            <span class="font-semibold text-gray-700" x-text="(detailData.duration_hours || 0) + ' giờ'"></span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-500 font-medium">Số bài giảng:</span>
-                            <span class="font-semibold text-gray-700" x-text="(detailData.total_lessons || 0) + ' bài'"></span>
-                        </div>
+        <div class="modal-card relative bg-white rounded-3xl overflow-hidden text-left shadow-2xl w-full max-w-lg z-50 flex flex-col border border-gray-100" style="max-height: min(92vh, 700px);" @click.stop>
+            <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
+                <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-500"></i> Chi tiết khóa học</h3>
+                <button type="button" @click="showDetailModal = false" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition"><i class="fa-solid fa-xmark text-xl pointer-events-none"></i></button>
+            </div>
+            <div class="px-6 py-6 overflow-y-auto grow space-y-4" style="overscroll-behavior: contain;">
+                <div class="flex gap-4">
+                    <img :src="detailData.thumbnail && detailData.thumbnail.startsWith('http') ? detailData.thumbnail : (detailData.thumbnail ? '/e-learning-project/public/' + detailData.thumbnail : 'https://placehold.co/100x70/4f46e5/fff?text=No+Image')" class="w-32 h-24 object-cover rounded-xl border">
+                    <div class="flex-1">
+                        <h4 class="text-lg font-bold text-gray-800 leading-tight" x-text="detailData.title"></h4>
+                        <p class="text-primary font-bold mt-2" x-text="(detailData.price > 0 ? new Intl.NumberFormat('vi-VN').format(detailData.price) + 'đ' : 'Miễn phí')"></p>
                     </div>
                 </div>
-                <div class="bg-gray-50 px-6 py-4 border-t flex justify-end shrink-0">
-                    <button @click="showDetailModal = false" class="px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 transition font-medium">Đóng</button>
+                <div class="bg-gray-50 rounded-xl p-4 border space-y-3">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <span class="text-gray-500 font-medium">Người đăng (Giảng viên):</span>
+                        <span class="font-bold text-gray-800" x-text="detailData.instructor || '—'"></span>
+                    </div>
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <span class="text-gray-500 font-medium">Thời gian đăng:</span>
+                                        <span class="font-semibold text-gray-700" x-text="(detailData.duration_hours || 0) + ' giờ'"></span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 font-medium">Số bài giảng:</span>
+                        <span class="font-semibold text-gray-700" x-text="(detailData.total_lessons || 0) + ' bài'"></span>
+                    </div>
                 </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 border-t flex justify-end shrink-0">
+                <button @click="showDetailModal = false" class="px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 transition font-medium">Đóng</button>
             </div>
         </div>
     </div>
-    
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const config = { toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo' ] };
+    // Tất cả CKEditor được khởi tạo lazy khi mở modal tương ứng
+    // (xem openAdd() và openEdit() trong x-data phía trên)
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `px-6 py-4 rounded-xl shadow-xl font-medium text-sm flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 z-50 pointer-events-auto ${type === 'success' ? 'bg-white text-green-600 border-l-4 border-green-500' : 'bg-white text-red-600 border-l-4 border-red-500'}`;
+        toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} text-lg"></i> ${message}`;
+        container.appendChild(toast);
         
-        // Form Thêm
-        ClassicEditor.create(document.querySelector('#editor_add'),          config).catch(err => console.error(err));
-        ClassicEditor.create(document.querySelector('#editor_add_benefits'), config).catch(err => console.error(err));
-        ClassicEditor.create(document.querySelector('#editor_add_reqs'),     config).catch(err => console.error(err));
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-x-full', 'opacity-0');
+        });
         
-        // Form Sửa
-        ClassicEditor.create(document.querySelector('#editor_edit'),          config).then(editor => { window.editorEdit         = editor; }).catch(err => console.error(err));
-        ClassicEditor.create(document.querySelector('#editor_edit_benefits'), config).then(editor => { window.editorEditBenefits = editor; }).catch(err => console.error(err));
-        ClassicEditor.create(document.querySelector('#editor_edit_reqs'),     config).then(editor => { window.editorEditReqs     = editor; }).catch(err => console.error(err));
-    });
+        setTimeout(() => {
+            toast.classList.add('translate-x-full', 'opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
     </script>
 </body>
 </html>

@@ -48,6 +48,7 @@ $contact_phone  = $course['contact_phone']  ?? null;
     width: 100vw;
     margin-left: calc(-50vw + 50%);
     margin-right: calc(-50vw + 50%);
+    margin-top: -2rem;
     /* Optional: padding at bottom so the card can overlap nicely */
 }
 .course-hero::before {
@@ -59,47 +60,123 @@ $contact_phone  = $course['contact_phone']  ?? null;
     pointer-events: none;
 }
 
+/* Main detail layout */
+.course-detail-shell {
+    width: min(100%, 80rem);
+    margin-inline: auto;
+    position: relative;
+    z-index: 20;
+    padding-inline: 1rem;
+}
+.course-main-column,
+.course-sidebar-column {
+    min-width: 0;
+}
+.course-sidebar-column {
+    position: relative;
+    align-self: stretch;
+}
+
+
+@media (min-width: 640px) {
+    .course-detail-shell {
+        padding-inline: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .course-detail-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(320px, 420px);
+        gap: 2.5rem;
+        align-items: stretch;
+        margin-top: 2.25rem;
+    }
+}
+
+@media (min-width: 1280px) {
+    .course-detail-shell {
+        padding-inline: 0;
+    }
+}
+
 /* Tab bar */
+.detail-tabs-holder {
+    margin-bottom: 2.5rem;
+}
 .detail-tabs {
     position: sticky;
-    top: 0;
+    top: 1.5rem;
     z-index: 40;
-    background: #fff;
-    border-bottom: 2px solid #e5e7eb;
-    margin-bottom: 2rem;
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 22px;
+    box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+    padding: 8px;
+    backdrop-filter: blur(10px);
+}
+.detail-tabs.is-fixed,
+.sticky-card.is-fixed {
+    position: fixed;
+    top: 1.5rem;
+    left: var(--fixed-left);
+    width: var(--fixed-width);
 }
 .tab-btn {
+    flex: 1 0 180px;
+    justify-content: center;
+    min-height: 52px;
     padding: 14px 24px;
     font-weight: 600;
-    font-size: 0.9rem;
-    color: #6b7280;
-    border-bottom: 3px solid transparent;
+    font-size: 1rem;
+    color: #111827;
+    border-radius: 16px;
     cursor: pointer;
     transition: all 0.2s;
-    background: none;
-    border-top: none;
-    border-left: none;
-    border-right: none;
+    background: #f3f4f6;
+    border: none;
     display: flex;
     align-items: center;
     gap: 6px;
     white-space: nowrap;
 }
-.tab-btn:hover { color: #4f46e5; }
-.tab-btn.active {
+.tab-btn:hover {
     color: #4f46e5;
-    border-bottom-color: #4f46e5;
+    background: #eef2ff;
 }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
+.tab-btn.active {
+    color: #fff;
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #0ea5e9 100%);
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.24);
+}
+.tab-btn.active span {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+.tab-panel {
+    display: block;
+    scroll-margin-top: 6rem;
+}
+.tab-panel + .tab-panel {
+    margin-top: 2rem;
+}
 
 /* Sticky sidebar card */
 .sticky-card {
     position: -webkit-sticky; /* Hỗ trợ trình duyệt Safari */
     position: sticky;
-    top: 100px; /* TĂNG KHOẢNG CÁCH NÀY LÊN. Nếu vẫn bị đè, hãy tăng lên 120px hoặc 150px */
     z-index: 50;
     height: fit-content;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    /* Prevent clipping of the inner card's box-shadow */
+    padding: 24px;
+    margin: -24px;
+}
+.sticky-card::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
 }
 
 /* Benefits list */
@@ -318,7 +395,7 @@ $contact_phone  = $course['contact_phone']  ?? null;
 <!-- ============================================================
      HERO SECTION
 ============================================================ -->
-<div class="course-hero px-4 sm:px-6 lg:px-8 py-10 lg:pt-14 lg:pb-40">
+<div class="course-hero px-4 sm:px-6 lg:px-8 py-10 lg:pt-14 lg:pb-28">
     <div class="max-w-7xl mx-auto relative z-10">
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-sm text-indigo-300 mb-6">
@@ -383,10 +460,10 @@ $contact_phone  = $course['contact_phone']  ?? null;
 <!-- ============================================================
      MAIN CONTENT + SIDEBAR
 ============================================================ -->
-<div class="flex flex-col lg:flex-row gap-8 mb-20 max-w-7xl mx-auto relative lg:-mt-72 z-20">
+<div class="course-detail-shell mb-20">
 
     <!-- ===== LEFT CONTENT AREA ===== -->
-    <div class="lg:w-2/3 min-w-0 lg:mt-72">
+    <div class="course-main-column">
 
         <!-- Mobile: Show sidebar card ABOVE tabs (only on mobile) -->
         <div class="lg:hidden mb-8">
@@ -396,18 +473,20 @@ $contact_phone  = $course['contact_phone']  ?? null;
         <!-- ============================================================
              TAB NAVIGATION BAR
         ============================================================ -->
-        <div class="detail-tabs">
-            <div class="flex overflow-x-auto hide-scrollbar">
-                <button class="tab-btn active" onclick="switchTab('overview', this)" id="tab-overview">
-                    <i class="fa-solid fa-book-open"></i> Tổng quan
-                </button>
-                <button class="tab-btn" onclick="switchTab('curriculum', this)" id="tab-curriculum">
-                    <i class="fa-solid fa-list-ul"></i> Lộ trình
-                    <span class="ml-1 bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full"><?= $total_chapters ?></span>
-                </button>
-                <button class="tab-btn" onclick="switchTab('detail', this)" id="tab-detail">
-                    <i class="fa-solid fa-circle-info"></i> Chi tiết
-                </button>
+        <div class="detail-tabs-holder">
+            <div class="detail-tabs">
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar">
+                    <button type="button" class="tab-btn active" onclick="switchTab('overview')" id="tab-overview">
+                        <i class="fa-solid fa-book-open"></i> Tổng quan
+                    </button>
+                    <button type="button" class="tab-btn" onclick="switchTab('curriculum')" id="tab-curriculum">
+                        <i class="fa-solid fa-list-ul"></i> Lộ trình
+                        <span class="ml-1 bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full"><?= $total_chapters ?></span>
+                    </button>
+                    <button type="button" class="tab-btn" onclick="switchTab('detail')" id="tab-detail">
+                        <i class="fa-solid fa-circle-info"></i> Chi tiết
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -577,7 +656,7 @@ $contact_phone  = $course['contact_phone']  ?? null;
     </div>
 
     <!-- ===== RIGHT: STICKY SIDEBAR CARD (desktop only) ===== -->
-    <div class="hidden lg:block lg:w-1/3 flex-shrink-0 relative">
+    <div class="course-sidebar-column hidden lg:block">
         <div class="sticky-card">
             <?php include __DIR__ . '/../../views/courses/_detail_card.php'; ?>
         </div>
@@ -586,17 +665,22 @@ $contact_phone  = $course['contact_phone']  ?? null;
 </div>
 
 <script>
-// Tab switching
-function switchTab(name, btn) {
-    // Hide all panels
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    // Show target
-    document.getElementById('panel-' + name).classList.add('active');
-    btn.classList.add('active');
-    // Smooth scroll to content
+function setActiveTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById('tab-' + name);
+    if (activeBtn) activeBtn.classList.add('active');
+}
+
+function switchTab(name) {
     const panel = document.getElementById('panel-' + name);
-    const offset = panel.getBoundingClientRect().top + window.scrollY - 80;
+    if (!panel) return;
+
+    setActiveTab(name);
+    const tabs = document.querySelector('.detail-tabs');
+    const tabStyles = tabs ? window.getComputedStyle(tabs) : null;
+    const stickyTop = tabStyles ? parseFloat(tabStyles.top) || 0 : 0;
+    const navOffset = tabs ? tabs.offsetHeight + stickyTop + 24 : 96;
+    const offset = panel.getBoundingClientRect().top + window.scrollY - navOffset;
     window.scrollTo({ top: offset, behavior: 'smooth' });
 }
 
@@ -605,4 +689,91 @@ function toggleChapter(id) {
     const el = document.getElementById(id);
     el.classList.toggle('open');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelector('.detail-tabs');
+    const tabsHolder = document.querySelector('.detail-tabs-holder');
+    const card = document.querySelector('.sticky-card');
+    const cardHolder = document.querySelector('.course-sidebar-column');
+
+    function syncFixedElement(el, holder, shouldFix, offsetLeft = 0, offsetWidth = 0) {
+        if (!el || !holder) return;
+
+        if (!shouldFix) {
+            el.classList.remove('is-fixed');
+            el.style.removeProperty('--fixed-left');
+            el.style.removeProperty('--fixed-width');
+            return;
+        }
+
+        const rect = holder.getBoundingClientRect();
+        el.style.setProperty('--fixed-left', (rect.left + offsetLeft) + 'px');
+        el.style.setProperty('--fixed-width', (rect.width + offsetWidth) + 'px');
+        el.classList.add('is-fixed');
+    }
+
+    function updateFixedCourseRail() {
+        const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+        if (!isDesktop) {
+            syncFixedElement(tabs, tabsHolder, false);
+            syncFixedElement(card, cardHolder, false);
+            if (tabsHolder) tabsHolder.style.minHeight = '';
+            return;
+        }
+
+        const stickyTop = 24;
+        if (tabs && tabsHolder) {
+            tabsHolder.style.minHeight = tabs.offsetHeight + 'px';
+            const tabsStart = tabsHolder.getBoundingClientRect().top + window.scrollY - stickyTop;
+            syncFixedElement(tabs, tabsHolder, window.scrollY >= tabsStart);
+        }
+
+        if (card && cardHolder) {
+            const cardStart = cardHolder.getBoundingClientRect().top + window.scrollY - stickyTop;
+            const cardBottomStop = cardHolder.getBoundingClientRect().top + window.scrollY + cardHolder.offsetHeight - stickyTop - card.offsetHeight;
+
+            if (window.scrollY >= cardStart && window.scrollY < cardBottomStop) {
+                card.classList.remove('is-bottom');
+                syncFixedElement(card, cardHolder, true, 0, 48);
+            } else if (window.scrollY >= cardBottomStop) {
+                card.classList.remove('is-fixed');
+                card.classList.add('is-bottom');
+                card.style.removeProperty('--fixed-left');
+                card.style.removeProperty('--fixed-width');
+            } else {
+                card.classList.remove('is-fixed', 'is-bottom');
+                card.style.removeProperty('--fixed-left');
+                card.style.removeProperty('--fixed-width');
+            }
+        }
+    }
+
+    updateFixedCourseRail();
+    window.addEventListener('scroll', updateFixedCourseRail, { passive: true });
+    window.addEventListener('resize', updateFixedCourseRail);
+
+    const sections = [
+        { name: 'overview', el: document.getElementById('panel-overview') },
+        { name: 'curriculum', el: document.getElementById('panel-curriculum') },
+        { name: 'detail', el: document.getElementById('panel-detail') }
+    ].filter(section => section.el);
+
+    if (!('IntersectionObserver' in window)) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        const visible = entries
+            .filter(entry => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (!visible) return;
+
+        const current = sections.find(section => section.el === visible.target);
+        if (current) setActiveTab(current.name);
+    }, {
+        rootMargin: '-120px 0px -45% 0px',
+        threshold: [0.15, 0.35, 0.6]
+    });
+
+    sections.forEach(section => observer.observe(section.el));
+});
 </script>

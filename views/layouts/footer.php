@@ -14,9 +14,9 @@
             <div>
                 <h5 class="text-white font-bold text-lg mb-4">LIÊN KẾT NHANH</h5>
                 <ul class="space-y-2 text-sm text-gray-400">
-                    <li><a href="#" class="hover:text-primary transition duration-300">Tất cả khóa học</a></li>
-                    <li><a href="#" class="hover:text-primary transition duration-300">Hướng dẫn thanh toán</a></li>
-                    <li><a href="#" class="hover:text-primary transition duration-300">Điều khoản & Bảo mật</a></li>
+                    <li><a href="?action=courses" class="hover:text-primary transition duration-300">Tất cả khóa học</a></li>
+                    <li><a href="?action=home#contact" class="hover:text-primary transition duration-300">Hướng dẫn thanh toán</a></li>
+                    <li><a href="?action=home#contact" class="hover:text-primary transition duration-300">Điều khoản & Bảo mật</a></li>
                 </ul>
             </div>
             
@@ -35,6 +35,63 @@
         </div>
     </div>
 </footer>
+
+<!-- ==================== SCROLL TO TOP BUTTON & LANDMARKS ==================== -->
+<div x-data="{ 
+        show: false, 
+        menuOpen: false, 
+        landmarks: [] 
+     }" 
+     x-init="
+        document.querySelectorAll('section[id]').forEach(sec => {
+            let h2 = sec.querySelector('h2');
+            let title = h2 ? h2.innerText : (sec.id === 'hero' ? 'Trang chủ' : sec.id);
+            landmarks.push({ id: sec.id, title: title });
+        });
+     "
+     @scroll.window="show = (window.pageYOffset > 500) ? true : false"
+     class="fixed bottom-8 right-8 z-[90]"
+     @mouseenter="menuOpen = true"
+     @mouseleave="menuOpen = false">
+     
+    <!-- Menu Popup -->
+    <div x-show="menuOpen && show && landmarks.length > 0" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+         x-cloak
+         class="absolute bottom-16 right-0 mb-3 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col py-2 max-h-[60vh] overflow-y-auto hide-scrollbar">
+        
+        <p class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 mb-1">Đi tới mục</p>
+        
+        <template x-for="item in landmarks" :key="item.id">
+            <a :href="'#' + item.id" 
+               @click="menuOpen = false"
+               class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors border-l-2 border-transparent hover:border-primary block truncate">
+                <span x-text="item.title"></span>
+            </a>
+        </template>
+    </div>
+
+    <!-- Nút Cuộn -->
+    <button x-show="show" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-10"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-10"
+            x-cloak
+            @click="window.scrollTo({top: 0, behavior: 'smooth'})"
+            class="bg-gradient-to-r from-primary to-yellow-500 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 focus:outline-none"
+            title="Cuộn lên đầu trang">
+        <i class="fa-solid fa-arrow-up text-lg"></i>
+    </button>
+</div>
+
 
 <!-- =====================================================
      GLOBAL TOAST NOTIFICATION SYSTEM

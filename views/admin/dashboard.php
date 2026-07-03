@@ -186,7 +186,7 @@
                     donut: {
                         size: '65%'
                     }
-                }
+                    }
             },
             dataLabels: {
                 enabled: false
