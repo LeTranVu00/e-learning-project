@@ -1,7 +1,11 @@
 <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     
     <div class="mb-10 text-center">
-        <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Khám phá Khóa học</h1>
+        <?php if (!empty($category_info)): ?>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Khóa học: <?= htmlspecialchars($category_info['name']) ?></h1>
+        <?php else: ?>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Khám phá Khóa học</h1>
+        <?php endif; ?>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">Tìm kiếm và lựa chọn lộ trình học tập phù hợp nhất với mục tiêu của bạn. Hàng trăm khóa học chất lượng đang chờ đón.</p>
     </div>
 
@@ -60,7 +64,9 @@
                 <div class="p-6 flex-grow flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs text-primary font-bold tracking-wider uppercase bg-yellow-50 px-2 py-1 rounded-md">Khóa học</span>
+                            <span class="text-xs text-primary font-bold tracking-wider uppercase bg-yellow-50 px-2 py-1 rounded-md">
+                                <?= htmlspecialchars($course['category_name'] ?? 'Khóa học') ?>
+                            </span>
                             <span class="text-xs text-gray-500 font-medium"><i class="fa-regular fa-clock"></i> <?= date('d/m/Y', strtotime($course['created_at'])) ?></span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-primary transition"><?= htmlspecialchars($course['title']) ?></h3>
@@ -86,7 +92,8 @@
                 <?php 
                     $currentSearch = isset($_GET['search']) ? '&search=' . urlencode($_GET['search']) : '';
                     $currentSort = isset($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
-                    $queryParams = $currentSearch . $currentSort;
+                    $currentCategory = isset($_GET['category']) ? '&category=' . urlencode($_GET['category']) : '';
+                    $queryParams = $currentSearch . $currentSort . $currentCategory;
                 ?>
                 
                 <?php if (isset($page) && $page > 1): ?>

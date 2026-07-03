@@ -34,6 +34,14 @@ switch ($action) {
     case 'home':
         $courseController->index();
         break;
+    case 'contact':
+        header("Location: ?action=home#contact");
+        exit;
+    case 'submit_contact':
+        require_once __DIR__ . '/../app/controllers/ContactController.php';
+        $contactController = new ContactController();
+        $contactController->submit();
+        break;
     case 'courses':
         $courseController->list();
         break;
@@ -105,6 +113,50 @@ switch ($action) {
     case 'admin_dashboard':
         $adminController = new AdminController();
         $adminController->dashboard();
+        break;
+    
+    // ==========================================
+    // KHU VỰC QUẢN LÝ DANH MỤC KHÓA HỌC
+    // ==========================================
+    case 'admin_manage_categories':
+        $adminController = new AdminController();
+        $adminController->manageCategories();
+        break;
+    case 'admin_store_category':
+        $adminController = new AdminController();
+        $adminController->storeCategory();
+        break;
+    case 'admin_update_category':
+        $adminController = new AdminController();
+        $adminController->updateCategory();
+        break;
+    case 'admin_delete_category':
+        $adminController = new AdminController();
+        $adminController->deleteCategory();
+        break;
+    
+    // Quản lý liên hệ (Admin)
+    case 'admin_manage_contacts':
+        $adminController = new AdminController();
+        $adminController->manageContacts();
+        break;
+    case 'admin_resolve_contact':
+        $adminController = new AdminController();
+        $adminController->resolveContact();
+        break;
+    
+    // Quản lý khóa học trong một danh mục cụ thể
+    case 'admin_manage_category_courses':
+        $adminController = new AdminController();
+        $adminController->manageCategoryCourses();
+        break;
+    case 'admin_update_course_category':
+        $adminController = new AdminController();
+        $adminController->updateCourseCategory();
+        break;
+    case 'admin_remove_course_category':
+        $adminController = new AdminController();
+        $adminController->removeCourseCategory();
         break;
     
     //Route cho trang tạo khóa học mới

@@ -33,11 +33,97 @@
                   if(window.editorEditBenefits) { window.editorEditBenefits.setData(course.benefits || ''); }
                   if(window.editorEditReqs)     { window.editorEditReqs.setData(course.requirements || ''); }
               });
+          },
+          async submitAddCourse(event) {
+              const form = event.target;
+              const formData = new FormData(form);
+              
+              if(window.editor) formData.set('description', window.editor.getData());
+              if(window.editorBenefits) formData.set('benefits', window.editorBenefits.getData());
+              if(window.editorReqs) formData.set('requirements', window.editorReqs.getData());
+
+              if (!formData.get('title') || formData.get('title').trim() === '') {
+                  showToast('Vui lòng nhập tên khóa học!', 'error');
+                  return;
+              }
+              const thumbnailFile = formData.get('thumbnail');
+              if (!thumbnailFile || thumbnailFile.size === 0) {
+                  showToast('Vui lòng chọn ảnh bìa!', 'error');
+                  return;
+              }
+
+              const btn = document.querySelector('button[form=' + form.id + ']') || form.querySelector('button[type=submit]');
+              const oldText = btn ? btn.innerHTML : '';
+              if (btn) {
+                  btn.innerHTML = 'Đang xử lý...';
+                  btn.disabled = true;
+              }
+
+              try {
+                  const response = await fetch('?action=admin_store_course', {
+                      method: 'POST',
+                      body: formData,
+                      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                  });
+                  const data = await response.json();
+                  if (data.success) {
+                      showToast(data.message, 'success');
+                      this.showAddModal = false;
+                      form.reset();
+                      if(window.editor) window.editor.setData('');
+                      if(window.editorBenefits) window.editorBenefits.setData('');
+                      if(window.editorReqs) window.editorReqs.setData('');
+                      
+                      // Fetch HTML mới của bảng khóa học để cập nhật mà không load lại trang
+                      const htmlResp = await fetch(window.location.href);
+                      const htmlText = await htmlResp.text();
+                      const parser = new DOMParser();
+                      const doc = parser.parseFromString(htmlText, 'text/html');
+                      const newTableBody = doc.querySelector('#coursesTableBody');
+                      if (newTableBody) {
+                          document.querySelector('#coursesTableBody').innerHTML = newTableBody.innerHTML;
+                      }
+                  } else {
+                      showToast(data.message, 'error');
+                  }
+              } catch(e) {
+                  showToast('Lỗi kết nối tới máy chủ!', 'error');
+              } finally {
+                  if (btn) {
+                      btn.innerHTML = oldText;
+                      btn.disabled = false;
+                  }
+              }
+          },
+          async deleteCourse(id) {
+              if (!confirm('Bạn có chắc chắn muốn XÓA khóa học này không? Mọi bài giảng bên trong sẽ bị mất!')) return;
+              try {
+                  const response = await fetch('?action=admin_delete_course&id=' + id, {
+                      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                  });
+                  const data = await response.json();
+                  if (data.success) {
+                      showToast(data.message, 'success');
+                      // Tự động load lại bảng mà không giật trang
+                      const htmlResp = await fetch(window.location.href);
+                      const htmlText = await htmlResp.text();
+                      const parser = new DOMParser();
+                      const doc = parser.parseFromString(htmlText, 'text/html');
+                      const newTableBody = doc.querySelector('#coursesTableBody');
+                      if (newTableBody) {
+                          document.querySelector('#coursesTableBody').innerHTML = newTableBody.innerHTML;
+                      }
+                  } else {
+                      showToast(data.message, 'error');
+                  }
+              } catch(e) {
+                  showToast('Lỗi kết nối tới máy chủ!', 'error');
+              }
           }
       }">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-dark text-white transition-all duration-300 flex flex-col shadow-2xl relative z-20" :class="sidebarOpen ? '' : '!w-20'">
+    <aside class="bg-dark text-white transition-all duration-300 flex flex-col shadow-2xl relative z-20" :class="sidebarOpen ? 'w-64' : 'w-20'">
         <div class="h-16 flex items-center justify-center border-b border-gray-800">
             <i class="fa-solid fa-graduation-cap text-primary text-2xl"></i>
             <span x-show="sidebarOpen" class="ml-3 font-bold text-lg tracking-wider">ADMIN PANEL</span>
@@ -48,6 +134,9 @@
             </a>
             <a href="?action=admin_manage_courses" class="flex items-center px-4 py-3 bg-gray-800 text-primary rounded-xl transition group">
                 <i class="fa-solid fa-book-open w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Khóa học</span>
+            </a>
+            <a href="?action=admin_manage_categories" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
+                <i class="fa-solid fa-folder-tree w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Danh mục</span>
             </a>
             <a href="?action=admin_manage_comments" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
                 <i class="fa-solid fa-comments w-6 text-center"></i>
@@ -126,12 +215,13 @@
                         <tr class="bg-gray-50 border-b border-gray-100 text-sm text-gray-500 uppercase tracking-wider">
                             <th class="p-4 font-semibold">Hình ảnh</th>
                             <th class="p-4 font-semibold">Tên khóa học</th>
+                            <th class="p-4 font-semibold">Danh mục</th>
                             <th class="p-4 font-semibold">Giảng viên</th>
                             <th class="p-4 font-semibold">Giá</th>
                             <th class="p-4 font-semibold text-center w-48">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody id="coursesTableBody" class="divide-y divide-gray-100">
                         <?php if(!empty($courses)): foreach($courses as $course): ?>
                         <tr class="hover:bg-gray-50 transition group">
                             <td class="p-4">
@@ -148,6 +238,9 @@
                                 <?php if (!empty($course['start_date'])): ?>
                                     <p class="text-xs text-gray-400 mt-1"><i class="fa-solid fa-calendar mr-1"></i><?= date('d/m/Y', strtotime($course['start_date'])) ?></p>
                                 <?php endif; ?>
+                            </td>
+                            <td class="p-4 text-sm text-gray-600">
+                                <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-semibold"><?= htmlspecialchars($course['category_name'] ?? 'Chưa phân loại') ?></span>
                             </td>
                             <td class="p-4 text-sm text-gray-600"><?= htmlspecialchars($course['instructor'] ?? '—') ?></td>
                             <td class="p-4 text-sm font-semibold <?= ($course['price'] ?? 0) > 0 ? 'text-red-600' : 'text-green-600' ?>">
@@ -171,9 +264,9 @@
                                     <button @click="openEdit(<?= htmlspecialchars(json_encode($course), ENT_QUOTES, 'UTF-8') ?>)" title="Sửa khóa học" class="w-10 h-10 rounded-full flex items-center justify-center bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition shadow-sm border border-yellow-100">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
-                                    <a href="?action=admin_delete_course&id=<?= $course['id'] ?>" onclick="return confirm('Bạn có chắc chắn muốn XÓA khóa học này không? Mọi bài giảng bên trong sẽ bị mất!');" title="Xóa khóa học" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition shadow-sm border border-red-100">
+                                    <button @click.prevent="deleteCourse(<?= $course['id'] ?>)" title="Xóa khóa học" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition shadow-sm border border-red-100">
                                         <i class="fa-solid fa-trash-can"></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -223,63 +316,72 @@
     <div x-show="showAddModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showAddModal = false"></div>
         <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showAddModal" class="relative bg-white rounded-2xl text-left shadow-2xl w-full max-w-4xl z-50 flex flex-col max-h-[92vh]">
+            <div x-show="showAddModal" class="relative bg-white rounded-3xl text-left shadow-2xl w-full max-w-4xl z-50 flex flex-col max-h-[92vh] overflow-hidden border border-gray-100">
                 <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-plus text-primary"></i> Thêm khóa học mới</h3>
                     <button @click="showAddModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 <div class="px-6 py-6 overflow-y-auto grow">
-                    <form action="?action=admin_store_course" method="POST" id="formAdd" class="space-y-5" enctype="multipart/form-data">
+                    <form @submit.prevent="submitAddCourse" id="formAdd" class="space-y-5" enctype="multipart/form-data" novalidate>
 
-                        <!-- Row 1: Tên + Giảng viên -->
+                        <!-- Row 1: Tên + Danh mục -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Tên khóa học <span class="text-red-500">*</span></label>
-                                <input type="text" name="title" required class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Tên khóa học <span class="text-red-500">*</span></label>
+                                <input type="text" name="title" required class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Giảng viên</label>
-                                <input type="text" name="instructor" value="<?= htmlspecialchars($_SESSION['user_name']) ?>" readonly class="w-full px-4 py-3 border rounded-xl outline-none bg-gray-100 text-gray-500 cursor-not-allowed">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Danh mục khóa học</label>
+                                <select name="category_id" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm text-gray-700">
+                                    <option value="">-- Chọn danh mục --</option>
+                                    <?php if (!empty($categories)): ?>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
                             </div>
                         </div>
+
+                        <!-- Giảng viên đã được tự động lấy theo session user_name -->
 
                         <!-- Row 2: Giá + Giá gốc -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Giá bán (VNĐ)</label>
-                                <input type="number" name="price" min="0" value="0" step="1000" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Giá bán (VNĐ)</label>
+                                <input type="number" name="price" min="0" value="0" step="1000" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Giá gốc (VNĐ) <span class="text-xs text-gray-400">(gạch ngang)</span></label>
-                                <input type="number" name="original_price" min="0" value="0" step="1000" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Giá gốc (VNĐ) <span class="text-xs text-gray-400">(gạch ngang)</span></label>
+                                <input type="number" name="original_price" min="0" value="0" step="1000" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
                             </div>
                         </div>
 
-                        <!-- Row 3: Cấp độ + Số giờ học (Số bài giảng tự đếm từ chương trình học) -->
+                        <!-- Row 3: Cấp độ + Số giờ học -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Cấp độ</label>
-                                <select name="level" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary bg-white">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Cấp độ</label>
+                                <select name="level" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm text-gray-700">
                                     <option>Sơ cấp</option>
                                     <option>Trung cấp</option>
                                     <option>Nâng cao</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Số giờ học</label>
-                                <input type="number" name="duration_hours" min="0" value="0" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Số giờ học</label>
+                                <input type="number" name="duration_hours" min="0" value="0" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
                             </div>
                         </div>
 
                         <!-- Row 4: Ngôn ngữ + Ảnh bìa -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Ngôn ngữ</label>
-                                <input type="text" name="language" value="Tiếng Việt" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Ngôn ngữ</label>
+                                <input type="text" name="language" value="Tiếng Việt" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Ảnh bìa <span class="text-red-500">*</span></label>
-                                <input type="file" name="thumbnail" accept="image/*" required class="w-full px-4 py-2.5 border rounded-xl outline-none bg-white">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Ảnh bìa <span class="text-red-500">*</span></label>
+                                <input type="file" name="thumbnail" accept="image/*" required class="w-full px-5 py-2.5 border border-gray-200 rounded-2xl outline-none bg-white shadow-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                             </div>
                         </div>
 
@@ -347,7 +449,7 @@
     <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showEditModal = false"></div>
         <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showEditModal" class="relative bg-white rounded-2xl text-left shadow-2xl w-full max-w-4xl z-50 flex flex-col max-h-[92vh]">
+            <div x-show="showEditModal" class="relative bg-white rounded-3xl text-left shadow-2xl w-full max-w-4xl z-50 flex flex-col max-h-[92vh] overflow-hidden border border-gray-100">
                 <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-yellow-500"></i> Sửa khóa học</h3>
                     <button @click="showEditModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -357,17 +459,26 @@
                         <input type="hidden" name="id"            :value="editData.id">
                         <input type="hidden" name="old_thumbnail" :value="editData.thumbnail">
 
-                        <!-- Row 1: Tên + Giảng viên -->
+                        <!-- Row 1: Tên + Danh mục -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Tên khóa học <span class="text-red-500">*</span></label>
-                                <input type="text" name="title" x-model="editData.title" required class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Tên khóa học <span class="text-red-500">*</span></label>
+                                <input type="text" name="title" x-model="editData.title" required class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold mb-1.5">Giảng viên</label>
-                                <input type="text" name="instructor" x-model="editData.instructor" placeholder="VD: Nguyễn Văn A" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                <label class="block text-sm font-semibold mb-1.5 text-gray-700">Danh mục khóa học</label>
+                                <select name="category_id" x-model="editData.category_id" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition shadow-sm text-gray-700">
+                                    <option value="">-- Chọn danh mục --</option>
+                                    <?php if (!empty($categories)): ?>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
                             </div>
                         </div>
+
+                        <!-- Giảng viên đã được tự động lấy theo session user_name -->
 
                         <!-- Row 2: Giá + Giá gốc -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -473,7 +584,7 @@
     <div x-show="showDetailModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showDetailModal = false"></div>
         <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showDetailModal" class="relative bg-white rounded-2xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col">
+            <div x-show="showDetailModal" class="relative bg-white rounded-3xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col overflow-hidden border border-gray-100">
                 <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-500"></i> Chi tiết khóa học</h3>
                     <button @click="showDetailModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>

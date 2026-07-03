@@ -10,25 +10,28 @@ class Course {
     }
 
     // Hàm lấy tất cả khóa học (Có hỗ trợ phân trang & lọc)
-    public function getAllCourses($limit = null, $offset = null, $search = '', $sort = 'latest', $date = '') {
-        $query = "SELECT * FROM courses WHERE 1=1";
+    public function getAllCourses($limit = null, $offset = null, $search = '', $sort = 'latest', $date = '', $category_id = null) {
+        $query = "SELECT c.*, cat.name as category_name FROM courses c LEFT JOIN categories cat ON c.category_id = cat.id WHERE 1=1";
         
         if (!empty($search)) {
-            $query .= " AND (title LIKE :search OR instructor LIKE :search)";
+            $query .= " AND (c.title LIKE :search OR c.instructor LIKE :search)";
         }
         if (!empty($date)) {
-            $query .= " AND DATE(created_at) = :date";
+            $query .= " AND DATE(c.created_at) = :date";
+        }
+        if (!empty($category_id)) {
+            $query .= " AND c.category_id = :category_id";
         }
         
         if ($sort === 'oldest') {
-            $query .= " ORDER BY created_at ASC";
+            $query .= " ORDER BY c.created_at ASC";
         } elseif ($sort === 'price_high') {
-            $query .= " ORDER BY price DESC";
+            $query .= " ORDER BY c.price DESC";
         } elseif ($sort === 'price_low') {
-            $query .= " ORDER BY price ASC";
+            $query .= " ORDER BY c.price ASC";
         } else {
             // latest
-            $query .= " ORDER BY is_featured DESC, created_at DESC";
+            $query .= " ORDER BY c.is_featured DESC, c.created_at DESC";
         }
         
         if ($limit !== null && $offset !== null) {
@@ -43,6 +46,9 @@ class Course {
         if (!empty($date)) {
             $stmt->bindValue(':date', $date);
         }
+        if (!empty($category_id)) {
+            $stmt->bindValue(':category_id', $category_id, PDO::PARAM_INT);
+        }
         if ($limit !== null && $offset !== null) {
             $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
             $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
@@ -53,13 +59,16 @@ class Course {
     }
 
     // Lấy tổng số khóa học để phân trang
-    public function getTotalCoursesCount($search = '', $date = '') {
+    public function getTotalCoursesCount($search = '', $date = '', $category_id = null) {
         $query = "SELECT COUNT(*) FROM courses WHERE 1=1";
         if (!empty($search)) {
             $query .= " AND (title LIKE :search OR instructor LIKE :search)";
         }
         if (!empty($date)) {
             $query .= " AND DATE(created_at) = :date";
+        }
+        if (!empty($category_id)) {
+            $query .= " AND category_id = :category_id";
         }
         
         $stmt = $this->conn->prepare($query);
@@ -69,6 +78,9 @@ class Course {
         }
         if (!empty($date)) {
             $stmt->bindValue(':date', $date);
+        }
+        if (!empty($category_id)) {
+            $stmt->bindValue(':category_id', $category_id, PDO::PARAM_INT);
         }
         
         $stmt->execute();
@@ -109,13 +121,14 @@ class Course {
     }
 
     // Hàm thêm khóa học mới vào DB (Đã cập nhật đầy đủ fields)
-    public function createCourse($title, $description, $thumbnail, $benefits, $requirements, $price = 0, $original_price = 0, $instructor = '', $level = 'Sơ cấp', $duration_hours = 0, $total_lessons = 0, $language = 'Tiếng Việt', $start_date = null, $schedule = null, $study_time = null, $contact_phone = null) {
-        $query = "INSERT INTO courses (title, price, original_price, description, thumbnail, benefits, requirements, instructor, level, duration_hours, total_lessons, language, start_date, schedule, study_time, contact_phone) 
-                  VALUES (:title, :price, :original_price, :description, :thumbnail, :benefits, :requirements, :instructor, :level, :duration_hours, :total_lessons, :language, :start_date, :schedule, :study_time, :contact_phone)";
+    public function createCourse($title, $description, $thumbnail, $benefits, $requirements, $price = 0, $original_price = 0, $instructor = '', $level = 'Sơ cấp', $duration_hours = 0, $total_lessons = 0, $language = 'Tiếng Việt', $start_date = null, $schedule = null, $study_time = null, $contact_phone = null, $category_id = null) {
+        $query = "INSERT INTO courses (title, category_id, price, original_price, description, thumbnail, benefits, requirements, instructor, level, duration_hours, total_lessons, language, start_date, schedule, study_time, contact_phone) 
+                  VALUES (:title, :category_id, :price, :original_price, :description, :thumbnail, :benefits, :requirements, :instructor, :level, :duration_hours, :total_lessons, :language, :start_date, :schedule, :study_time, :contact_phone)";
         $stmt = $this->conn->prepare($query);
         
         return $stmt->execute([
             ':title'          => $title,
+            ':category_id'    => $category_id,
             ':price'          => $price,
             ':original_price' => $original_price,
             ':description'    => $description,

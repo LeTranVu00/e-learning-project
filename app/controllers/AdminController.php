@@ -109,7 +109,7 @@ class AdminController {
             // BUG FIX: Khai báo trước khối if upload để không bị undefined khi không có file
             $benefits       = $_POST['benefits'] ?? '';
             $requirements   = $_POST['requirements'] ?? '';
-            $instructor     = $_POST['instructor']     ?? '';
+            $instructor     = $_SESSION['user_name'] ?? 'Admin';
             $level          = $_POST['level']          ?? 'Sơ cấp';
             $duration_hours = isset($_POST['duration_hours']) ? intval($_POST['duration_hours']) : 0;
             $total_lessons  = isset($_POST['total_lessons'])  ? intval($_POST['total_lessons'])  : 0;
@@ -146,15 +146,32 @@ class AdminController {
             require_once __DIR__ . '/../models/Course.php';
             $db = (new Database())->getConnection();
             $courseModel = new Course($db);
+            $category_id = !empty($_POST['category_id']) ? $_POST['category_id'] : null;
 
-            if ($courseModel->createCourse($title, $description, $thumbnail_path, $benefits, $requirements, $price, $original_price, $instructor, $level, $duration_hours, $total_lessons, $language, $start_date, $schedule, $study_time, $contact_phone)) {
-                $_SESSION['success'] = "Tuyệt vời! Khóa học đã được tạo thành công.";
+            if ($courseModel->createCourse($title, $description, $thumbnail_path, $benefits, $requirements, $price, $original_price, $instructor, $level, $duration_hours, $total_lessons, $language, $start_date, $schedule, $study_time, $contact_phone, $category_id)) {
+                $isSuccess = true;
+                $message = "Tuyệt vời! Khóa học đã được tạo thành công.";
             } else {
-                $_SESSION['error'] = "Xin lỗi! Có lỗi xảy ra khi tạo khóa học.";
+                $isSuccess = false;
+                $message = "Xin lỗi! Có lỗi xảy ra khi tạo khóa học.";
             }
 
-            // Quay lại trang Dashboard
-            header('Location: ?action=admin_dashboard');
+            // Xử lý Request từ AJAX / Fetch
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => $isSuccess, 'message' => $message]);
+                exit();
+            }
+
+            // Request thông thường
+            if ($isSuccess) {
+                $_SESSION['success'] = $message;
+            } else {
+                $_SESSION['error'] = $message;
+            }
+
+            // Quay lại trang Quản lý khóa học
+            header('Location: ?action=admin_manage_courses');
             exit();
         }
     }
@@ -261,6 +278,11 @@ class AdminController {
         // Lấy danh sách khóa học có phân trang & lọc
         $courses = $courseModel->getAllCourses($limit, $offset, $search, $sort, $date);
         
+        // Lấy danh sách danh mục để đổ vào select box Thêm/Sửa khóa học
+        require_once __DIR__ . '/../models/Category.php';
+        $catModel = new Category($db);
+        $categories = $catModel->getAllCategories();
+
         // Gọi file giao diện mới
         require_once __DIR__ . '/../../views/admin/manage_courses.php';
     }
@@ -292,7 +314,7 @@ class AdminController {
             $description    = $_POST['description'];
             $benefits       = $_POST['benefits'] ?? '';
             $requirements   = $_POST['requirements'] ?? '';
-            $instructor     = $_POST['instructor']     ?? '';
+            $instructor     = $_SESSION['user_name'] ?? 'Admin';
             $level          = $_POST['level']          ?? 'Sơ cấp';
             $duration_hours = isset($_POST['duration_hours']) ? intval($_POST['duration_hours']) : 0;
             $total_lessons  = isset($_POST['total_lessons'])  ? intval($_POST['total_lessons'])  : 0;
@@ -333,7 +355,18 @@ class AdminController {
             $db = (new Database())->getConnection();
             
             $stmt = $db->prepare("DELETE FROM courses WHERE id = ?");
-            $stmt->execute([$_GET['id']]);
+            $success = $stmt->execute([$_GET['id']]);
+
+            // AJAX request check
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                header('Content-Type: application/json');
+                if ($success) {
+                    echo json_encode(['success' => true, 'message' => 'Khóa học đã được xóa khỏi hệ thống!']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra khi xóa khóa học.']);
+                }
+                exit();
+            }
 
             $_SESSION['success'] = "Khóa học đã được xóa khỏi hệ thống!";
             header('Location: ?action=admin_manage_courses');
@@ -615,6 +648,160 @@ class AdminController {
             header('Location: ?action=admin_manage_comments');
             exit();
         }
+    }
+
+    // ==========================================
+    // KHU VỰC QUẢN LÝ DANH MỤC
+    // ==========================================
+    public function manageCategories() {
+        require_once __DIR__ . '/../config/Database.php';
+        require_once __DIR__ . '/../models/Category.php';
+        $db = (new Database())->getConnection();
+        $catModel = new Category($db);
+        $categories = $catModel->getAllCategories();
+        require_once __DIR__ . '/../../views/admin/manage_categories.php';
+    }
+
+    public function storeCategory() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../models/Category.php';
+            $db = (new Database())->getConnection();
+            $catModel = new Category($db);
+            
+            $catModel->createCategory($_POST['name'], $_POST['icon'] ?? 'fa-folder', $_POST['color'] ?? 'bg-gray-100 text-gray-600');
+            $_SESSION['success'] = "Đã thêm danh mục mới!";
+            header('Location: ?action=admin_manage_categories');
+            exit();
+        }
+    }
+
+    public function updateCategory() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../models/Category.php';
+            $db = (new Database())->getConnection();
+            $catModel = new Category($db);
+            
+            $catModel->updateCategory($_POST['id'], $_POST['name'], $_POST['icon'] ?? 'fa-folder', $_POST['color'] ?? 'bg-gray-100 text-gray-600');
+            $_SESSION['success'] = "Đã cập nhật danh mục!";
+            header('Location: ?action=admin_manage_categories');
+            exit();
+        }
+    }
+
+    public function deleteCategory() {
+        if (isset($_GET['id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../models/Category.php';
+            $db = (new Database())->getConnection();
+            $catModel = new Category($db);
+            
+            $catModel->deleteCategory($_GET['id']);
+            $_SESSION['success'] = "Đã xóa danh mục!";
+            header('Location: ?action=admin_manage_categories');
+            exit();
+        }
+    }
+
+    // ==========================================
+    // KHU VỰC QUẢN LÝ KHÓA HỌC TRONG DANH MỤC
+    // ==========================================
+    public function manageCategoryCourses() {
+        if (!isset($_GET['id'])) {
+            header('Location: ?action=admin_manage_categories');
+            exit();
+        }
+        
+        $category_id = $_GET['id'];
+        require_once __DIR__ . '/../config/Database.php';
+        require_once __DIR__ . '/../models/Category.php';
+        
+        $db = (new Database())->getConnection();
+        $catModel = new Category($db);
+        
+        $category = $catModel->getCategoryById($category_id);
+        if (!$category) {
+            header('Location: ?action=admin_manage_categories');
+            exit();
+        }
+        
+        // Lấy danh sách khóa học thuộc danh mục này
+        $stmt = $db->prepare("SELECT * FROM courses WHERE category_id = :cat_id ORDER BY id DESC");
+        $stmt->bindParam(':cat_id', $category_id);
+        $stmt->execute();
+        $category_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Lấy danh sách khóa học trống hoặc thuộc danh mục khác (để Thêm vào)
+        $stmt2 = $db->prepare("SELECT id, title FROM courses WHERE category_id IS NULL OR category_id != :cat_id ORDER BY id DESC");
+        $stmt2->bindParam(':cat_id', $category_id);
+        $stmt2->execute();
+        $available_courses = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        
+        require_once __DIR__ . '/../../views/admin/manage_category_courses.php';
+    }
+
+    public function updateCourseCategory() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['course_id']) && isset($_POST['category_id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            
+            $stmt = $db->prepare("UPDATE courses SET category_id = :cat_id WHERE id = :course_id");
+            $stmt->execute([
+                ':cat_id' => $_POST['category_id'],
+                ':course_id' => $_POST['course_id']
+            ]);
+            
+            $_SESSION['success'] = "Đã thêm khóa học vào danh mục thành công!";
+            header('Location: ?action=admin_manage_category_courses&id=' . $_POST['category_id']);
+            exit();
+        }
+    }
+
+    public function removeCourseCategory() {
+        if (isset($_GET['course_id']) && isset($_GET['category_id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            $db = (new Database())->getConnection();
+            
+            $stmt = $db->prepare("UPDATE courses SET category_id = NULL WHERE id = :course_id");
+            $stmt->execute([':course_id' => $_GET['course_id']]);
+            
+            $_SESSION['success'] = "Đã gỡ khóa học khỏi danh mục!";
+            header('Location: ?action=admin_manage_category_courses&id=' . $_GET['category_id']);
+            exit();
+        }
+    }
+
+    // ==========================================
+    // KHU VỰC QUẢN LÝ LIÊN HỆ
+    // ==========================================
+    public function manageContacts() {
+        require_once __DIR__ . '/../config/Database.php';
+        require_once __DIR__ . '/../models/Contact.php';
+        $db = (new Database())->getConnection();
+        $contactModel = new Contact($db);
+        
+        $contacts = $contactModel->getAllContacts();
+        $pending_count = $contactModel->getPendingCount();
+
+        require_once __DIR__ . '/../../views/admin/manage_contacts.php';
+    }
+
+    public function resolveContact() {
+        if (isset($_GET['id'])) {
+            require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../models/Contact.php';
+            $db = (new Database())->getConnection();
+            $contactModel = new Contact($db);
+            
+            if ($contactModel->markAsResolved($_GET['id'])) {
+                $_SESSION['success'] = "Đã đánh dấu liên hệ là đã xử lý!";
+            } else {
+                $_SESSION['error'] = "Có lỗi xảy ra!";
+            }
+        }
+        header("Location: ?action=admin_manage_contacts");
+        exit;
     }
 }
 ?>

@@ -35,12 +35,23 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Giảng viên</label>
-                        <input type="text" name="instructor" placeholder="VD: Nguyễn Văn A" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Danh mục khóa học</label>
+                        <select name="category_id" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white">
+                            <option value="">-- Chọn danh mục --</option>
+                            <?php if (!empty($categories)): ?>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Giảng viên</label>
+                        <input type="text" name="instructor" placeholder="VD: Nguyễn Văn A" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                    </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Giá khóa học (VNĐ)</label>
                         <input type="number" name="price" min="0" value="0" step="1000" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
