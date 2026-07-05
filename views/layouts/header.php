@@ -77,11 +77,26 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        .dark ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #f59e0b, #d97706); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(to bottom, #d97706, #b45309); }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #f59e0b, #d97706);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #d97706, #b45309);
+        }
 
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
@@ -94,29 +109,67 @@
 
         /* Animation Keyframes (Global) */
         @keyframes bounce-slow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(245, 158, 11, 0.6); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
-        .animate-bounce-slow { animation: bounce-slow 3s ease-in-out infinite; }
-        .animate-float { animation: float 4s ease-in-out infinite; }
-        .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(245, 158, 11, 0.6);
+            }
+        }
+
+        .animate-bounce-slow {
+            animation: bounce-slow 3s ease-in-out infinite;
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
 
         .card-hover {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .card-hover:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
@@ -135,24 +188,28 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
+
         .dark .glass {
             background: rgba(31, 41, 55, 0.7);
             border: 1px solid rgba(75, 85, 99, 0.3);
         }
 
         /* CKEditor Dark Mode */
-        .dark .ck.ck-editor__main > .ck-editor__editable {
+        .dark .ck.ck-editor__main>.ck-editor__editable {
             background-color: #374151 !important;
             border-color: #4b5563 !important;
             color: #e5e7eb !important;
         }
+
         .dark .ck.ck-toolbar {
             background-color: #1f2937 !important;
             border-color: #4b5563 !important;
         }
+
         .dark .ck.ck-button {
             color: #d1d5db !important;
         }
+
         .dark .ck.ck-button:hover {
             background-color: #374151 !important;
         }
@@ -203,7 +260,7 @@
                         class="text-gray-300 hover:text-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
                         Diễn đàn
                     </a>
-                    <a href="?action=home#contact"
+                    <a href="?action=home#contact-social"
                         class="text-gray-300 hover:text-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
                         Liên hệ
                     </a>
@@ -213,9 +270,12 @@
                 <div class="hidden md:flex items-center shrink-0">
 
                     <!-- Cart Icon Desktop -->
-                    <a href="?action=cart" class="relative text-gray-400 hover:text-primary mr-2 p-2 transition-colors group" title="Giỏ hàng">
+                    <a href="?action=cart"
+                        class="relative text-gray-400 hover:text-primary mr-2 p-2 transition-colors group"
+                        title="Giỏ hàng">
                         <i class="fa-solid fa-cart-shopping text-xl group-hover:scale-110 transition-transform"></i>
-                        <span id="cart-badge-desktop" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full transform translate-x-1/4 -translate-y-1/4 <?= $cart_count > 0 ? '' : 'hidden' ?>">
+                        <span id="cart-badge-desktop"
+                            class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full transform translate-x-1/4 -translate-y-1/4 <?= $cart_count > 0 ? '' : 'hidden' ?>">
                             <?= $cart_count ?>
                         </span>
                     </a>
@@ -229,13 +289,12 @@
                     </button>
 
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <div x-data="{ profileOpen: false }" class="relative" 
-                             @mouseenter="profileOpen = true" 
-                             @mouseleave="profileOpen = false">
+                        <div x-data="{ profileOpen: false }" class="relative" @mouseenter="profileOpen = true"
+                            @mouseleave="profileOpen = false">
                             <button @click="profileOpen = !profileOpen" @click.away="profileOpen = false"
                                 class="flex items-center gap-2.5 hover:bg-gray-800 px-3 py-2 rounded-lg transition duration-200">
-                                <?php 
-                                    $headerAvatar = !empty($_SESSION['user_avatar']) ? $_SESSION['user_avatar'] : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['user_name'] ?? 'User') . '&background=random';
+                                <?php
+                                $headerAvatar = !empty($_SESSION['user_avatar']) ? $_SESSION['user_avatar'] : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['user_name'] ?? 'User') . '&background=random';
                                 ?>
                                 <img src="<?= htmlspecialchars($headerAvatar) ?>" alt="Avatar" referrerpolicy="no-referrer"
                                     class="w-8 h-8 rounded-full border border-gray-500 object-cover">
@@ -300,7 +359,8 @@
                 <div class="md:hidden flex items-center gap-2">
                     <a href="?action=cart" class="relative text-gray-400 hover:text-white p-2 transition-colors group">
                         <i class="fa-solid fa-cart-shopping text-xl group-hover:scale-110 transition-transform"></i>
-                        <span id="cart-badge-mobile" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full transform translate-x-1/4 -translate-y-1/4 <?= $cart_count > 0 ? '' : 'hidden' ?>">
+                        <span id="cart-badge-mobile"
+                            class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full transform translate-x-1/4 -translate-y-1/4 <?= $cart_count > 0 ? '' : 'hidden' ?>">
                             <?= $cart_count ?>
                         </span>
                     </a>
@@ -352,9 +412,11 @@
                             class="w-10 h-10 rounded-full border border-gray-500 object-cover">
                         <div>
                             <p class="text-white font-semibold text-sm">Chào,
-                                <?= htmlspecialchars($_SESSION['user_name']) ?> 👋</p>
+                                <?= htmlspecialchars($_SESSION['user_name']) ?> 👋
+                            </p>
                             <p class="text-xs text-gray-400">
-                                <?= $_SESSION['user_role'] === 'admin' ? 'Quản trị viên' : 'Học viên' ?></p>
+                                <?= $_SESSION['user_role'] === 'admin' ? 'Quản trị viên' : 'Học viên' ?>
+                            </p>
                         </div>
                     </div>
 

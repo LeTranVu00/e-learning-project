@@ -150,5 +150,35 @@ class User {
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
     }
+
+    // --- CÁC HÀM KHÔI PHỤC MẬT KHẨU ---
+
+    // Lưu mã xác nhận khôi phục mật khẩu
+    public function saveResetToken($email, $token, $expiry) {
+        $query = "UPDATE users SET reset_token = :token, reset_token_expiry = :expiry WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':token', $token);
+        $stmt->bindParam(':expiry', $expiry);
+        $stmt->bindParam(':email', $email);
+        return $stmt->execute();
+    }
+
+    // Tìm người dùng theo mã xác nhận khôi phục mật khẩu
+    public function findByResetToken($token) {
+        $query = "SELECT * FROM users WHERE reset_token = :token AND reset_token_expiry > NOW() LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':token', $token);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Cập nhật mật khẩu mới và xóa token
+    public function updatePassword($id, $hashed_password) {
+        $query = "UPDATE users SET password = :password, reset_token = NULL, reset_token_expiry = NULL WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':password', $hashed_password);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
 }
 ?>

@@ -129,6 +129,109 @@ class AuthController {
     }
 
     // ==========================================
+    // PHẦN: KHÔI PHỤC MẬT KHẨU
+    // ==========================================
+
+    public function showForgotPassword() {
+        require_once __DIR__ . '/../../views/layouts/header.php';
+        require_once __DIR__ . '/../../views/auth/forgot_password.php';
+        require_once __DIR__ . '/../../views/layouts/footer.php';
+    }
+
+    public function handleForgotPassword() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?action=forgot_password');
+            exit();
+        }
+
+        $email = trim($_POST['email'] ?? '');
+        if (empty($email)) {
+            $_SESSION['error'] = 'Vui lòng nhập email!';
+            header('Location: ?action=forgot_password');
+            exit();
+        }
+
+        $db = (new Database())->getConnection();
+        $userModel = new User($db);
+        $user = $userModel->findByEmail($email);
+
+        if ($user) {
+            // Tạo token ngẫu nhiên và thời hạn 1 giờ
+            $token = bin2hex(random_bytes(32));
+            $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+            
+            if ($userModel->saveResetToken($email, $token, $expiry)) {
+                // Trong thực tế, gửi email ở đây.
+                // Để demo/local test, hiển thị link ra màn hình.
+                $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/e-learning-project/public/index.php?action=reset_password&token=" . $token;
+                $_SESSION['success'] = 'Yêu cầu khôi phục mật khẩu đã được gửi! <br><a href="' . $resetLink . '" class="underline font-bold text-blue-600">BẤM VÀO ĐÂY ĐỂ ĐẶT LẠI MẬT KHẨU (DEMO)</a>';
+            } else {
+                $_SESSION['error'] = 'Lỗi hệ thống, không thể tạo mã khôi phục.';
+            }
+        } else {
+            // Không nên báo email không tồn tại vì lý do bảo mật, nhưng để demo thì cho dễ nhìn:
+            $_SESSION['error'] = 'Email chưa được đăng ký trong hệ thống!';
+        }
+
+        header('Location: ?action=forgot_password');
+        exit();
+    }
+
+    public function showResetPassword() {
+        $token = $_GET['token'] ?? '';
+        
+        $db = (new Database())->getConnection();
+        $userModel = new User($db);
+        $user = $userModel->findByResetToken($token);
+
+        if (!$user) {
+            $_SESSION['error'] = 'Đường dẫn khôi phục không hợp lệ hoặc đã hết hạn!';
+            header('Location: ?action=login');
+            exit();
+        }
+
+        require_once __DIR__ . '/../../views/layouts/header.php';
+        require_once __DIR__ . '/../../views/auth/reset_password.php';
+        require_once __DIR__ . '/../../views/layouts/footer.php';
+    }
+
+    public function handleResetPassword() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?action=login');
+            exit();
+        }
+
+        $token = $_POST['token'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $password_confirm = $_POST['password_confirm'] ?? '';
+
+        if (empty($password) || $password !== $password_confirm) {
+            $_SESSION['error'] = 'Mật khẩu không khớp hoặc bị trống!';
+            header('Location: ?action=reset_password&token=' . $token);
+            exit();
+        }
+
+        $db = (new Database())->getConnection();
+        $userModel = new User($db);
+        $user = $userModel->findByResetToken($token);
+
+        if ($user) {
+            $hashed = password_hash($password, PASSWORD_BCRYPT);
+            if ($userModel->updatePassword($user['id'], $hashed)) {
+                $_SESSION['success'] = 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập ngay bây giờ.';
+                header('Location: ?action=login');
+                exit();
+            } else {
+                $_SESSION['error'] = 'Đã xảy ra lỗi khi cập nhật mật khẩu.';
+            }
+        } else {
+            $_SESSION['error'] = 'Đường dẫn khôi phục không hợp lệ hoặc đã hết hạn!';
+        }
+
+        header('Location: ?action=login');
+        exit();
+    }
+
     // PHẦN 2: CÁC HÀM XỬ LÝ GOOGLE SSO MỚI
     // ==========================================
 

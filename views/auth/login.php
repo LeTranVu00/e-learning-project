@@ -32,7 +32,7 @@
                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                         <i class="fa-solid fa-lock text-gray-400 mr-1.5"></i>Mật khẩu
                     </label>
-                    <a href="#" class="text-xs text-primary hover:text-yellow-600 font-medium transition">Quên mật khẩu?</a>
+                    <a href="?action=forgot_password" class="text-xs text-primary hover:text-yellow-600 font-medium transition">Quên mật khẩu?</a>
                 </div>
                 <div class="relative" x-data="{ show: false }">
                     <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm"></i>

@@ -44,6 +44,23 @@ class Progress {
         }
     }
 
+    // Bật trạng thái hoàn thành và lưu điểm (Dành cho Quiz)
+    public function saveQuizScore($user_id, $material_id, $score) {
+        $check = "SELECT id FROM material_completions WHERE user_id = :uid AND material_id = :mid";
+        $stmt = $this->conn->prepare($check);
+        $stmt->execute(['uid' => $user_id, 'mid' => $material_id]);
+        
+        if($stmt->rowCount() > 0) {
+            // Đã có -> Cập nhật điểm
+            $update = "UPDATE material_completions SET score = :score WHERE user_id = :uid AND material_id = :mid";
+            $this->conn->prepare($update)->execute(['uid' => $user_id, 'mid' => $material_id, 'score' => $score]);
+        } else {
+            // Chưa có -> Thêm vào cùng điểm
+            $insert = "INSERT INTO material_completions (user_id, material_id, score) VALUES (:uid, :mid, :score)";
+            $this->conn->prepare($insert)->execute(['uid' => $user_id, 'mid' => $material_id, 'score' => $score]);
+        }
+    }
+
     // Hàm tính % hoàn thành khóa học của một User
     public function calculateProgress($user_id, $course_id) {
         // 1. Đếm TỔNG SỐ tài liệu có trong khóa học này

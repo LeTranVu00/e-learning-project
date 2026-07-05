@@ -658,7 +658,7 @@ $topPosts = $forumModel->getFeaturedPosts(3);
         <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Sẵn sàng bắt đầu hành trình của bạn?</h2>
         <p class="text-gray-400 text-lg mb-10">Tham gia cùng 10,000+ học viên và nâng cấp kỹ năng ngay hôm nay.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#" class="bg-gradient-to-r from-primary to-yellow-500 hover:from-yellow-500 hover:to-primary text-white font-bold py-4 px-10 rounded-xl shadow-2xl transition-all duration-300 text-lg transform hover:-translate-y-1">
+            <a href="?action=register" class="bg-gradient-to-r from-primary to-yellow-500 hover:from-yellow-500 hover:to-primary text-white font-bold py-4 px-10 rounded-xl shadow-2xl transition-all duration-300 text-lg transform hover:-translate-y-1">
                 Đăng ký ngay
             </a>
             <a href="#how-it-works" class="glass hover:bg-white/20 text-white border border-white/20 font-bold py-4 px-10 rounded-xl transition-all duration-300 text-lg">

@@ -6,9 +6,12 @@ require_once 'layouts/header.php'; ?>
         showEditChapterModal: false,
         showEditMaterialModal: false,
         currentChapterId: null,
-        newMaterialType: 'file', 
+        newMaterialType: 'file',
+        materialTab: 'file', // 'file', 'link', 'quiz'
         addFiles: [],
         addLinks: [],
+        quizTitle: '',
+        addQuizzes: [],
         editFileName: '',
         editChapterData: { id: '', title: '', description: '' },
         editMaterialData: { id: '', title: '', type: '', content: '', description: '' },
@@ -239,14 +242,34 @@ require_once 'layouts/header.php'; ?>
             <form action="?action=admin_store_material" method="POST" enctype="multipart/form-data" class="space-y-4">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                 <input type="hidden" name="chapter_id" :value="currentChapterId">
+                <input type="hidden" name="material_type" :value="materialTab">
+                
+                <!-- TABS -->
+                <div class="flex border-b border-gray-200 dark:border-gray-700">
+                    <button type="button" @click="materialTab = 'file'" 
+                        :class="materialTab === 'file' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="w-1/3 py-2 text-center border-b-2 font-semibold text-sm transition">
+                        Tải File
+                    </button>
+                    <button type="button" @click="materialTab = 'link'"
+                        :class="materialTab === 'link' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="w-1/3 py-2 text-center border-b-2 font-semibold text-sm transition">
+                        Thêm Link
+                    </button>
+                    <button type="button" @click="materialTab = 'quiz'"
+                        :class="materialTab === 'quiz' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="w-1/3 py-2 text-center border-b-2 font-semibold text-sm transition">
+                        Trắc nghiệm
+                    </button>
+                </div>
 
                 <div>
-                    <label class="block text-sm font-semibold mb-2 dark:text-gray-300">Nội dung chi tiết / Mô tả (Tùy chọn - Áp dụng chung)</label>
+                    <label class="block text-sm font-semibold mb-2 dark:text-gray-300">Nội dung chi tiết / Mô tả (Tùy chọn)</label>
                     <textarea name="description" id="editor-add-material"></textarea>
                 </div>
 
                 <!-- Khu vực tải file -->
-                <div>
+                <div x-show="materialTab === 'file'">
                     <label class="block text-sm font-semibold mb-2 dark:text-gray-300">Tải file lên (Mỗi file = 1 Bài giảng)</label>
                     <div class="flex items-center justify-center w-full">
                         <label for="dropzone-file-add"
@@ -273,7 +296,7 @@ require_once 'layouts/header.php'; ?>
                 </div>
 
                 <!-- Khu vực thêm link -->
-                <div>
+                <div x-show="materialTab === 'link'">
                     <div class="flex items-center justify-between mb-2">
                         <label class="block text-sm font-semibold dark:text-gray-300">Đường dẫn ngoài (Mỗi link = 1 Bài giảng)</label>
                         <button type="button" @click="addLinks.push({title: '', url: ''})" 
@@ -286,9 +309,9 @@ require_once 'layouts/header.php'; ?>
                         <template x-for="(link, index) in addLinks" :key="index">
                             <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700 p-3 rounded-xl border border-gray-200 dark:border-gray-600">
                                 <div class="flex-1 space-y-3">
-                                    <input type="text" x-model="link.title" :name="'link_titles['+index+']'" placeholder="Tên bài giảng cho link này..." required
+                                    <input type="text" x-model="link.title" :name="'link_titles['+index+']'" placeholder="Tên bài giảng cho link này..."
                                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white rounded-lg outline-none focus:ring-2 focus:ring-primary transition">
-                                    <input type="url" x-model="link.url" :name="'link_urls['+index+']'" placeholder="https://youtube.com/..." required
+                                    <input type="url" x-model="link.url" :name="'link_urls['+index+']'" placeholder="https://youtube.com/..."
                                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white rounded-lg outline-none focus:ring-2 focus:ring-primary transition">
                                 </div>
                                 <button type="button" @click="addLinks.splice(index, 1)" 
@@ -299,6 +322,51 @@ require_once 'layouts/header.php'; ?>
                         </template>
                     </div>
                     <p x-show="addLinks.length === 0" class="text-sm text-gray-400 italic mt-1">Chưa có link nào được thêm.</p>
+                </div>
+
+                <!-- Khu vực Trắc nghiệm (Quiz) -->
+                <div x-show="materialTab === 'quiz'">
+                    <div class="mb-3">
+                        <label class="block text-sm font-semibold mb-2 dark:text-gray-300">Tiêu đề bài Trắc nghiệm</label>
+                        <input type="text" name="quiz_title" x-model="quizTitle" placeholder="VD: Bài tập ôn luyện cuối chương"
+                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white rounded-lg outline-none focus:ring-2 focus:ring-primary transition">
+                    </div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-semibold dark:text-gray-300">Danh sách câu hỏi</label>
+                        <button type="button" @click="addQuizzes.push({question: '', options: ['','','',''], correct_index: 0})" 
+                                class="text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Thêm Câu Hỏi
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4 max-h-64 overflow-y-auto pr-2" x-show="addQuizzes.length > 0" x-cloak>
+                        <template x-for="(q, qIndex) in addQuizzes" :key="qIndex">
+                            <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl border border-gray-200 dark:border-gray-600 relative">
+                                <button type="button" @click="addQuizzes.splice(qIndex, 1)" 
+                                        class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition" title="Xóa câu hỏi">
+                                    <i class="fa-solid fa-xmark text-sm"></i>
+                                </button>
+                                
+                                <label class="block text-xs font-bold mb-1 text-gray-600 dark:text-gray-400">Câu hỏi <span x-text="qIndex+1"></span></label>
+                                <input type="text" x-model="q.question" placeholder="Nội dung câu hỏi..."
+                                    class="w-full px-3 py-2 mb-3 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white rounded-lg outline-none focus:ring-2 focus:ring-primary transition">
+                                
+                                <label class="block text-xs font-bold mb-1 text-gray-600 dark:text-gray-400">Các đáp án (Chọn đáp án đúng)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <template x-for="(opt, oIndex) in q.options" :key="oIndex">
+                                        <div class="flex items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-300 dark:border-gray-600">
+                                            <input type="radio" :name="'correct_' + qIndex" :value="oIndex" x-model="q.correct_index" class="w-4 h-4 text-primary">
+                                            <input type="text" x-model="q.options[oIndex]" :placeholder="'Đáp án ' + String.fromCharCode(65 + oIndex)"
+                                                class="w-full text-sm bg-transparent outline-none dark:text-white">
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <!-- Hidden field để gửi mảng JSON lên backend -->
+                    <input type="hidden" name="quiz_json" :value="JSON.stringify(addQuizzes)">
+                    <p x-show="addQuizzes.length === 0" class="text-sm text-gray-400 italic mt-1">Chưa có câu hỏi nào.</p>
                 </div>
 
                 <div class="flex justify-end gap-2 mt-4">

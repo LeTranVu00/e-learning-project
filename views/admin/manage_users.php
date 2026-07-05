@@ -185,9 +185,6 @@
                 </nav>
             </div>
             <?php endif; ?>
-        </div>
-    </main>
-
     <!-- MODAL SỬA NGƯỜI DÙNG -->
     <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showEditModal = false"></div>

@@ -15,17 +15,17 @@
                 <h5 class="text-white font-bold text-lg mb-4">LIÊN KẾT NHANH</h5>
                 <ul class="space-y-2 text-sm text-gray-400">
                     <li><a href="?action=courses" class="hover:text-primary transition duration-300">Tất cả khóa học</a></li>
-                    <li><a href="?action=home#contact" class="hover:text-primary transition duration-300">Hướng dẫn thanh toán</a></li>
-                    <li><a href="?action=home#contact" class="hover:text-primary transition duration-300">Điều khoản & Bảo mật</a></li>
+                    <li><a href="?action=forum" class="hover:text-primary transition duration-300">Diễn đàn bình luận</a></li>
+                    <li><a href="?action=home#contact-social" class="hover:text-primary transition duration-300">Kết nối với chúng tôi</a></li>
                 </ul>
             </div>
             
             <div>
                 <h5 class="text-white font-bold text-lg mb-4">THÔNG TIN LIÊN HỆ</h5>
                 <ul class="space-y-3 text-sm text-gray-400">
-                    <li class="flex items-center"><i class="fa-solid fa-envelope text-primary w-6 text-center mr-2"></i> support@elearning.vn</li>
-                    <li class="flex items-center"><i class="fa-solid fa-phone text-primary w-6 text-center mr-2"></i> 0123 456 789</li>
-                    <li class="flex items-center"><i class="fa-solid fa-location-dot text-primary w-6 text-center mr-2"></i> Ký túc xá Đại học, Việt Nam</li>
+                    <li class="flex items-center"><i class="fa-solid fa-envelope text-primary w-6 text-center mr-2"></i> vult8073@ut.edu.vn</li>
+                    <li class="flex items-center"><i class="fa-solid fa-phone text-primary w-6 text-center mr-2"></i> 0396870877</li>
+                    <li class="flex items-center"><i class="fa-solid fa-location-dot text-primary w-6 text-center mr-2"></i> Trường đại học giao thông vận tải thành phố Hồ Chí Minh</li>
                 </ul>
             </div>
         </div>

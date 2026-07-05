@@ -269,7 +269,7 @@ class AdminController {
             $addedCount = 0;
 
             // Xử lý upload file hàng loạt
-            if (isset($_FILES['slide_files'])) {
+            if (isset($_POST['material_type']) && $_POST['material_type'] === 'file' && isset($_FILES['slide_files'])) {
                 $upload_dir = __DIR__ . '/../../public/uploads/materials/';
                 if (!is_dir($upload_dir)) {
                     mkdir($upload_dir, 0777, true);
@@ -295,7 +295,7 @@ class AdminController {
             }
 
             // Xử lý thêm link hàng loạt
-            if (isset($_POST['link_urls']) && is_array($_POST['link_urls'])) {
+            if (isset($_POST['material_type']) && $_POST['material_type'] === 'link' && isset($_POST['link_urls']) && is_array($_POST['link_urls'])) {
                 $link_titles = $_POST['link_titles'] ?? [];
                 foreach ($_POST['link_urls'] as $index => $url) {
                     if (!empty(trim($url))) {
@@ -306,10 +306,18 @@ class AdminController {
                 }
             }
             
+            // Xử lý thêm Quiz
+            if (isset($_POST['material_type']) && $_POST['material_type'] === 'quiz' && !empty($_POST['quiz_json'])) {
+                $title = !empty(trim($_POST['quiz_title'])) ? trim($_POST['quiz_title']) : 'Bài Trắc nghiệm';
+                $quiz_json = $_POST['quiz_json']; // Cấu trúc mảng đã stringify
+                $stmt->execute([$chapter_id, $title, 'quiz', $quiz_json, $description]);
+                $addedCount++;
+            }
+            
             if ($addedCount > 0) {
-                $_SESSION['success'] = "Đã thêm $addedCount Bài giảng mới vào chương!";
+                $_SESSION['success'] = "Đã thêm $addedCount Bài giảng/Trắc nghiệm mới vào chương!";
             } else {
-                $_SESSION['error'] = "Không có Bài giảng nào được thêm. Vui lòng chọn file hoặc nhập link.";
+                $_SESSION['error'] = "Không có Bài giảng nào được thêm. Vui lòng kiểm tra lại.";
             }
 
             header('Location: ?action=admin_manage_content&id=' . $course_id);

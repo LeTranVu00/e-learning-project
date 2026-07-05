@@ -86,6 +86,21 @@ switch ($action) {
         break;
     // ----------------------------------
 
+    // ----- ROUTE KHÔI PHỤC MẬT KHẨU -----
+    case 'forgot_password':
+        $authController->showForgotPassword();
+        break;
+    case 'handle_forgot_password':
+        $authController->handleForgotPassword();
+        break;
+    case 'reset_password':
+        $authController->showResetPassword();
+        break;
+    case 'handle_reset_password':
+        $authController->handleResetPassword();
+        break;
+    // ------------------------------------
+
     // ----- ROUTE CHO GOOGLE SSO -----
     case 'google_login':
         $authController->googleLogin();
@@ -137,6 +152,9 @@ switch ($action) {
     // ----- ROUTE CHO MARK DONE -----
     case 'mark_done':
         $learningController->markDone();
+        break;
+    case 'submit_quiz':
+        $learningController->submitQuiz();
         break;
     //Route cho trang Dashboard Admin
     case 'admin_dashboard':

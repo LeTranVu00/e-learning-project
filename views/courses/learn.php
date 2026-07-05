@@ -145,7 +145,49 @@
                                         <li x-data="{ 
                                                 done: <?= in_array($material['id'], $completed_materials) ? 'true' : 'false' ?>, 
                                                 loading: false,
+                                                showQuiz: false,
+                                                quizResults: null,
+                                                quizScore: null,
+                                                quizPassed: false,
                                                 materialIndex: <?= $currentGlobalIndex ?>,
+                                                submitQuiz(e, matId) {
+                                                    this.loading = true;
+                                                    let formData = new FormData(e.target);
+                                                    formData.append('material_id', matId);
+                                                    fetch('?action=submit_quiz', { method: 'POST', body: formData })
+                                                    .then(res => res.json())
+                                                    .then(data => {
+                                                        if(data.success) {
+                                                            this.quizResults = data.results;
+                                                            this.quizScore = data.score;
+                                                            this.quizPassed = data.passed;
+                                                            if (data.passed) {
+                                                                Swal.fire({
+                                                                    title: 'Chúc mừng!',
+                                                                    text: 'Bạn đạt ' + data.score + ' điểm và đã qua bài kiểm tra.',
+                                                                    icon: 'success',
+                                                                    confirmButtonColor: '#f59e0b',
+                                                                    confirmButtonText: 'Xem đáp án'
+                                                                });
+                                                                if (!this.done) {
+                                                                    this.done = true;
+                                                                    window.dispatchEvent(new CustomEvent('material-completed', { detail: { increment: 1, index: this.materialIndex, chapterIndex: <?= $index ?> } }));
+                                                                }
+                                                            } else {
+                                                                Swal.fire({
+                                                                    title: 'Chưa đạt yêu cầu',
+                                                                    text: 'Bạn chỉ đạt ' + data.score + ' điểm. ' + data.message,
+                                                                    icon: 'error',
+                                                                    confirmButtonColor: '#f59e0b',
+                                                                    confirmButtonText: 'Xem chi tiết'
+                                                                });
+                                                            }
+                                                        } else {
+                                                            Swal.fire('Lỗi', data.message, 'error');
+                                                        }
+                                                        this.loading = false;
+                                                    }).catch(() => { this.loading = false; alert('Lỗi kết nối!'); });
+                                                },
                                                 markDone(e, showFireworks = true) {
                                                     this.loading = true;
                                                     let formData = new FormData();
@@ -184,16 +226,23 @@
                                             
                                             <div class="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-3">
                                                 <!-- Material Link -->
+                                                <?php if($material['type'] === 'quiz'): ?>
+                                                <button type="button" @click="showQuiz = !showQuiz"
+                                                   class="flex items-center gap-3 flex-1 min-w-0 group/link text-left">
+                                                <?php else: ?>
                                                 <a href="<?= getMaterialUrl($material['content'], $material['type']) ?>" 
                                                    target="_blank" 
                                                    @click="if(!done) markDone($event, false)"
                                                    class="flex items-center gap-3 flex-1 min-w-0 group/link">
+                                                <?php endif; ?>
                                                     <div :class="done ? 'bg-green-100 dark:bg-green-900/30 text-green-500 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 group-hover/link:bg-primary/10 group-hover/link:text-primary'" 
                                                          class="w-10 h-10 rounded-lg flex items-center justify-center transition shrink-0">
                                                         <?php if($material['type'] == 'video'): ?>
                                                             <i class="fa-solid fa-play text-sm"></i>
                                                         <?php elseif($material['type'] == 'file'): ?>
                                                             <i class="fa-solid fa-file-pdf text-sm"></i>
+                                                        <?php elseif($material['type'] == 'quiz'): ?>
+                                                            <i class="fa-solid fa-clipboard-question text-sm"></i>
                                                         <?php else: ?>
                                                             <i class="fa-solid fa-link text-sm"></i>
                                                         <?php endif; ?>
@@ -209,7 +258,11 @@
                                                             <?= ucfirst($material['type']) ?>
                                                         </span>
                                                     </div>
+                                                <?php if($material['type'] === 'quiz'): ?>
+                                                </button>
+                                                <?php else: ?>
                                                 </a>
+                                                <?php endif; ?>
                                                 
                                                 <!-- Actions -->
                                                 <div class="flex items-center gap-2 shrink-0">
@@ -246,6 +299,82 @@
                                             <div class="w-full mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
                                                 <?= $material['description'] ?>
                                             </div>
+                                            <?php endif; ?>
+
+                                            <?php if ($material['type'] === 'quiz'): ?>
+                                            <!-- Quiz Interface -->
+                                            <?php 
+                                                $quizData = json_decode($material['content'], true); 
+                                                if (is_array($quizData) && count($quizData) > 0): 
+                                            ?>
+                                            <!-- Modal Container -->
+                                            <template x-teleport="body">
+                                                <div x-show="showQuiz" style="display: none;" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                                                    <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity" @click="showQuiz = false"></div>
+                                                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                                                        <div x-show="showQuiz" x-transition class="relative bg-white dark:bg-gray-800 rounded-2xl text-left shadow-2xl w-full max-w-3xl z-[10000] flex flex-col overflow-hidden my-8">
+                                                            <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shrink-0">
+                                                                <h3 class="text-xl font-bold flex items-center gap-2 text-gray-800 dark:text-white">
+                                                                    <i class="fa-solid fa-clipboard-question text-primary"></i> Bài Trắc Nghiệm: <?= htmlspecialchars($material['title']) ?>
+                                                                </h3>
+                                                                <button type="button" @click="showQuiz = false" class="text-gray-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                                                            </div>
+                                                            <div class="px-6 py-6 overflow-y-auto max-h-[70vh]">
+                                                                <template x-if="quizScore !== null">
+                                                                    <div class="mb-6 rounded-2xl p-6 text-center border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all" 
+                                                                         :class="quizPassed ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'">
+                                                                        <span class="text-sm font-bold uppercase tracking-wider" :class="quizPassed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                                                            <span x-text="quizPassed ? 'Chúc mừng! Bạn đã Đạt' : 'Rất tiếc! Bạn Chưa Đạt'"></span>
+                                                                        </span>
+                                                                        <div class="text-4xl font-extrabold flex items-baseline gap-1" :class="quizPassed ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'">
+                                                                            <span x-text="quizScore"></span> <span class="text-xl font-bold opacity-70">/ 100</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </template>
+                                                                <form x-ref="quizForm" @submit.prevent="submitQuiz($event, <?= $material['id'] ?>)">
+                                                                    <div class="space-y-6">
+                                                        <?php foreach ($quizData as $qIdx => $q): ?>
+                                                        <div class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl">
+                                                            <p class="font-bold text-gray-800 dark:text-white mb-3">Câu <?= $qIdx + 1 ?>: <?= htmlspecialchars($q['question']) ?></p>
+                                                            <div class="space-y-2">
+                                                                <?php foreach ($q['options'] as $oIdx => $opt): ?>
+                                                                <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer transition"
+                                                                       :class="quizResults ? (quizResults[<?= $qIdx ?>].correct_index === <?= $oIdx ?> ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400 font-bold' : (quizResults[<?= $qIdx ?>].user_ans === <?= $oIdx ?> ? 'bg-red-50 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-400' : 'opacity-50')) : 'hover:bg-white dark:hover:bg-gray-800'">
+                                                                    <input type="radio" name="ans_<?= $qIdx ?>" value="<?= $oIdx ?>" required class="w-4 h-4 text-primary" :disabled="quizResults !== null">
+                                                                    <span class="text-sm" :class="quizResults ? '' : 'text-gray-700 dark:text-gray-300'"><?= htmlspecialchars($opt) ?></span>
+                                                                    <template x-if="quizResults && quizResults[<?= $qIdx ?>].correct_index === <?= $oIdx ?>">
+                                                                        <i class="fa-solid fa-circle-check ml-auto text-green-500"></i>
+                                                                    </template>
+                                                                    <template x-if="quizResults && quizResults[<?= $qIdx ?>].user_ans === <?= $oIdx ?> && !quizResults[<?= $qIdx ?>].is_correct">
+                                                                        <i class="fa-solid fa-circle-xmark ml-auto text-red-500"></i>
+                                                                    </template>
+                                                                </label>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                            <template x-if="quizResults && !quizResults[<?= $qIdx ?>].is_correct">
+                                                                <div class="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center gap-2 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg border border-red-100 dark:border-red-800/50">
+                                                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                                                    <span>Đáp án này chưa chính xác. Vui lòng thử lại!</span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                    <div class="mt-4 flex justify-end items-center">
+                                                        <button type="submit" x-show="!quizResults" class="px-5 py-2 bg-primary text-white rounded-xl font-bold hover:bg-yellow-600 transition shadow-lg flex items-center gap-2 ml-auto" :disabled="loading">
+                                                            <i class="fa-solid fa-paper-plane text-sm"></i> Nộp Bài & Chấm Điểm
+                                                        </button>
+                                                        <button type="button" x-show="quizResults" @click="showQuiz = false" class="px-5 py-2 bg-gray-200 text-gray-800 rounded-xl font-bold hover:bg-gray-300 transition shadow-lg flex items-center gap-2 ml-auto">
+                                                            Đóng
+                                                        </button>
+                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <?php endif; ?>
                                             <?php endif; ?>
                                         </li>
                                     <?php endforeach; ?>
