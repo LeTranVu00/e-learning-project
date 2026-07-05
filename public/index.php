@@ -19,6 +19,8 @@ require_once __DIR__ . '/../app/controllers/LearningController.php';
 require_once __DIR__ . '/../app/controllers/AdminController.php';
 require_once __DIR__ . '/../app/controllers/ForumController.php';
 require_once __DIR__ . '/../app/controllers/PaymentController.php';
+require_once __DIR__ . '/../app/controllers/ProfileController.php';
+require_once __DIR__ . '/../app/controllers/CartController.php';
 
 $courseController = new CourseController();
 $authController = new AuthController(); // Khởi tạo AuthController
@@ -50,6 +52,24 @@ switch ($action) {
         $courseController->show($id);
         break;
 
+    // ----- ROUTE CHO GIỎ HÀNG -----
+    case 'cart':
+        $cartController = new CartController();
+        $cartController->index();
+        break;
+    case 'add_to_cart':
+        $cartController = new CartController();
+        $cartController->add();
+        break;
+    case 'remove_from_cart':
+        $cartController = new CartController();
+        $cartController->remove();
+        break;
+    case 'checkout_cart':
+        $paymentController = new PaymentController();
+        $paymentController->createCartPayment();
+        break;
+
     // ----- THÊM 2 ROUTE MỚI Ở ĐÂY -----
     case 'login':
         $authController->showLogin();
@@ -79,7 +99,16 @@ switch ($action) {
         $authController->logout();
         break;
 
-    //-----------------------------------
+    // ----- ROUTE CHO TRANG HỒ SƠ -----
+    case 'profile':
+        $profileController = new ProfileController();
+        $profileController->index();
+        break;
+    case 'update_profile':
+        $profileController = new ProfileController();
+        $profileController->update();
+        break;
+    // -----------------------------------
     // ----- ROUTE CHO THANH TOÁN VNPAY -----
     case 'pay':
         $paymentController = new PaymentController();

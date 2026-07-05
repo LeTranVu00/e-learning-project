@@ -131,6 +131,18 @@ class User {
         return $stmt->execute();
     }
 
+    // Cập nhật Hồ sơ cá nhân (dành cho người dùng)
+    public function updateProfile($id, $fullname, $phone, $address, $bio) {
+        $query = "UPDATE users SET fullname = :fullname, phone = :phone, address = :address, bio = :bio WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':fullname', $fullname);
+        $stmt->bindParam(':phone', $phone);
+        $stmt->bindParam(':address', $address);
+        $stmt->bindParam(':bio', $bio);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
+
     // Xóa người dùng
     public function deleteUser($id) {
         $query = "DELETE FROM users WHERE id = :id";

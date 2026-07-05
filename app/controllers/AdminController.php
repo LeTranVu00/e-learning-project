@@ -26,6 +26,41 @@ class AdminController {
         // Tổng doanh thu
         $total_revenue = $db->query("SELECT SUM(c.price) FROM enrollments e JOIN courses c ON e.course_id = c.id")->fetchColumn() ?: 0;
 
+        // Thống kê "Hôm nay"
+        $today_revenue = $db->query("SELECT SUM(c.price) FROM enrollments e JOIN courses c ON e.course_id = c.id WHERE DATE(e.enrolled_at) = CURRENT_DATE()")->fetchColumn() ?: 0;
+        $today_users = $db->query("SELECT COUNT(*) FROM users WHERE role = 'student' AND DATE(created_at) = CURRENT_DATE()")->fetchColumn() ?: 0;
+
+        // Giao dịch mới nhất (Latest Transactions)
+        $latest_transactions = $db->query("
+            SELECT u.fullname, u.avatar, c.title, c.price, e.enrolled_at 
+            FROM enrollments e 
+            JOIN users u ON e.user_id = u.id 
+            JOIN courses c ON e.course_id = c.id 
+            ORDER BY e.enrolled_at DESC LIMIT 5
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // Hoạt động gần đây (Recent Activities)
+        $recent_users = $db->query("SELECT id, fullname, created_at, 'user' as type FROM users ORDER BY created_at DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+        $recent_enrolls = $db->query("
+            SELECT e.id, u.fullname, c.title as extra_info, e.enrolled_at as created_at, 'enrollment' as type 
+            FROM enrollments e 
+            JOIN users u ON e.user_id = u.id 
+            JOIN courses c ON e.course_id = c.id 
+            ORDER BY e.enrolled_at DESC LIMIT 5
+        ")->fetchAll(PDO::FETCH_ASSOC);
+        $recent_comments = $db->query("
+            SELECT c.id, u.fullname, c.content as extra_info, c.created_at, 'comment' as type 
+            FROM comments c 
+            JOIN users u ON c.user_id = u.id 
+            ORDER BY c.created_at DESC LIMIT 5
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        $recent_activities = array_merge($recent_users, $recent_enrolls, $recent_comments);
+        usort($recent_activities, function($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
+        $recent_activities = array_slice($recent_activities, 0, 7);
+
         // Dữ liệu biểu đồ Doanh thu & Học viên theo tháng (Năm hiện tại)
         $monthly_stats = $db->query("
             SELECT MONTH(e.enrolled_at) as month, SUM(c.price) as revenue, COUNT(e.id) as enrollments
@@ -203,9 +238,10 @@ class AdminController {
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
             // BUG FIX: Thêm order_num để có thể sắp xếp chương học
-            $stmt = $db->prepare("INSERT INTO chapters (course_id, title, order_num) VALUES (?, ?, ?)");
+            $stmt = $db->prepare("INSERT INTO chapters (course_id, title, description, order_num) VALUES (?, ?, ?, ?)");
             $order_num = $_POST['order_num'] ?? 0;
-            $stmt->execute([$_POST['course_id'], $_POST['title'], $order_num]);
+            $description = $_POST['description'] ?? null;
+            $stmt->execute([$_POST['course_id'], $_POST['title'], $description, $order_num]);
             
             $_SESSION['success'] = "Đã thêm Chương học mới!";
             header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
@@ -219,36 +255,64 @@ class AdminController {
             // Kiểm tra xem POST request có bị huỷ do vượt quá giới hạn dung lượng không
             if (empty($_POST)) {
                 $_SESSION['error'] = "File tải lên quá lớn! Vui lòng chọn file nhỏ hơn hoặc cấu hình lại server.";
-                header('Location: ?action=admin_manage_courses'); // Hoặc lấy referer nếu có
+                header('Location: ?action=admin_manage_courses');
                 exit();
             }
 
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
             
-            $content = $_POST['content'] ?? '';
-            
-            // Xử lý upload file nếu người dùng chọn loại "file"
-            if ($_POST['type'] === 'file' && isset($_FILES['slide_file']) && $_FILES['slide_file']['error'] === UPLOAD_ERR_OK) {
+            $chapter_id = $_POST['chapter_id'];
+            $course_id = $_POST['course_id'];
+            $description = !empty(trim($_POST['description'] ?? '')) ? trim($_POST['description']) : null;
+            $stmt = $db->prepare("INSERT INTO materials (chapter_id, title, type, content, description) VALUES (?, ?, ?, ?, ?)");
+            $addedCount = 0;
+
+            // Xử lý upload file hàng loạt
+            if (isset($_FILES['slide_files'])) {
                 $upload_dir = __DIR__ . '/../../public/uploads/materials/';
                 if (!is_dir($upload_dir)) {
                     mkdir($upload_dir, 0777, true);
                 }
                 
-                $file_extension = pathinfo($_FILES['slide_file']['name'], PATHINFO_EXTENSION);
-                $new_file_name = 'mat_' . time() . '_' . uniqid() . '.' . $file_extension;
-                $target_file = $upload_dir . $new_file_name;
+                $total_files = count($_FILES['slide_files']['name']);
+                for ($i = 0; $i < $total_files; $i++) {
+                    if ($_FILES['slide_files']['error'][$i] === UPLOAD_ERR_OK) {
+                        $original_name = $_FILES['slide_files']['name'][$i];
+                        $file_extension = pathinfo($original_name, PATHINFO_EXTENSION);
+                        $title = pathinfo($original_name, PATHINFO_FILENAME); // Tên file làm tiêu đề
+                        
+                        $new_file_name = 'mat_' . time() . '_' . uniqid() . '.' . $file_extension;
+                        $target_file = $upload_dir . $new_file_name;
 
-                if (move_uploaded_file($_FILES['slide_file']['tmp_name'], $target_file)) {
-                    $content = 'uploads/materials/' . $new_file_name;
+                        if (move_uploaded_file($_FILES['slide_files']['tmp_name'][$i], $target_file)) {
+                            $content = 'uploads/materials/' . $new_file_name;
+                            $stmt->execute([$chapter_id, $title, 'file', $content, $description]);
+                            $addedCount++;
+                        }
+                    }
                 }
             }
 
-            $stmt = $db->prepare("INSERT INTO materials (chapter_id, title, type, content) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$_POST['chapter_id'], $_POST['title'], $_POST['type'], $content]);
+            // Xử lý thêm link hàng loạt
+            if (isset($_POST['link_urls']) && is_array($_POST['link_urls'])) {
+                $link_titles = $_POST['link_titles'] ?? [];
+                foreach ($_POST['link_urls'] as $index => $url) {
+                    if (!empty(trim($url))) {
+                        $title = isset($link_titles[$index]) && !empty(trim($link_titles[$index])) ? trim($link_titles[$index]) : 'Liên kết ngoài';
+                        $stmt->execute([$chapter_id, $title, 'link', trim($url), $description]);
+                        $addedCount++;
+                    }
+                }
+            }
             
-            $_SESSION['success'] = "Đã thêm Tài liệu mới vào chương!";
-            header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
+            if ($addedCount > 0) {
+                $_SESSION['success'] = "Đã thêm $addedCount Bài giảng mới vào chương!";
+            } else {
+                $_SESSION['error'] = "Không có Bài giảng nào được thêm. Vui lòng chọn file hoặc nhập link.";
+            }
+
+            header('Location: ?action=admin_manage_content&id=' . $course_id);
             exit();
         }
     }
@@ -383,8 +447,9 @@ class AdminController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
-            $stmt = $db->prepare("UPDATE chapters SET title = ? WHERE id = ?");
-            $stmt->execute([$_POST['title'], $_POST['id']]);
+            $stmt = $db->prepare("UPDATE chapters SET title = ?, description = ? WHERE id = ?");
+            $description = $_POST['description'] ?? null;
+            $stmt->execute([$_POST['title'], $description, $_POST['id']]);
             
             $_SESSION['success'] = "Đã cập nhật tên Chương!";
             header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);
@@ -437,8 +502,9 @@ class AdminController {
                 }
             }
 
-            $stmt = $db->prepare("UPDATE materials SET title = ?, type = ?, content = ? WHERE id = ?");
-            $stmt->execute([$_POST['title'], $_POST['type'], $content, $_POST['id']]);
+            $stmt = $db->prepare("UPDATE materials SET title = ?, type = ?, content = ?, description = ? WHERE id = ?");
+            $description = $_POST['description'] ?? null;
+            $stmt->execute([$_POST['title'], $_POST['type'], $content, $description, $_POST['id']]);
             
             $_SESSION['success'] = "Đã cập nhật Bài giảng!";
             header('Location: ?action=admin_manage_content&id=' . $_POST['course_id']);

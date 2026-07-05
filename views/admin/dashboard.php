@@ -1,202 +1,319 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - E-Learning</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script>
-        tailwind.config = { theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } }
-    </script>
-</head>
-<body class="bg-gray-100 font-sans flex h-screen overflow-hidden" x-data="{ sidebarOpen: true }">
+<?php $pageTitle = 'Bảng điều khiển';
+require_once 'layouts/header.php'; ?>
 
-    <aside class="w-64 bg-dark text-white transition-all duration-300 flex flex-col shadow-2xl relative z-20" :class="sidebarOpen ? '' : '!w-20'">
-        <div class="h-16 flex items-center justify-center border-b border-gray-800">
-            <i class="fa-solid fa-graduation-cap text-primary text-2xl"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-bold text-lg tracking-wider transition-opacity duration-300">ADMIN PANEL</span>
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4" data-aos="fade-up">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Bảng điều khiển</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Tổng quan hệ thống E-Learning</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="?action=admin_create_course"
+            class="bg-primary hover:bg-yellow-600 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 text-sm">
+            <i class="fa-solid fa-plus"></i> Khóa học mới
+        </a>
+        <a href="?action=admin_manage_comments"
+            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold py-2.5 px-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 text-sm">
+            <i class="fa-regular fa-comment-dots"></i> Duyệt bình luận
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 border-l-4 border-l-primary transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+        data-aos="fade-up" data-aos-delay="50">
+        <div
+            class="w-12 h-12 sm:w-14 sm:h-14 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl flex items-center justify-center text-primary text-xl sm:text-2xl shrink-0">
+            <i class="fa-solid fa-book"></i>
+        </div>
+        <div>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Tổng Khóa Học</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                <?= number_format($total_courses ?? 0) ?></p>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 border-l-4 border-l-blue-500 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+        data-aos="fade-up" data-aos-delay="100">
+        <div
+            class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-500 text-xl sm:text-2xl shrink-0">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Tổng Học Viên</p>
+            <div class="flex items-end gap-2">
+                <p class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                    <?= number_format($total_users ?? 0) ?></p>
+                <?php if (!empty($today_users) && $today_users > 0): ?>
+                    <span
+                        class="text-xs font-bold text-green-500 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded mb-1">+<?= $today_users ?></span>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 border-l-4 border-l-green-500 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+        data-aos="fade-up" data-aos-delay="150">
+        <div
+            class="w-12 h-12 sm:w-14 sm:h-14 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center text-green-500 text-xl sm:text-2xl shrink-0">
+            <i class="fa-solid fa-user-plus"></i>
+        </div>
+        <div>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Lượt Ghi Danh</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                <?= number_format($total_enrollments ?? 0) ?></p>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 border-l-4 border-l-emerald-600 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+        data-aos="fade-up" data-aos-delay="200">
+        <div
+            class="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-600 text-xl sm:text-2xl shrink-0">
+            <i class="fa-solid fa-money-bill-trend-up"></i>
+        </div>
+        <div>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Tổng Doanh Thu</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                <?= number_format($total_revenue ?? 0, 0, ',', '.') ?>đ</p>
+            <?php if (!empty($today_revenue) && $today_revenue > 0): ?>
+                <p class="text-xs text-green-500 font-medium mt-0.5"><i
+                        class="fa-solid fa-arrow-trend-up mr-1"></i>+<?= number_format($today_revenue, 0, ',', '.') ?>đ</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+        data-aos="fade-up" data-aos-delay="250">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Doanh thu & Đăng ký năm nay</h2>
+        <div id="revenueChart"></div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+        data-aos="fade-up" data-aos-delay="300">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Top Khóa học nổi bật</h2>
+        <div id="courseDonutChart" class="flex justify-center"></div>
+    </div>
+</div>
+
+<!-- Tables & Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Transactions Table -->
+    <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors overflow-hidden"
+        data-aos="fade-up" data-aos-delay="350">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-white">Giao dịch mới nhất</h2>
+            <a href="?action=admin_manage_users"
+                class="text-sm font-medium text-primary hover:text-yellow-600 transition">Xem tất cả →</a>
         </div>
 
-        <nav class="flex-1 px-2 py-6 space-y-2">
-            <a href="?action=admin_dashboard" class="flex items-center px-4 py-3 bg-gray-800 text-primary rounded-xl transition group">
-                <i class="fa-solid fa-chart-pie w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Tổng quan</span>
-            </a>
-            
-            <a href="?action=admin_manage_courses" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-book-open w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Khóa học</span>        
-            </a>
-
-            <a href="?action=admin_manage_categories" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-folder-tree w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Danh mục</span>
-            </a>
-
-            <a href="?action=admin_manage_comments" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-comments w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Bình luận</span>
-            </a>
-
-            <a href="?action=admin_manage_users" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-users w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Người dùng</span>
-            </a>
-        </nav>
-
-        <div class="p-4 border-t border-gray-800">
-            <a href="?action=home" class="flex items-center px-4 py-3 text-gray-400 hover:bg-red-500 hover:text-white rounded-xl transition">
-                <i class="fa-solid fa-arrow-right-from-bracket w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Thoát Admin</span>
-            </a>
+        <div class="overflow-x-auto -mx-5 sm:mx-0">
+            <table class="w-full text-left border-collapse min-w-[500px]">
+                <thead>
+                    <tr class="text-gray-400 dark:text-gray-500 text-sm border-b border-gray-100 dark:border-gray-700">
+                        <th class="pb-3 font-medium pl-5 sm:pl-0">Học viên</th>
+                        <th class="pb-3 font-medium">Khóa học</th>
+                        <th class="pb-3 font-medium text-right">Số tiền</th>
+                        <th class="pb-3 font-medium text-right pr-5 sm:pr-0">Ngày</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($latest_transactions)): ?>
+                        <tr>
+                            <td colspan="4" class="py-8 text-center text-gray-500 dark:text-gray-400">
+                                <i class="fa-solid fa-inbox text-2xl mb-2 block opacity-50"></i>
+                                Chưa có giao dịch nào
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($latest_transactions as $tx): ?>
+                            <tr
+                                class="border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="py-4 pl-5 sm:pl-0">
+                                    <div class="flex items-center gap-3">
+                                        <img src="<?= htmlspecialchars($tx['avatar'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($tx['fullname']) . '&background=random') ?>"
+                                            class="w-8 h-8 rounded-lg object-cover shadow-sm">
+                                        <span
+                                            class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?= htmlspecialchars($tx['fullname']) ?></span>
+                                    </div>
+                                </td>
+                                <td class="py-4 text-gray-600 dark:text-gray-400 text-sm max-w-[150px] truncate">
+                                    <?= htmlspecialchars($tx['title']) ?></td>
+                                <td class="py-4 text-right">
+                                    <span
+                                        class="inline-block px-2.5 py-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-bold rounded-lg text-xs">
+                                        <?= number_format($tx['price'], 0, ',', '.') ?>đ
+                                    </span>
+                                </td>
+                                <td class="py-4 text-right text-gray-400 dark:text-gray-500 text-xs pr-5 sm:pr-0">
+                                    <?= date('d/m/Y', strtotime($tx['enrolled_at'])) ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-    </aside>
+    </div>
 
-    <main class="flex-1 flex flex-col overflow-hidden">
-        
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10">
-            <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-primary focus:outline-none">
-                <i class="fa-solid fa-bars text-xl"></i>
-            </button>
-            
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-semibold text-gray-700">Xin chào, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
-                <img src="<?= htmlspecialchars($_SESSION['user_avatar'] ?? '') ?>" class="w-9 h-9 rounded-full border-2 border-primary object-cover">
-            </div>
-        </header>
+    <!-- Recent Activities -->
+    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+        data-aos="fade-up" data-aos-delay="400">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-6">Hoạt động gần đây</h2>
 
-        <div class="flex-1 overflow-y-auto p-6 md:p-8">
-            <h1 class="text-2xl font-bold text-gray-800 mb-6">Bảng điều khiển</h1>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 border-l-4 border-l-primary">
-                    <div class="w-14 h-14 bg-yellow-50 rounded-full flex items-center justify-center text-primary text-2xl">
-                        <i class="fa-solid fa-book"></i>
+        <div
+            class="space-y-5 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 dark:before:via-gray-700 before:to-transparent">
+            <?php if (empty($recent_activities)): ?>
+                <p class="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
+                    <i class="fa-solid fa-clock text-2xl mb-2 block opacity-50"></i>
+                    Chưa có hoạt động nào
+                </p>
+            <?php else: ?>
+                <?php foreach ($recent_activities as $act): ?>
+                    <div class="relative flex items-start gap-3">
+                        <?php
+                        $iconBg = 'bg-gray-100 dark:bg-gray-700 text-gray-500';
+                        $iconClass = 'fa-solid fa-bell';
+                        $actionText = 'đã thực hiện hành động';
+                        $extraText = '';
+                        if ($act['type'] === 'user') {
+                            $iconBg = 'bg-blue-100 dark:bg-blue-900/30 text-blue-500';
+                            $iconClass = 'fa-solid fa-user-plus';
+                            $actionText = 'đã đăng ký tài khoản';
+                        } elseif ($act['type'] === 'enrollment') {
+                            $iconBg = 'bg-green-100 dark:bg-green-900/30 text-green-500';
+                            $iconClass = 'fa-solid fa-cart-shopping';
+                            $actionText = 'đã mua khóa học';
+                            $extraText = $act['extra_info'] ?? '';
+                        } elseif ($act['type'] === 'comment') {
+                            $iconBg = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-500';
+                            $iconClass = 'fa-regular fa-comment';
+                            $actionText = 'đã bình luận';
+                            $extraText = '"' . mb_strimwidth($act['extra_info'] ?? '', 0, 40, '...') . '"';
+                        }
+                        ?>
+                        <div
+                            class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 <?= $iconBg ?> shadow-sm border-2 border-white dark:border-gray-800">
+                            <i class="<?= $iconClass ?> text-xs"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-gray-800 dark:text-gray-200">
+                                <span class="font-bold"><?= htmlspecialchars($act['fullname']) ?></span>
+                                <span class="text-gray-500 dark:text-gray-400"><?= $actionText ?></span>
+                            </p>
+                            <?php if ($extraText): ?>
+                                <p class="text-xs text-primary font-medium truncate mt-0.5"><?= htmlspecialchars($extraText) ?></p>
+                            <?php endif; ?>
+                            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1">
+                                <i class="fa-regular fa-clock"></i>
+                                <?php
+                                $diff = time() - strtotime($act['created_at']);
+                                if ($diff < 60)
+                                    echo 'Vừa xong';
+                                elseif ($diff < 3600)
+                                    echo floor($diff / 60) . ' phút trước';
+                                elseif ($diff < 86400)
+                                    echo floor($diff / 3600) . ' giờ trước';
+                                elseif ($diff < 604800)
+                                    echo floor($diff / 86400) . ' ngày trước';
+                                elseif ($diff < 2592000)
+                                    echo floor($diff / 604800) . ' tuần trước';
+                                else
+                                    echo date('d/m/Y', strtotime($act['created_at']));
+                                ?>
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-sm text-gray-500 font-medium">Tổng Khóa Học</p>
-                        <p class="text-2xl font-bold text-gray-800"><?= number_format($total_courses ?? 0) ?></p>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 border-l-4 border-l-blue-500">
-                    <div class="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 text-2xl">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 font-medium">Tổng Học Viên</p>
-                        <p class="text-2xl font-bold text-gray-800"><?= number_format($total_users ?? 0) ?></p>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 border-l-4 border-l-green-500">
-                    <div class="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center text-green-500 text-2xl">
-                        <i class="fa-solid fa-user-plus"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 font-medium">Lượt Ghi Danh</p>
-                        <p class="text-2xl font-bold text-gray-800"><?= number_format($total_enrollments ?? 0) ?></p>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 border-l-4 border-l-green-600">
-                    <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-2xl">
-                        <i class="fa-solid fa-money-bill-trend-up"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 font-medium">Doanh Thu</p>
-                        <p class="text-2xl font-bold text-gray-800"><?= number_format($total_revenue ?? 0, 0, ',', '.') ?>đ</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <!-- Biểu đồ Doanh thu -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4">Doanh thu & Đăng ký năm nay</h2>
-                    <div id="revenueChart"></div>
-                </div>
-                
-                <!-- Biểu đồ Phân bổ khóa học -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4">Top Khóa học nổi bật</h2>
-                    <div id="courseDonutChart" class="flex justify-center"></div>
-                </div>
-            </div>
-
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
-    </main>
+    </div>
+</div>
 
-    <script>
-        // Data for Revenue & Enrollments Chart
-        var revenueOptions = {
-            series: [{
-                name: 'Doanh thu (VNĐ)',
-                type: 'column',
-                data: <?= json_encode($chart_revenue ?? []) ?>
-            }, {
-                name: 'Ghi danh',
-                type: 'line',
-                data: <?= json_encode($chart_enrollments ?? []) ?>
-            }],
-            chart: {
-                height: 350,
-                type: 'line',
-                fontFamily: 'inherit',
-                toolbar: { show: false }
-            },
-            stroke: {
-                width: [0, 4]
-            },
-            colors: ['#10b981', '#f59e0b'],
-            dataLabels: {
-                enabled: true,
-                enabledOnSeries: [1],
-                formatter: function (val) { return parseInt(val).toLocaleString('vi-VN'); }
-            },
-            labels: <?= json_encode($chart_months ?? []) ?>,
-            yaxis: [{
-                title: { text: 'Doanh thu (VNĐ)', style: { fontWeight: 500 } },
-                labels: { formatter: function (y) { return y.toLocaleString('vi-VN') + " đ"; } }
-            }, {
-                opposite: true,
-                title: { text: 'Số lượt ghi danh', style: { fontWeight: 500 } },
-                decimalsInFloat: 0,
-                labels: { formatter: function (val) { return parseInt(val).toLocaleString('vi-VN'); } }
-            }]
-        };
-        var revenueChart = new ApexCharts(document.querySelector("#revenueChart"), revenueOptions);
-        revenueChart.render();
+<script>
+    // Initialize AOS
+    AOS.init({ duration: 600, easing: 'ease-in-out', once: true });
 
-        // Data for Top Courses Donut Chart
-        var donutOptions = {
-            series: <?= json_encode($chart_course_series ?? []) ?>,
-            labels: <?= json_encode($chart_course_labels ?? []) ?>,
-            chart: {
-                type: 'donut',
-                height: 350,
-                fontFamily: 'inherit',
-            },
-            colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '65%'
-                    }
-                    }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            legend: {
-                position: 'bottom'
+    // Revenue Chart
+    var revenueOptions = {
+        series: [{
+            name: 'Doanh thu (VNĐ)',
+            type: 'column',
+            data: <?= json_encode($chart_revenue ?? []) ?>
+        }, {
+            name: 'Ghi danh',
+            type: 'line',
+            data: <?= json_encode($chart_enrollments ?? []) ?>
+        }],
+        chart: {
+            height: 350,
+            type: 'line',
+            fontFamily: 'inherit',
+            toolbar: { show: false },
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
+        stroke: { width: [0, 4], curve: 'smooth' },
+        colors: ['#10b981', '#f59e0b'],
+        dataLabels: {
+            enabled: true,
+            enabledOnSeries: [1],
+            formatter: function (val) { return parseInt(val).toLocaleString('vi-VN'); }
+        },
+        labels: <?= json_encode($chart_months ?? []) ?>,
+        yaxis: [{
+            title: { text: 'Doanh thu (VNĐ)', style: { fontWeight: 500 } },
+            labels: { formatter: function (y) { return y.toLocaleString('vi-VN') + ' đ'; } }
+        }, {
+            opposite: true,
+            title: { text: 'Số lượt ghi danh', style: { fontWeight: 500 } },
+            labels: { formatter: function (val) { return parseInt(val).toLocaleString('vi-VN'); } }
+        }],
+        grid: { borderColor: '#e5e7eb', strokeDashArray: 4 },
+        theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    };
+    var revenueChart = new ApexCharts(document.querySelector("#revenueChart"), revenueOptions);
+    revenueChart.render();
+
+    // Donut Chart
+    var donutOptions = {
+        series: <?= !empty($chart_course_series) ? json_encode($chart_course_series) : '[]' ?>,
+        labels: <?= !empty($chart_course_labels) ? json_encode($chart_course_labels) : '[]' ?>,
+        chart: {
+            type: 'donut',
+            height: 350,
+            fontFamily: 'inherit',
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
+        colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4445'],
+        plotOptions: { pie: { donut: { size: '65%' } } },
+        dataLabels: { enabled: false },
+        legend: { position: 'bottom', itemMargin: { horizontal: 10 } },
+        noData: { text: 'Chưa có dữ liệu', align: 'center', verticalAlign: 'middle', style: { fontSize: '14px' } },
+        responsive: [{ breakpoint: 480, options: { chart: { height: 280 }, legend: { position: 'bottom' } } }],
+        theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    };
+    var donutChart = new ApexCharts(document.querySelector("#courseDonutChart"), donutOptions);
+    donutChart.render();
+
+    // Update chart theme on dark mode change
+    function updateChartTheme() {
+        var isDark = document.documentElement.classList.contains('dark');
+        var theme = isDark ? 'dark' : 'light';
+        if (revenueChart) revenueChart.updateOptions({ theme: { mode: theme } });
+        if (donutChart) donutChart.updateOptions({ theme: { mode: theme } });
+    }
+
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.attributeName === "class") {
+                updateChartTheme();
             }
-        };
-        var donutChart = new ApexCharts(document.querySelector("#courseDonutChart"), donutOptions);
-        donutChart.render();
-    </script>
-</body>
-</html>
+        });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+</script>
+
+<?php require_once 'layouts/footer.php'; ?>

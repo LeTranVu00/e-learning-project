@@ -1,22 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm khóa học mới - Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-    
-    <style>
-        .ck-editor__editable_inline {
-            min-height: 300px; /* Chiều cao tối thiểu cho khung soạn thảo */
-        }
-    </style>
-</head>
-<body class="bg-gray-100 font-sans p-8">
-
+<?php $pageTitle = 'Thêm khóa học mới'; require_once 'layouts/header.php'; ?>
     <div class="max-w-4xl mx-auto">
         <div class="mb-6">
             <a href="?action=admin_dashboard" class="text-gray-500 hover:text-primary transition font-medium flex items-center gap-2">
@@ -161,5 +143,4 @@
         ClassicEditor.create(document.querySelector('#course_benefits'), editorConfig).catch(error => console.error(error));
         ClassicEditor.create(document.querySelector('#course_requirements'), editorConfig).catch(error => console.error(error));
     </script>
-</body>
-</html>
+<?php require_once 'layouts/footer.php'; ?>

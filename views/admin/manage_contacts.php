@@ -1,65 +1,5 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản lý Liên hệ - Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script> tailwind.config = { theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } } </script>
-</head>
-<body class="bg-gray-100 font-sans flex h-screen overflow-hidden" x-data="{ sidebarOpen: true }">
+<?php $pageTitle = 'Quản lý Liên hệ'; require_once 'layouts/header.php'; ?>
 
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-dark text-white transition-all duration-300 flex flex-col shadow-2xl relative z-20" :class="sidebarOpen ? '' : '!w-20'">
-        <div class="h-16 flex items-center justify-center border-b border-gray-800">
-            <i class="fa-solid fa-graduation-cap text-primary text-2xl"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-bold text-lg tracking-wider transition-opacity duration-300">ADMIN PANEL</span>
-        </div>
-
-        <nav class="flex-1 px-2 py-6 space-y-2 overflow-y-auto">
-            <a href="?action=admin_dashboard" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-chart-pie w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Tổng quan</span>
-            </a>
-            
-            <a href="?action=admin_manage_courses" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-book-open w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Khóa học</span>
-            </a>
-            
-            <a href="?action=admin_manage_categories" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-folder-tree w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Danh mục</span>
-            </a>
-
-            <a href="?action=admin_manage_comments" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-comments w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Bình luận</span>
-            </a>
-
-            <a href="?action=admin_manage_users" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-users w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Người dùng</span>
-            </a>
-            
-            <a href="?action=admin_manage_contacts" class="flex items-center px-4 py-3 bg-gray-800 text-primary rounded-xl transition group">
-                <i class="fa-solid fa-envelope w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Liên hệ</span>
-            </a>
-        </nav>
-
-        <div class="p-4 border-t border-gray-800">
-            <a href="?action=home" class="flex items-center px-4 py-3 text-gray-400 hover:bg-red-500 hover:text-white rounded-xl transition">
-                <i class="fa-solid fa-arrow-right-from-bracket w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Thoát Admin</span>
-            </a>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10 shrink-0">
-            <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-primary focus:outline-none"><i class="fa-solid fa-bars text-xl"></i></button>
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-semibold text-gray-700">Xin chào, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
-                <img src="<?= htmlspecialchars($_SESSION['user_avatar'] ?? '') ?>" class="w-9 h-9 rounded-full border-2 border-primary object-cover">
-            </div>
-        </header>
-
-        <div class="flex-1 overflow-y-auto p-6 md:p-8 bg-gray-50/50">
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
                     <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Quản lý Liên hệ</h1>
@@ -70,7 +10,7 @@
             <!-- BẢNG DANH SÁCH LIÊN HỆ -->
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <div class="overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1000px]">
                         <thead>
                             <tr class="bg-gray-50/80 border-b border-gray-100 text-sm text-gray-500 uppercase">
                                 <th class="py-4 px-6 font-semibold">Khách hàng</th>
@@ -154,7 +94,7 @@
                                 </div>
                             </div>
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
         </div>
@@ -171,5 +111,4 @@
         </div>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
-</body>
-</html>
+<?php require_once 'layouts/footer.php'; ?>

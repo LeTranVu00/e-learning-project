@@ -44,9 +44,13 @@
      }" 
      x-init="
         document.querySelectorAll('section[id]').forEach(sec => {
+            if (sec.id === 'stats') return;
             let h2 = sec.querySelector('h2');
-            let title = h2 ? h2.innerText : (sec.id === 'hero' ? 'Trang chủ' : sec.id);
-            landmarks.push({ id: sec.id, title: title });
+            if (sec.id === 'hero') {
+                landmarks.push({ id: sec.id, title: 'Trang chủ' });
+            } else if (h2) {
+                landmarks.push({ id: sec.id, title: h2.innerText });
+            }
         });
      "
      @scroll.window="show = (window.pageYOffset > 500) ? true : false"
@@ -178,6 +182,73 @@ function dismissToast(id) {
     setTimeout(() => el && el.remove(), 420);
 }
 
+// ── Thêm/Xóa khỏi giỏ hàng (Toggle AJAX) cho nút bên ngoài ──
+function toggleCart(courseId, btnElement) {
+    const isInCart = btnElement.getAttribute('data-in-cart') === 'true';
+    const action = isInCart ? 'remove_from_cart' : 'add_to_cart';
+    const type = btnElement.getAttribute('data-type') || 'home';
+    
+    fetch('?action=' + action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ course_id: courseId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update badge count
+            const badgeDesktop = document.getElementById('cart-badge-desktop');
+            const badgeMobile = document.getElementById('cart-badge-mobile');
+            if (badgeDesktop && badgeMobile) {
+                if (data.cart_count > 0) {
+                    badgeDesktop.textContent = data.cart_count;
+                    badgeMobile.textContent = data.cart_count;
+                    badgeDesktop.classList.remove('hidden');
+                    badgeMobile.classList.remove('hidden');
+                    badgeDesktop.classList.add('scale-150');
+                    setTimeout(() => badgeDesktop.classList.remove('scale-150'), 200);
+                } else {
+                    badgeDesktop.classList.add('hidden');
+                    badgeMobile.classList.add('hidden');
+                }
+            }
+            
+            // Toggle button state
+            if (isInCart) {
+                btnElement.setAttribute('data-in-cart', 'false');
+                if (type === 'home') {
+                    btnElement.className = "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-gray-200 font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5";
+                    btnElement.title = "Thêm vào giỏ hàng";
+                    btnElement.innerHTML = '<i class="fa-solid fa-cart-plus"></i>';
+                } else {
+                    btnElement.className = "sc-btn hover:shadow-md hover:-translate-y-0.5";
+                    btnElement.style = "background: white; border: 2px solid #2563eb; color: #2563eb; box-shadow: 0 2px 8px rgba(37,99,235,0.15); transition: all 0.2s;";
+                    btnElement.innerHTML = '<i class="fa-solid fa-cart-plus mr-2"></i>Thêm vào giỏ hàng';
+                }
+                showToast("Đã xóa khỏi giỏ hàng", 'info');
+            } else {
+                btnElement.setAttribute('data-in-cart', 'true');
+                if (type === 'home') {
+                    btnElement.className = "bg-primary text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 hover:bg-primary/90";
+                    btnElement.title = "Xóa khỏi giỏ hàng";
+                    btnElement.innerHTML = '<i class="fa-solid fa-cart-arrow-down"></i>';
+                } else {
+                    btnElement.className = "sc-btn hover:shadow-md hover:-translate-y-0.5";
+                    btnElement.style = "background: #eff6ff; border: 2px solid #3b82f6; color: #1d4ed8; transition: all 0.2s;";
+                    btnElement.innerHTML = '<i class="fa-solid fa-cart-arrow-down mr-2 text-blue-600"></i>Xóa khỏi giỏ hàng';
+                }
+                showToast("Đã thêm vào giỏ hàng", 'success');
+            }
+        } else {
+            showToast(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Không thể kết nối đến server.', 'error');
+    });
+}
+
 // ── Đọc Flash Messages từ PHP Session và hiển thị Toast ──
 document.addEventListener('DOMContentLoaded', function() {
     <?php if (!empty($_SESSION['success'])): ?>
@@ -197,6 +268,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script>
+    if (typeof AOS !== 'undefined') {
+        AOS.init({ duration: 800, easing: 'ease-in-out', once: true, mirror: false });
+    }
+</script>
 <script src="/public/js/main.js"></script>
 </body>
 </html>

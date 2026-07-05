@@ -27,9 +27,9 @@ if ($schedule) {
     border-radius: 18px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(80, 80, 160, 0.10);
-    /* Ensure border-radius clipping works across all browsers */
     transform: translateZ(0);
 }
+.dark .sc-card { background: #1f2937; border-color: #374151; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
 
 /* Thumbnail */
 .sc-thumb {
@@ -56,7 +56,9 @@ if ($schedule) {
     color: #111827;
     letter-spacing: -0.5px;
 }
+.dark .sc-price-current { color: #f9fafb; }
 .sc-price-current.free { color: #059669; }
+.dark .sc-price-current.free { color: #10b981; }
 .sc-price-old {
     font-size: 1rem;
     color: #9ca3af;
@@ -116,10 +118,14 @@ if ($schedule) {
     font-size: 0.875rem;
     gap: 8px;
 }
+.dark .sc-row { border-color: #374151; }
 .sc-row:last-child { border-bottom: none; }
 .sc-row-label { color: #6b7280; white-space: nowrap; flex-shrink: 0; }
+.dark .sc-row-label { color: #9ca3af; }
 .sc-row-value { font-weight: 600; color: #111827; text-align: right; }
+.dark .sc-row-value { color: #f3f4f6; }
 .sc-row-value.blue { color: #2563eb; }
+.dark .sc-row-value.blue { color: #60a5fa; }
 
 /* Schedule pills */
 .sc-schedule-pills {
@@ -138,6 +144,7 @@ if ($schedule) {
     font-weight: 600;
     white-space: nowrap;
 }
+.dark .sc-pill { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
 
 /* Contact box */
 .sc-contact {
@@ -148,11 +155,13 @@ if ($schedule) {
     text-align: center;
     border: 1px solid #e8eaf6;
 }
+.dark .sc-contact { background: #111827; border-color: #1f2937; }
 .sc-contact-label {
     font-size: 0.82rem;
     color: #6b7280;
     margin-bottom: 10px;
 }
+.dark .sc-contact-label { color: #9ca3af; }
 .sc-zalo-btn {
     display: inline-flex;
     align-items: center;
@@ -204,25 +213,6 @@ if ($schedule) {
             <?php endif; ?>
         </div>
 
-        <!-- CTA Button -->
-        <?php if ($is_enrolled): ?>
-            <a href="?action=learn&id=<?= $course['id'] ?>" class="sc-btn sc-btn-continue">
-                <i class="fa-solid fa-play-circle mr-2"></i>Tiếp tục học
-            </a>
-        <?php elseif ($price > 0): ?>
-            <a href="?action=pay&id=<?= $course['id'] ?>" class="sc-btn sc-btn-pay">
-                Đăng Ký Học
-            </a>
-        <?php elseif (isset($_SESSION['user_id'])): ?>
-            <a href="?action=enroll_course&id=<?= $course['id'] ?>" class="sc-btn sc-btn-free">
-                Đăng Ký Học
-            </a>
-        <?php else: ?>
-            <a href="?action=login" class="sc-btn sc-btn-login">
-                Đăng nhập để đăng ký
-            </a>
-        <?php endif; ?>
-
         <!-- Meta rows -->
         <div class="mt-5">
 
@@ -267,19 +257,32 @@ if ($schedule) {
 
         </div>
 
-        <!-- Contact / Zalo -->
-        <?php if ($contact_phone): ?>
-        <div class="sc-contact">
-            <p class="sc-contact-label">Bạn cần tư vấn thêm, liên hệ với chúng tôi:</p>
-            <a href="https://zalo.me/<?= preg_replace('/\D/', '', $contact_phone) ?>" target="_blank" class="sc-zalo-btn">
-                <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="32" height="32" rx="8" fill="#0068FF"/>
-                    <text x="5" y="22" font-size="14" font-weight="bold" fill="white" font-family="Arial">Za</text>
-                </svg>
-                Zalo: <?= htmlspecialchars($contact_phone) ?>
-            </a>
+        <!-- Call to Action -->
+        <div class="mt-6 pt-5 border-t border-gray-100 dark:border-gray-700">
+            <?php if ($is_enrolled): ?>
+                <a href="?action=learn&id=<?= $course['id'] ?>" class="sc-btn sc-btn-continue">
+                    <i class="fa-solid fa-play-circle mr-2"></i>Tiếp tục học
+                </a>
+            <?php elseif ($price > 0): ?>
+                <div class="flex flex-col gap-3">
+                    <a href="?action=pay&id=<?= $course['id'] ?>" class="sc-btn sc-btn-pay">
+                        Mua ngay
+                    </a>
+                    <?php $in_cart = isset($_SESSION['cart']) && in_array($course['id'], $_SESSION['cart']); ?>
+                    <button data-type="detail" data-in-cart="<?= $in_cart ? 'true' : 'false' ?>" onclick="toggleCart(<?= $course['id'] ?>, this)" class="sc-btn hover:shadow-md hover:-translate-y-0.5" style="<?= $in_cart ? 'background: #eff6ff; border: 2px solid #3b82f6; color: #1d4ed8; transition: all 0.2s;' : 'background: white; border: 2px solid #2563eb; color: #2563eb; box-shadow: 0 2px 8px rgba(37,99,235,0.15); transition: all 0.2s;' ?>">
+                        <i class="fa-solid <?= $in_cart ? 'fa-cart-arrow-down mr-2 text-blue-600' : 'fa-cart-plus mr-2' ?>"></i><?= $in_cart ? 'Xóa khỏi giỏ hàng' : 'Thêm vào giỏ hàng' ?>
+                    </button>
+                </div>
+            <?php elseif (isset($_SESSION['user_id'])): ?>
+                <a href="?action=enroll_course&id=<?= $course['id'] ?>" class="sc-btn sc-btn-free">
+                    Đăng Ký Học
+                </a>
+            <?php else: ?>
+                <a href="?action=login" class="sc-btn sc-btn-login">
+                    Đăng nhập để đăng ký
+                </a>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
 
     </div>
 </div>

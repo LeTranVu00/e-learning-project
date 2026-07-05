@@ -1,16 +1,5 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản lý Người dùng - Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script> tailwind.config = { theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } } </script>
-</head>
-<body class="bg-gray-100 font-sans flex h-screen overflow-hidden" 
-      x-data="{ 
-          sidebarOpen: true, 
+<?php $pageTitle = 'Quản lý Người dùng'; require_once 'layouts/header.php'; ?>
+<div x-data="{ 
           showEditModal: false,
           showDetailModal: false,
           editData: {},
@@ -19,68 +8,25 @@
               this.editData = { ...user };
               this.showEditModal = true;
           }
-      }">
-
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-dark text-white transition-all duration-300 flex flex-col shadow-2xl relative z-20" :class="sidebarOpen ? '' : '!w-20'">
-        <div class="h-16 flex items-center justify-center border-b border-gray-800">
-            <i class="fa-solid fa-graduation-cap text-primary text-2xl"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-bold text-lg tracking-wider">ADMIN PANEL</span>
-        </div>
-        <nav class="flex-1 px-2 py-6 space-y-2">
-            <a href="?action=admin_dashboard" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-chart-pie w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Tổng quan</span>
-            </a>
-            <a href="?action=admin_manage_courses" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-book-open w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Khóa học</span>
-            </a>
-            <a href="?action=admin_manage_categories" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-folder-tree w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Danh mục</span>
-            </a>
-            <a href="?action=admin_manage_comments" class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition group">
-                <i class="fa-solid fa-comments w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Quản lý Bình luận</span>
-            </a>
-            <a href="?action=admin_manage_users" class="flex items-center px-4 py-3 bg-gray-800 text-primary rounded-xl transition group">
-                <i class="fa-solid fa-users w-6 text-center"></i>
-                <span x-show="sidebarOpen" class="ml-3 font-medium">Người dùng</span>
-            </a>
-        </nav>
-        <div class="p-4 border-t border-gray-800">
-            <a href="?action=home" class="flex items-center px-4 py-3 text-gray-400 hover:bg-red-500 hover:text-white rounded-xl transition">
-                <i class="fa-solid fa-arrow-right-from-bracket w-6 text-center"></i><span x-show="sidebarOpen" class="ml-3 font-medium">Thoát Admin</span>
-            </a>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10 shrink-0">
-            <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-primary focus:outline-none"><i class="fa-solid fa-bars text-xl"></i></button>
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-semibold text-gray-700">Xin chào, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
-                <img src="<?= htmlspecialchars($_SESSION['user_avatar'] ?? '') ?>" class="w-9 h-9 rounded-full border-2 border-primary object-cover">
-            </div>
-        </header>
-
-        <div class="flex-1 overflow-y-auto p-6 md:p-8">
+      }" class="h-full flex flex-col">
             <div class="flex justify-between items-end mb-6">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Quản lý Người dùng</h1>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Quản lý Người dùng</h1>
                 </div>
             </div>
 
             <?php if (isset($_SESSION['success'])): ?>
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" 
                      x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-x-10 opacity-0" x-transition:enter-end="translate-x-0 opacity-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-10 opacity-0"
-                     class="fixed top-20 right-6 z-50 bg-white border-l-4 border-green-500 shadow-xl rounded-xl px-6 py-4 flex items-center gap-4">
+                     class="fixed top-20 right-6 z-50 bg-white dark:bg-gray-800 border-l-4 border-green-500 shadow-xl rounded-xl px-6 py-4 flex items-center gap-4">
                     <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-check text-green-600"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-gray-800">Thành công!</h4>
-                        <p class="text-sm text-gray-600"><?= $_SESSION['success']; ?></p>
+                        <h4 class="font-bold text-gray-800 dark:text-white">Thành công!</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400"><?= $_SESSION['success']; ?></p>
                     </div>
-                    <button @click="show = false" class="ml-2 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+                    <button @click="show = false" class="ml-2 text-gray-400 hover:text-gray-600 dark:text-gray-400"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <?php unset($_SESSION['success']); ?>
             <?php endif; ?>
@@ -88,32 +34,32 @@
             <?php if (isset($_SESSION['error'])): ?>
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" 
                      x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-x-10 opacity-0" x-transition:enter-end="translate-x-0 opacity-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-10 opacity-0"
-                     class="fixed top-20 right-6 z-50 bg-white border-l-4 border-red-500 shadow-xl rounded-xl px-6 py-4 flex items-center gap-4">
+                     class="fixed top-20 right-6 z-50 bg-white dark:bg-gray-800 border-l-4 border-red-500 shadow-xl rounded-xl px-6 py-4 flex items-center gap-4">
                     <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-exclamation text-red-600"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-gray-800">Lỗi!</h4>
-                        <p class="text-sm text-gray-600"><?= $_SESSION['error']; ?></p>
+                        <h4 class="font-bold text-gray-800 dark:text-white">Lỗi!</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400"><?= $_SESSION['error']; ?></p>
                     </div>
-                    <button @click="show = false" class="ml-2 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+                    <button @click="show = false" class="ml-2 text-gray-400 hover:text-gray-600 dark:text-gray-400"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <?php unset($_SESSION['error']); ?>
             <?php endif; ?>
 
             <!-- BỘ LỌC -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
                 <form method="GET" action="index.php" class="flex flex-wrap gap-4 items-end">
                     <input type="hidden" name="action" value="admin_manage_users">
                     
                     <div class="flex-1 min-w-[200px]">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Tìm kiếm</label>
-                        <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Tên người dùng, Email..." class="w-full h-[40px] px-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm">
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Tìm kiếm</label>
+                        <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Tên người dùng, Email..." class="w-full h-[40px] px-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white dark:bg-gray-800 transition text-sm">
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Vai trò</label>
-                        <select name="role" class="h-[40px] px-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm font-medium text-gray-700">
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Vai trò</label>
+                        <select name="role" class="h-[40px] px-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white dark:bg-gray-800 transition text-sm font-medium text-gray-700 dark:text-gray-300">
                             <option value="all" <?= ($_GET['role'] ?? 'all') === 'all' ? 'selected' : '' ?>>Tất cả</option>
                             <option value="student" <?= ($_GET['role'] ?? '') === 'student' ? 'selected' : '' ?>>Học viên</option>
                             <option value="instructor" <?= ($_GET['role'] ?? '') === 'instructor' ? 'selected' : '' ?>>Giảng viên</option>
@@ -122,8 +68,8 @@
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Sắp xếp</label>
-                        <select name="sort" class="h-[40px] px-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm font-medium text-gray-700">
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Sắp xếp</label>
+                        <select name="sort" class="h-[40px] px-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:bg-white dark:bg-gray-800 transition text-sm font-medium text-gray-700 dark:text-gray-300">
                             <option value="latest" <?= ($_GET['sort'] ?? '') === 'latest' ? 'selected' : '' ?>>Mới nhất</option>
                             <option value="oldest" <?= ($_GET['sort'] ?? '') === 'oldest' ? 'selected' : '' ?>>Cũ nhất</option>
                         </select>
@@ -134,7 +80,7 @@
                     </button>
                     
                     <?php if(!empty($_GET['search']) || (isset($_GET['role']) && $_GET['role'] !== 'all') || (!empty($_GET['sort']) && $_GET['sort'] !== 'latest')): ?>
-                    <a href="?action=admin_manage_users" class="px-5 h-[40px] flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition text-sm">
+                    <a href="?action=admin_manage_users" class="px-5 h-[40px] flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition text-sm">
                         Xóa lọc
                     </a>
                     <?php endif; ?>
@@ -142,19 +88,19 @@
             </div>
 
             <!-- BẢNG DỮ LIỆU -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <table class="w-full text-left border-collapse">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1000px]">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-100 text-sm text-gray-500 uppercase tracking-wider">
+                        <tr class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             <th class="p-4 font-semibold">Người dùng</th>
                             <th class="p-4 font-semibold">Vai trò</th>
                             <th class="p-4 font-semibold text-center">Tham gia lúc</th>
                             <th class="p-4 font-semibold text-center w-48">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         <?php if(!empty($users)): foreach($users as $user): ?>
-                        <tr class="hover:bg-gray-50 transition group">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 dark:bg-gray-700/50 dark:hover:bg-gray-700/50 dark:bg-gray-700/50 dark:hover:bg-gray-700/50 transition group">
                             <td class="p-4">
                                 <div class="flex items-center gap-3">
                                     <?php 
@@ -163,10 +109,10 @@
                                             ? (str_starts_with($avatar, 'http') ? $avatar : '/e-learning-project/public/' . $avatar) 
                                             : 'https://ui-avatars.com/api/?name=' . urlencode($user['fullname']) . '&background=random';
                                     ?>
-                                    <img src="<?= htmlspecialchars($avatarDisplay) ?>" class="w-12 h-12 rounded-full object-cover border border-gray-200">
+                                    <img src="<?= htmlspecialchars($avatarDisplay) ?>" class="w-12 h-12 rounded-full object-cover border border-gray-200 dark:border-gray-600">
                                     <div>
-                                        <p class="font-bold text-gray-800"><?= htmlspecialchars($user['fullname']) ?></p>
-                                        <p class="text-xs text-gray-500"><?= htmlspecialchars($user['email']) ?></p>
+                                        <p class="font-bold text-gray-800 dark:text-white"><?= htmlspecialchars($user['fullname']) ?></p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400"><?= htmlspecialchars($user['email']) ?></p>
                                     </div>
                                 </div>
                             </td>
@@ -179,12 +125,12 @@
                                     <span class="px-3 py-1 bg-green-50 text-green-600 border border-green-200 rounded-full text-xs font-bold uppercase tracking-wider">Học viên</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="p-4 text-center text-sm text-gray-600">
+                            <td class="p-4 text-center text-sm text-gray-600 dark:text-gray-400">
                                 <?= date('d/m/Y', strtotime($user['created_at'])) ?>
                             </td>
                             <td class="p-4 text-center">
                                 <div class="flex items-center justify-center gap-3">
-                                    <button @click="detailData = <?= htmlspecialchars(json_encode($user), ENT_QUOTES, 'UTF-8') ?>; showDetailModal = true" title="Xem chi tiết" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 text-gray-600 hover:bg-gray-800 hover:text-white transition shadow-sm border border-gray-200">
+                                    <button @click="detailData = <?= htmlspecialchars(json_encode($user), ENT_QUOTES, 'UTF-8') ?>; showDetailModal = true" title="Xem chi tiết" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 hover:bg-gray-800 hover:text-white transition shadow-sm border border-gray-200 dark:border-gray-600">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
                                     
@@ -203,10 +149,10 @@
                             </td>
                         </tr>
                         <?php endforeach; else: ?>
-                            <tr><td colspan="4" class="p-8 text-center text-gray-500">Chưa có người dùng nào.</td></tr>
+                            <tr><td colspan="4" class="p-8 text-center text-gray-500 dark:text-gray-400">Chưa có người dùng nào.</td></tr>
                         <?php endif; ?>
                     </tbody>
-                </table>
+                </table></div>
             </div>
 
             <!-- PHÂN TRANG -->
@@ -220,19 +166,19 @@
             <div class="mt-6 flex justify-center">
                 <nav class="flex items-center gap-2">
                     <?php if ($page > 1): ?>
-                        <a href="?action=admin_manage_users&page=<?= $page - 1 ?><?= $filterParams ?>" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition">
+                        <a href="?action=admin_manage_users&page=<?= $page - 1 ?><?= $filterParams ?>" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 dark:bg-gray-700/50 dark:hover:bg-gray-700/50 dark:bg-gray-700/50 dark:hover:bg-gray-700/50 transition">
                             <i class="fa-solid fa-chevron-left text-sm"></i>
                         </a>
                     <?php endif; ?>
                     
                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?action=admin_manage_users&page=<?= $i ?><?= $filterParams ?>" class="px-4 py-2 <?= $i === $page ? 'bg-primary text-white border-primary' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50' ?> border rounded-lg font-medium transition">
+                        <a href="?action=admin_manage_users&page=<?= $i ?><?= $filterParams ?>" class="px-4 py-2 <?= $i === $page ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 dark:bg-gray-700/50 dark:hover:bg-gray-700/50 dark:bg-gray-700/50 dark:hover:bg-gray-700/50' ?> border rounded-lg font-medium transition">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
 
                     <?php if ($page < $totalPages): ?>
-                        <a href="?action=admin_manage_users&page=<?= $page + 1 ?><?= $filterParams ?>" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition">
+                        <a href="?action=admin_manage_users&page=<?= $page + 1 ?><?= $filterParams ?>" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 dark:bg-gray-700/50 dark:hover:bg-gray-700/50 dark:bg-gray-700/50 dark:hover:bg-gray-700/50 transition">
                             <i class="fa-solid fa-chevron-right text-sm"></i>
                         </a>
                     <?php endif; ?>
@@ -246,8 +192,8 @@
     <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showEditModal = false"></div>
         <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showEditModal" class="relative bg-white rounded-2xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col overflow-hidden">
-                <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
+            <div x-show="showEditModal" class="relative bg-white dark:bg-gray-800 rounded-2xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col overflow-hidden">
+                <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-user-pen text-primary"></i> Cập nhật Người dùng</h3>
                     <button @click="showEditModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
@@ -262,7 +208,7 @@
                         
                         <div>
                             <label class="block text-sm font-semibold mb-1.5">Email</label>
-                            <input type="text" x-model="editData.email" readonly class="w-full px-4 py-3 border rounded-xl outline-none bg-gray-100 text-gray-500 cursor-not-allowed">
+                            <input type="text" x-model="editData.email" readonly class="w-full px-4 py-3 border rounded-xl outline-none bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed">
                         </div>
                         
                         <div>
@@ -275,7 +221,7 @@
                         </div>
                     </form>
                 </div>
-                <div class="bg-gray-50 px-6 py-4 border-t flex justify-end gap-3 shrink-0">
+                <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-t flex justify-end gap-3 shrink-0">
                     <button @click="showEditModal = false" class="px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 transition font-medium">Hủy</button>
                     <button type="submit" form="formEdit" class="bg-primary text-white font-bold py-2.5 px-6 rounded-xl hover:bg-yellow-600 transition">
                         <i class="fa-solid fa-floppy-disk mr-2"></i>Lưu thay đổi
@@ -289,8 +235,8 @@
     <div x-show="showDetailModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showDetailModal = false"></div>
         <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showDetailModal" class="relative bg-white rounded-2xl text-left shadow-2xl w-full max-w-sm z-50 flex flex-col overflow-hidden">
-                <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
+            <div x-show="showDetailModal" class="relative bg-white dark:bg-gray-800 rounded-2xl text-left shadow-2xl w-full max-w-sm z-50 flex flex-col overflow-hidden">
+                <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-500"></i> Thông tin tài khoản</h3>
                     <button @click="showDetailModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
@@ -298,8 +244,8 @@
                     <div class="flex flex-col items-center gap-3">
                         <img :src="detailData.avatar && detailData.avatar.startsWith('http') ? detailData.avatar : (detailData.avatar ? '/e-learning-project/public/' + detailData.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(detailData.fullname || '') + '&background=random')" class="w-24 h-24 object-cover rounded-full border-4 border-white shadow-lg">
                         <div class="text-center">
-                            <h4 class="text-xl font-bold text-gray-800 leading-tight" x-text="detailData.fullname"></h4>
-                            <p class="text-gray-500 text-sm mt-1" x-text="detailData.email"></p>
+                            <h4 class="text-xl font-bold text-gray-800 dark:text-white leading-tight" x-text="detailData.fullname"></h4>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1" x-text="detailData.email"></p>
                         </div>
                         <div class="mt-2">
                             <template x-if="detailData.role === 'admin'">
@@ -314,31 +260,31 @@
                         </div>
                     </div>
                     
-                    <div class="bg-gray-50 rounded-xl p-4 border mt-4 space-y-3">
+                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border mt-4 space-y-3">
                         <div class="flex flex-col border-b pb-2">
-                            <span class="text-gray-500 text-xs font-medium uppercase mb-1">Thời gian tạo tài khoản</span>
-                            <span class="font-semibold text-gray-800" x-text="detailData.created_at ? new Date(detailData.created_at.replace(' ', 'T')).toLocaleString('vi-VN') : '—'"></span>
+                            <span class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase mb-1">Thời gian tạo tài khoản</span>
+                            <span class="font-semibold text-gray-800 dark:text-white" x-text="detailData.created_at ? new Date(detailData.created_at.replace(' ', 'T')).toLocaleString('vi-VN') : '—'"></span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-gray-500 text-xs font-medium uppercase mb-1">Phương thức đăng nhập</span>
-                            <span class="font-semibold text-gray-800" x-text="detailData.google_id ? 'Google (SSO)' : 'Email & Mật khẩu'"></span>
+                            <span class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase mb-1">Phương thức đăng nhập</span>
+                            <span class="font-semibold text-gray-800 dark:text-white" x-text="detailData.google_id ? 'Google (SSO)' : 'Email & Mật khẩu'"></span>
                         </div>
                     </div>
 
                     <!-- KHÓA HỌC ĐÃ ĐĂNG KÝ -->
                     <div class="mt-4 border-t pt-4">
-                        <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-3"><i class="fa-solid fa-book-open text-primary mr-1"></i> Khóa học đã đăng ký</h4>
+                        <h4 class="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider mb-3"><i class="fa-solid fa-book-open text-primary mr-1"></i> Khóa học đã đăng ký</h4>
                         <template x-if="!detailData.enrolled_courses || detailData.enrolled_courses.length === 0">
-                            <p class="text-gray-500 text-sm italic text-center py-4 bg-gray-50 rounded-xl border border-dashed">Chưa đăng ký khóa học nào.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm italic text-center py-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-dashed">Chưa đăng ký khóa học nào.</p>
                         </template>
                         <template x-if="detailData.enrolled_courses && detailData.enrolled_courses.length > 0">
                             <ul class="space-y-2 max-h-48 overflow-y-auto pr-1">
                                 <template x-for="course in detailData.enrolled_courses" :key="course.id">
-                                    <li class="bg-gray-50 border rounded-xl p-3 flex gap-3 items-center hover:bg-white hover:shadow-sm transition">
-                                        <img :src="course.thumbnail && course.thumbnail.startsWith('http') ? course.thumbnail : (course.thumbnail ? '/e-learning-project/public/' + course.thumbnail : 'https://placehold.co/100x100?text=No+Image')" class="w-12 h-12 rounded-lg object-cover border border-gray-200">
+                                    <li class="bg-gray-50 dark:bg-gray-700/50 border rounded-xl p-3 flex gap-3 items-center hover:bg-white dark:bg-gray-800 hover:shadow-sm transition">
+                                        <img :src="course.thumbnail && course.thumbnail.startsWith('http') ? course.thumbnail : (course.thumbnail ? '/e-learning-project/public/' + course.thumbnail : 'https://placehold.co/100x100?text=No+Image')" class="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-gray-600">
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-bold text-gray-800 truncate" x-text="course.title"></p>
-                                            <p class="text-xs text-gray-500 mt-0.5">Ngày ĐK: <span class="font-medium text-gray-700" x-text="course.enrolled_at ? new Date(course.enrolled_at.replace(' ', 'T')).toLocaleDateString('vi-VN') : '—'"></span></p>
+                                            <p class="text-sm font-bold text-gray-800 dark:text-white truncate" x-text="course.title"></p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ngày ĐK: <span class="font-medium text-gray-700 dark:text-gray-300" x-text="course.enrolled_at ? new Date(course.enrolled_at.replace(' ', 'T')).toLocaleDateString('vi-VN') : '—'"></span></p>
                                         </div>
                                     </li>
                                 </template>
@@ -347,11 +293,11 @@
                     </div>
 
                 </div>
-                <div class="bg-gray-50 px-6 py-4 border-t flex justify-end shrink-0">
+                <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-t flex justify-end shrink-0">
                     <button @click="showDetailModal = false" class="px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 transition font-medium">Đóng</button>
                 </div>
             </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+<?php require_once 'layouts/footer.php'; ?>
