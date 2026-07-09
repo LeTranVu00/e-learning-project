@@ -38,7 +38,7 @@
     </div>
     
     <!-- Search & Filter -->
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6" data-aos="fade-up" data-aos-delay="50">
+    <div class="relative z-40 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6" data-aos="fade-up" data-aos-delay="50">
         <form action="" method="GET" class="flex flex-col md:flex-row gap-3">
             <input type="hidden" name="action" value="forum">           
             <?php if(($_GET['filter'] ?? '') === 'my_posts'): ?>
@@ -253,7 +253,7 @@
                 </div>
                 
                 <div class="px-6 py-6 overflow-y-auto grow">
-                    <form action="?action=forum_store_post" method="POST" id="formPostForum" class="space-y-4">
+                    <form action="?action=forum_store_post" method="POST" id="formPostForum" class="space-y-4" onsubmit="document.getElementById('btnSubmitPost').disabled=true; document.getElementById('btnSubmitPost').classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none'); document.getElementById('btnSubmitPost').innerHTML='<i class=\'fa-solid fa-spinner fa-spin mr-1\'></i> Đang đăng...';">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tiêu đề bài viết <span class="text-red-500">*</span></label>
                             <input type="text" name="title" required 
@@ -272,7 +272,7 @@
                             class="px-6 py-2.5 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition">
                         Hủy
                     </button>
-                    <button type="submit" form="formPostForum" 
+                    <button type="submit" form="formPostForum" id="btnSubmitPost"
                             class="bg-primary hover:bg-yellow-600 text-white font-bold py-2.5 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                         <i class="fa-solid fa-paper-plane mr-1"></i> Đăng bài
                     </button>
@@ -310,7 +310,7 @@
                 </div>
                 
                 <div class="px-6 py-6 overflow-y-auto grow">
-                    <form action="?action=forum_update_post" method="POST" id="formEditForum" class="space-y-4">
+                    <form action="?action=forum_update_post" method="POST" id="formEditForum" class="space-y-4" onsubmit="document.getElementById('btnSubmitEdit').disabled=true; document.getElementById('btnSubmitEdit').classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none'); document.getElementById('btnSubmitEdit').innerHTML='<i class=\'fa-solid fa-spinner fa-spin mr-1\'></i> Đang lưu...';">
                         <input type="hidden" name="id" :value="editData.id">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tiêu đề bài viết <span class="text-red-500">*</span></label>
@@ -330,9 +330,9 @@
                             class="px-6 py-2.5 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition">
                         Hủy
                     </button>
-                    <button type="submit" form="formEditForum" 
+                    <button type="submit" form="formEditForum" id="btnSubmitEdit"
                             class="bg-primary hover:bg-yellow-600 text-white font-bold py-2.5 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                        <i class="fa-solid fa-check mr-1"></i> Lưu thay đổi
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu thay đổi
                     </button>
                 </div>
             </div>

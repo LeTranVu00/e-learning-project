@@ -13,7 +13,7 @@
     </div>
 
     <!-- Bộ lọc & Tìm kiếm -->
-    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-10" data-aos="fade-up" data-aos-delay="100">
+    <div class="relative z-40 bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-10" data-aos="fade-up" data-aos-delay="100">
         <form action="" method="GET" class="flex flex-col md:flex-row gap-4">
             <input type="hidden" name="action" value="courses">
             
@@ -104,7 +104,7 @@
                     <?php endif; ?>
                     
                     <div class="absolute top-3 right-3 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                        <i class="fa-solid fa-users mr-1"></i> 2.5k
+                        <i class="fa-solid fa-book-open mr-1"></i> <?= htmlspecialchars($course['real_total_lessons'] ?? 0) ?> bài giảng
                     </div>
                 </div>
                 
@@ -115,7 +115,7 @@
                                 <?= htmlspecialchars($course['category_name'] ?? 'Khóa học') ?>
                             </span>
                             <span class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                                <i class="fa-regular fa-clock"></i> <?= date('d/m/Y', strtotime($course['created_at'])) ?>
+                                <i class="fa-regular fa-clock"></i> <?= htmlspecialchars($course['duration_hours'] ?? 0) ?> giờ
                             </span>
                         </div>
                         
@@ -127,17 +127,6 @@
                             <?= htmlspecialchars(strip_tags($course['description'])) ?>
                         </p>
                         
-                        <!-- Rating Stars -->
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="flex text-yellow-400 text-sm">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star-half-stroke"></i>
-                            </div>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">(4.8)</span>
-                        </div>
                     </div>
                     
                     <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-5 mt-auto">

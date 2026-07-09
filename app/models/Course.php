@@ -11,7 +11,10 @@ class Course {
 
     // Hàm lấy tất cả khóa học (Có hỗ trợ phân trang & lọc)
     public function getAllCourses($limit = null, $offset = null, $search = '', $sort = 'latest', $date = '', $category_id = null) {
-        $query = "SELECT c.*, cat.name as category_name FROM courses c LEFT JOIN categories cat ON c.category_id = cat.id WHERE 1=1";
+        $query = "SELECT c.*, cat.name as category_name,
+                  (SELECT COUNT(m.id) FROM materials m JOIN chapters ch ON m.chapter_id = ch.id WHERE ch.course_id = c.id) as real_total_lessons,
+                  (SELECT COUNT(e.id) FROM enrollments e WHERE e.course_id = c.id) as real_enrollments
+                  FROM courses c LEFT JOIN categories cat ON c.category_id = cat.id WHERE 1=1";
         
         if (!empty($search)) {
             $query .= " AND (c.title LIKE :search OR c.instructor LIKE :search)";
