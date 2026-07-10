@@ -315,9 +315,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(this);
 
             try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const res = await fetch('?action=forum_store_comment', {
                     method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     body: formData
                 });
                 
@@ -374,9 +378,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(this);
 
             try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 const res = await fetch('?action=forum_store_comment', {
                     method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     body: formData
                 });
                 

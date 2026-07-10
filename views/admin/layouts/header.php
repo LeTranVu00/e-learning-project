@@ -1,13 +1,7 @@
 <!DOCTYPE html>
-<html lang="vi" x-data="{ darkMode: localStorage.getItem('adminDarkMode') === 'true' }" x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'))">
+<html lang="vi">
 
 <head>
-    <script>
-        // Apply dark mode immediately to prevent flash of white content
-        if (localStorage.getItem('adminDarkMode') === 'true') {
-            document.documentElement.classList.add('dark');
-        }
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?? 'Admin Dashboard' ?> - E-Learning</title>
@@ -26,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } }
+        tailwind.config = { theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } }
     </script>
     <style>
         [x-cloak] {
@@ -117,7 +111,7 @@
     </style>
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 font-sans flex min-h-screen transition-colors duration-300 overflow-y-scroll"
+<body class="bg-gray-100 font-sans flex min-h-screen transition-colors duration-300 overflow-y-scroll"
     x-data="{ sidebarOpen: true, mobileSidebarOpen: false }">
 
     <?php require_once 'sidebar.php'; ?>

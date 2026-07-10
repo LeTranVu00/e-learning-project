@@ -14,7 +14,7 @@
     </div>
 
     <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col-reverse lg:flex-row items-center justify-between gap-12">
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
         <div class="w-full lg:w-1/2 space-y-6 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
             <div
                 class="inline-flex items-center gap-3 bg-white/5 dark:bg-gray-800/50 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 rounded-full px-2 py-2 pr-6 shadow-sm mb-2">
@@ -87,8 +87,7 @@
                 <div
                     class="absolute inset-0 bg-gradient-to-br from-primary to-yellow-500 rounded-3xl blur-xl opacity-20 transform rotate-6 animate-pulse">
                 </div>
-                <div class="rounded-3xl shadow-2xl w-full max-w-lg lg:max-w-full relative transform hover:rotate-1 transition-transform duration-500 bg-[#1e1e1e] border border-gray-700 overflow-hidden"
-                    style="aspect-ratio: 3/2;">
+                <div class="rounded-3xl shadow-2xl w-full max-w-lg lg:max-w-full relative transform hover:rotate-1 transition-transform duration-500 bg-[#1e1e1e] border border-gray-700 overflow-hidden">
                     <!-- Window Controls -->
                     <div class="bg-[#2d2d2d] px-4 py-3 flex items-center gap-2 border-b border-gray-700">
                         <div class="w-3 h-3 rounded-full bg-red-500"></div>
@@ -99,7 +98,7 @@
                     </div>
                     <!-- Code Content -->
                     <div
-                        class="p-6 sm:p-8 lg:p-10 font-mono text-base sm:text-lg lg:text-xl leading-relaxed text-gray-300 h-full flex flex-col justify-center pb-16">
+                        class="p-6 sm:p-8 lg:p-10 font-mono text-sm sm:text-base lg:text-lg leading-relaxed text-gray-300 flex flex-col justify-center">
                         <div class="text-blue-400 font-bold mb-2">&lt;?php</div>
                         <div class="text-blue-400"><span class="text-purple-400">class</span> <span
                                 class="text-yellow-300">ELearning</span> {</div>
@@ -112,7 +111,8 @@
                                 class="text-blue-300">getSkills</span>() {</div>
                         <div class="ml-8 sm:ml-16"><span class="text-purple-400">return</span> [<span
                                 class="text-green-400">'Code'</span>, <span class="text-green-400">'Create'</span>,
-                            <span class="text-green-400">'Success'</span>];</div>
+                            <span class="text-green-400">'Success'</span>];
+                        </div>
                         <div class="ml-4 sm:ml-8">}</div>
                         <div>}</div>
                         <div class="mt-4"><span class="text-blue-200">$student</span> = <span
@@ -124,7 +124,7 @@
                     </div>
                 </div>
 
-                <div class="absolute -top-6 -right-6 glass rounded-2xl shadow-xl p-4 animate-bounce-slow"
+                <div class="absolute -top-6 -right-6 glass rounded-2xl shadow-xl p-4 animate-bounce-slow z-10"
                     data-aos="zoom-in" data-aos-delay="600">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-laptop-code text-blue-400 text-lg"></i>
@@ -320,7 +320,7 @@
         <div class="relative group px-2" x-data="{
             initSwiper() {
                 new Swiper(this.$refs.swiperContainer, {
-                    loop: true,
+                    loop: false,
                     slidesPerView: 'auto',
                     spaceBetween: 24,
                     grabCursor: true,
@@ -332,7 +332,7 @@
             }
         }" x-init="initSwiper()" data-aos="fade-up" data-aos-delay="200">
             <button x-ref="prevBtn"
-                class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 shadow-xl rounded-full w-12 h-12 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 shadow-xl rounded-full w-12 h-12 items-center justify-center hover:bg-primary hover:text-white hover:border-primary z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
 
@@ -347,10 +347,12 @@
                                     <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> text-2xl"></i>
                                 </div>
                                 <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">
-                                    <?= htmlspecialchars($cat['name']) ?></h3>
+                                    <?= htmlspecialchars($cat['name']) ?>
+                                </h3>
                                 <p
                                     class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-full px-3 py-1">
-                                    <?= $cat['course_count'] ?> khóa học</p>
+                                    <?= $cat['course_count'] ?> khóa học
+                                </p>
                             </a>
                         </div>
                     <?php endforeach; ?>
@@ -358,7 +360,7 @@
             </div>
 
             <button x-ref="nextBtn"
-                class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 shadow-xl rounded-full w-12 h-12 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 shadow-xl rounded-full w-12 h-12 items-center justify-center hover:bg-primary hover:text-white hover:border-primary z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <i class="fa-solid fa-chevron-right"></i>
             </button>
         </div>
@@ -405,7 +407,8 @@
                         <?php endif; ?>
                         <div
                             class="absolute top-4 right-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                            <i class="fa-solid fa-book-open mr-1"></i> <?= htmlspecialchars($course['real_total_lessons'] ?? 0) ?> bài giảng
+                            <i class="fa-solid fa-book-open mr-1"></i>
+                            <?= htmlspecialchars($course['real_total_lessons'] ?? 0) ?> bài giảng
                         </div>
                     </div>
                     <div class="p-6 flex-grow flex flex-col justify-between">
@@ -415,7 +418,8 @@
                                     class="text-xs font-semibold text-primary bg-primary/5 dark:bg-primary/10 px-3 py-1 rounded-full">Khóa
                                     học</span>
                                 <span class="text-xs text-gray-400 dark:text-gray-500"><i
-                                        class="fa-regular fa-clock mr-1"></i> <?= htmlspecialchars($course['duration_hours'] ?? 0) ?> giờ</span>
+                                        class="fa-regular fa-clock mr-1"></i>
+                                    <?= htmlspecialchars($course['duration_hours'] ?? 0) ?> giờ</span>
                             </div>
                             <h3
                                 class="text-lg font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-primary transition-colors">
@@ -424,7 +428,7 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
                                 <?= htmlspecialchars(strip_tags($course['description'])) ?>
                             </p>
-                            
+
                         </div>
                         <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-4">
                             <div class="flex flex-col">
@@ -457,6 +461,13 @@
                     </div>
                 </div>
             <?php endforeach; ?>
+        </div>
+
+        <div class="mt-8 text-center md:hidden" data-aos="fade-up">
+            <a href="?action=courses"
+                class="inline-flex justify-center items-center gap-2 bg-gradient-to-r from-blue-600 to-primary text-white font-bold py-4 px-8 rounded-2xl hover:shadow-xl transition-all w-full">
+                Xem tất cả khóa học <i class="fa-solid fa-arrow-right"></i>
+            </a>
         </div>
     </div>
 </section>
@@ -656,7 +667,8 @@ $topPosts = $forumModel->getFeaturedPosts(3);
                                 class="w-14 h-14 rounded-2xl object-cover shadow-lg ring-4 ring-white dark:ring-gray-700">
                             <div class="flex-grow">
                                 <h4 class="font-bold text-gray-900 dark:text-white">
-                                    <?= htmlspecialchars($post['author_name']) ?></h4>
+                                    <?= htmlspecialchars($post['author_name']) ?>
+                                </h4>
                                 <?php if (isset($post['author_role']) && $post['author_role'] === 'student'): ?>
                                     <p class="text-xs text-primary font-medium mt-0.5">Học viên</p>
                                 <?php endif; ?>

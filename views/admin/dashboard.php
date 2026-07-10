@@ -4,77 +4,67 @@ require_once 'layouts/header.php'; ?>
 <!-- Page Header -->
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4" data-aos="fade-up">
     <div>
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Bảng điều khiển</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Tổng quan hệ thống E-Learning</p>
-    </div>
-    <div class="flex items-center gap-3">
-        <a href="?action=admin_create_course"
-            class="bg-primary hover:bg-yellow-600 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 text-sm">
-            <i class="fa-solid fa-plus"></i> Khóa học mới
-        </a>
-        <a href="?action=admin_manage_comments"
-            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold py-2.5 px-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 text-sm">
-            <i class="fa-regular fa-comment-dots"></i> Duyệt bình luận
-        </a>
+        <h1 class="text-2xl font-bold text-gray-800">Bảng điều khiển</h1>
+        <p class="text-sm text-gray-500 mt-1">Tổng quan hệ thống E-Learning</p>
     </div>
 </div>
 
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 border-l-4 border-l-primary transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 border-l-4 border-l-primary transition-all duration-300 hover:shadow-md hover:-translate-y-1"
         data-aos="fade-up" data-aos-delay="50">
         <div
-            class="w-12 h-12 sm:w-14 sm:h-14 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl flex items-center justify-center text-primary text-xl sm:text-2xl shrink-0">
+            class="w-12 h-12 sm:w-14 sm:h-14 bg-yellow-50 rounded-xl flex items-center justify-center text-primary text-xl sm:text-2xl shrink-0">
             <i class="fa-solid fa-book"></i>
         </div>
         <div>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Tổng Khóa Học</p>
-            <p class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Tổng Khóa Học</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-800">
                 <?= number_format($total_courses ?? 0) ?></p>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 border-l-4 border-l-blue-500 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 border-l-4 border-l-blue-500 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
         data-aos="fade-up" data-aos-delay="100">
         <div
-            class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-500 text-xl sm:text-2xl shrink-0">
+            class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 text-xl sm:text-2xl shrink-0">
             <i class="fa-solid fa-users"></i>
         </div>
         <div>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Tổng Học Viên</p>
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Tổng Học Viên</p>
             <div class="flex items-end gap-2">
-                <p class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                <p class="text-xl sm:text-2xl font-bold text-gray-800">
                     <?= number_format($total_users ?? 0) ?></p>
                 <?php if (!empty($today_users) && $today_users > 0): ?>
                     <span
-                        class="text-xs font-bold text-green-500 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded mb-1">+<?= $today_users ?></span>
+                        class="text-xs font-bold text-green-500 bg-green-50 px-1.5 py-0.5 rounded mb-1">+<?= $today_users ?></span>
                 <?php endif; ?>
             </div>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 border-l-4 border-l-green-500 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 border-l-4 border-l-green-500 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
         data-aos="fade-up" data-aos-delay="150">
         <div
-            class="w-12 h-12 sm:w-14 sm:h-14 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center text-green-500 text-xl sm:text-2xl shrink-0">
+            class="w-12 h-12 sm:w-14 sm:h-14 bg-green-50 rounded-xl flex items-center justify-center text-green-500 text-xl sm:text-2xl shrink-0">
             <i class="fa-solid fa-user-plus"></i>
         </div>
         <div>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Lượt Ghi Danh</p>
-            <p class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Lượt Ghi Danh</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-800">
                 <?= number_format($total_enrollments ?? 0) ?></p>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 border-l-4 border-l-emerald-600 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 border-l-4 border-l-emerald-600 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
         data-aos="fade-up" data-aos-delay="200">
         <div
-            class="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-600 text-xl sm:text-2xl shrink-0">
+            class="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 text-xl sm:text-2xl shrink-0">
             <i class="fa-solid fa-money-bill-trend-up"></i>
         </div>
         <div>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Tổng Doanh Thu</p>
-            <p class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Tổng Doanh Thu</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-800">
                 <?= number_format($total_revenue ?? 0, 0, ',', '.') ?>đ</p>
             <?php if (!empty($today_revenue) && $today_revenue > 0): ?>
                 <p class="text-xs text-green-500 font-medium mt-0.5"><i
@@ -86,26 +76,26 @@ require_once 'layouts/header.php'; ?>
 
 <!-- Charts -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 transition-colors"
         data-aos="fade-up" data-aos-delay="250">
-        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Doanh thu & Đăng ký năm nay</h2>
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Doanh thu & Đăng ký năm nay</h2>
         <div id="revenueChart"></div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 transition-colors"
         data-aos="fade-up" data-aos-delay="300">
-        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Top Khóa học nổi bật</h2>
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Top Khóa học nổi bật</h2>
         <div id="courseDonutChart" class="flex justify-center"></div>
     </div>
 </div>
 
 <!-- Tables & Activity -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-start">
     <!-- Transactions Table -->
-    <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors overflow-hidden"
+    <div class="lg:col-span-2 bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 transition-colors overflow-hidden"
         data-aos="fade-up" data-aos-delay="350">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-white">Giao dịch mới nhất</h2>
+            <h2 class="text-lg font-bold text-gray-800">Giao dịch mới nhất</h2>
             <a href="?action=admin_manage_users"
                 class="text-sm font-medium text-primary hover:text-yellow-600 transition">Xem tất cả →</a>
         </div>
@@ -113,7 +103,7 @@ require_once 'layouts/header.php'; ?>
         <div class="overflow-x-auto -mx-5 sm:mx-0">
             <table class="w-full text-left border-collapse min-w-[500px]">
                 <thead>
-                    <tr class="text-gray-400 dark:text-gray-500 text-sm border-b border-gray-100 dark:border-gray-700">
+                    <tr class="text-gray-400 text-sm border-b border-gray-100">
                         <th class="pb-3 font-medium pl-5 sm:pl-0">Học viên</th>
                         <th class="pb-3 font-medium">Khóa học</th>
                         <th class="pb-3 font-medium text-right">Số tiền</th>
@@ -123,7 +113,7 @@ require_once 'layouts/header.php'; ?>
                 <tbody>
                     <?php if (empty($latest_transactions)): ?>
                         <tr>
-                            <td colspan="4" class="py-8 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="4" class="py-8 text-center text-gray-500">
                                 <i class="fa-solid fa-inbox text-2xl mb-2 block opacity-50"></i>
                                 Chưa có giao dịch nào
                             </td>
@@ -131,24 +121,24 @@ require_once 'layouts/header.php'; ?>
                     <?php else: ?>
                         <?php foreach ($latest_transactions as $tx): ?>
                             <tr
-                                class="border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                                 <td class="py-4 pl-5 sm:pl-0">
                                     <div class="flex items-center gap-3">
                                         <img src="<?= htmlspecialchars($tx['avatar'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($tx['fullname']) . '&background=random') ?>"
                                             class="w-8 h-8 rounded-lg object-cover shadow-sm">
                                         <span
-                                            class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?= htmlspecialchars($tx['fullname']) ?></span>
+                                            class="font-semibold text-gray-800 text-sm"><?= htmlspecialchars($tx['fullname']) ?></span>
                                     </div>
                                 </td>
-                                <td class="py-4 text-gray-600 dark:text-gray-400 text-sm max-w-[150px] truncate">
+                                <td class="py-4 text-gray-600 text-sm max-w-[150px] truncate">
                                     <?= htmlspecialchars($tx['title']) ?></td>
                                 <td class="py-4 text-right">
                                     <span
-                                        class="inline-block px-2.5 py-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-bold rounded-lg text-xs">
+                                        class="inline-block px-2.5 py-1 bg-green-50 text-green-600 font-bold rounded-lg text-xs">
                                         <?= number_format($tx['price'], 0, ',', '.') ?>đ
                                     </span>
                                 </td>
-                                <td class="py-4 text-right text-gray-400 dark:text-gray-500 text-xs pr-5 sm:pr-0">
+                                <td class="py-4 text-right text-gray-400 text-xs pr-5 sm:pr-0">
                                     <?= date('d/m/Y', strtotime($tx['enrolled_at'])) ?>
                                 </td>
                             </tr>
@@ -160,14 +150,15 @@ require_once 'layouts/header.php'; ?>
     </div>
 
     <!-- Recent Activities -->
-    <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 transition-colors"
         data-aos="fade-up" data-aos-delay="400">
-        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-6">Hoạt động gần đây</h2>
+        <h2 class="text-lg font-bold text-gray-800 mb-6">Hoạt động gần đây</h2>
 
-        <div
-            class="space-y-5 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 dark:before:via-gray-700 before:to-transparent">
-            <?php if (empty($recent_activities)): ?>
-                <p class="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
+        <div class="overflow-y-auto max-h-[420px] pr-2 -mr-2">
+            <div
+                class="space-y-5 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
+                <?php if (empty($recent_activities)): ?>
+                <p class="text-gray-500 text-sm text-center py-4">
                     <i class="fa-solid fa-clock text-2xl mb-2 block opacity-50"></i>
                     Chưa có hoạt động nào
                 </p>
@@ -175,39 +166,40 @@ require_once 'layouts/header.php'; ?>
                 <?php foreach ($recent_activities as $act): ?>
                     <div class="relative flex items-start gap-3">
                         <?php
-                        $iconBg = 'bg-gray-100 dark:bg-gray-700 text-gray-500';
+                        $iconBg = 'bg-gray-100 text-gray-500';
                         $iconClass = 'fa-solid fa-bell';
                         $actionText = 'đã thực hiện hành động';
-                        $extraText = '';
+                        $extraTextClass = 'text-primary font-medium';
                         if ($act['type'] === 'user') {
-                            $iconBg = 'bg-blue-100 dark:bg-blue-900/30 text-blue-500';
+                            $iconBg = 'bg-blue-100 text-blue-500';
                             $iconClass = 'fa-solid fa-user-plus';
                             $actionText = 'đã đăng ký tài khoản';
                         } elseif ($act['type'] === 'enrollment') {
-                            $iconBg = 'bg-green-100 dark:bg-green-900/30 text-green-500';
+                            $iconBg = 'bg-green-100 text-green-500';
                             $iconClass = 'fa-solid fa-cart-shopping';
                             $actionText = 'đã mua khóa học';
                             $extraText = $act['extra_info'] ?? '';
                         } elseif ($act['type'] === 'comment') {
-                            $iconBg = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-500';
+                            $iconBg = 'bg-yellow-100 text-yellow-500';
                             $iconClass = 'fa-regular fa-comment';
                             $actionText = 'đã bình luận';
-                            $extraText = '"' . mb_strimwidth($act['extra_info'] ?? '', 0, 40, '...') . '"';
+                            $extraText = mb_strimwidth($act['extra_info'] ?? '', 0, 40, '...');
+                            $extraTextClass = 'text-gray-500 italic border-l-2 border-gray-200 pl-2';
                         }
                         ?>
                         <div
-                            class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 <?= $iconBg ?> shadow-sm border-2 border-white dark:border-gray-800">
+                            class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 <?= $iconBg ?> shadow-sm border-2 border-white">
                             <i class="<?= $iconClass ?> text-xs"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-800 dark:text-gray-200">
+                            <p class="text-sm text-gray-800">
                                 <span class="font-bold"><?= htmlspecialchars($act['fullname']) ?></span>
-                                <span class="text-gray-500 dark:text-gray-400"><?= $actionText ?></span>
+                                <span class="text-gray-500"><?= $actionText ?></span>
                             </p>
                             <?php if ($extraText): ?>
-                                <p class="text-xs text-primary font-medium truncate mt-0.5"><?= htmlspecialchars($extraText) ?></p>
+                                <p class="text-xs <?= $extraTextClass ?> truncate mt-1.5"><?= htmlspecialchars($extraText) ?></p>
                             <?php endif; ?>
-                            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1">
+                            <p class="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
                                 <i class="fa-regular fa-clock"></i>
                                 <?php
                                 $diff = time() - strtotime($act['created_at']);
@@ -229,6 +221,7 @@ require_once 'layouts/header.php'; ?>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
@@ -241,38 +234,53 @@ require_once 'layouts/header.php'; ?>
     var revenueOptions = {
         series: [{
             name: 'Doanh thu (VNĐ)',
-            type: 'column',
             data: <?= json_encode($chart_revenue ?? []) ?>
         }, {
             name: 'Ghi danh',
-            type: 'line',
             data: <?= json_encode($chart_enrollments ?? []) ?>
         }],
         chart: {
             height: 350,
-            type: 'line',
+            type: 'bar',
             fontFamily: 'inherit',
             toolbar: { show: false },
             animations: { enabled: true, easing: 'easeinout', speed: 800 }
         },
-        stroke: { width: [0, 4], curve: 'smooth' },
-        colors: ['#10b981', '#f59e0b'],
-        dataLabels: {
-            enabled: true,
-            enabledOnSeries: [1],
-            formatter: function (val) { return parseInt(val).toLocaleString('vi-VN'); }
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                borderRadius: 4
+            },
         },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        colors: ['#10b981', '#f59e0b'],
         labels: <?= json_encode($chart_months ?? []) ?>,
         yaxis: [{
             title: { text: 'Doanh thu (VNĐ)', style: { fontWeight: 500 } },
+            min: 0,
+            tickAmount: 5,
+            decimalsInFloat: 0,
+            max: function(val) { return val < 500000 ? 500000 : val; },
             labels: { formatter: function (y) { return y.toLocaleString('vi-VN') + ' đ'; } }
         }, {
             opposite: true,
             title: { text: 'Số lượt ghi danh', style: { fontWeight: 500 } },
-            labels: { formatter: function (val) { return parseInt(val).toLocaleString('vi-VN'); } }
+            min: 0,
+            tickAmount: 5,
+            decimalsInFloat: 0,
+            max: function(val) { return val < 5 ? 5 : val; },
+            labels: { formatter: function (val) { return Math.round(val).toString(); } }
         }],
         grid: { borderColor: '#e5e7eb', strokeDashArray: 4 },
-        theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+        theme: { mode: 'light' }
     };
     var revenueChart = new ApexCharts(document.querySelector("#revenueChart"), revenueOptions);
     revenueChart.render();
@@ -293,27 +301,11 @@ require_once 'layouts/header.php'; ?>
         legend: { position: 'bottom', itemMargin: { horizontal: 10 } },
         noData: { text: 'Chưa có dữ liệu', align: 'center', verticalAlign: 'middle', style: { fontSize: '14px' } },
         responsive: [{ breakpoint: 480, options: { chart: { height: 280 }, legend: { position: 'bottom' } } }],
-        theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+        theme: { mode: 'light' }
     };
     var donutChart = new ApexCharts(document.querySelector("#courseDonutChart"), donutOptions);
     donutChart.render();
 
-    // Update chart theme on dark mode change
-    function updateChartTheme() {
-        var isDark = document.documentElement.classList.contains('dark');
-        var theme = isDark ? 'dark' : 'light';
-        if (revenueChart) revenueChart.updateOptions({ theme: { mode: theme } });
-        if (donutChart) donutChart.updateOptions({ theme: { mode: theme } });
-    }
-
-    var observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            if (mutation.attributeName === "class") {
-                updateChartTheme();
-            }
-        });
-    });
-    observer.observe(document.documentElement, { attributes: true });
 </script>
 
 <?php require_once 'layouts/footer.php'; ?>

@@ -10,6 +10,25 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
+// Khởi tạo bảo vệ Security (CSRF)
+require_once __DIR__ . '/../app/utils/Security.php';
+Security::initCSRF();
+Security::verifyCSRF();
+
+// Sử dụng Output Buffering để tự động tiêm CSRF token vào các Form
+ob_start(function($buffer) {
+    if (isset($_SESSION['csrf_token'])) {
+        $token = $_SESSION['csrf_token'];
+        $input = "\n" . '<input type="hidden" name="csrf_token" value="' . $token . '">';
+        $buffer = preg_replace('/(<form[^>]*method=["\']?POST["\']?[^>]*>)/i', '$1' . $input, $buffer);
+        
+        // Tiêm meta tag csrf-token vào <head> cho các request AJAX/Fetch
+        $meta = "\n" . '<meta name="csrf-token" content="' . $token . '">';
+        $buffer = preg_replace('/(<\/head>)/i', $meta . "\n" . '$1', $buffer);
+    }
+    return $buffer;
+});
+
 // ... (Các dòng require Controller cũ ở dưới giữ nguyên)
 
 require_once __DIR__ . '/../app/controllers/CourseController.php';
@@ -298,6 +317,11 @@ switch ($action) {
     case 'admin_manage_users':
         $adminController = new AdminController();
         $adminController->manageUsersList();
+        break;
+        
+    case 'admin_system_logs':
+        $adminController = new AdminController();
+        $adminController->systemLogs();
         break;
     case 'admin_update_user':
         $adminController = new AdminController();

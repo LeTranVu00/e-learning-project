@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/Enrollment.php';
 // BUG FIX: Thêm require Progress.php vì myCourses() dùng class Progress
 require_once __DIR__ . '/../models/Progress.php';
+require_once __DIR__ . '/../utils/AuditLogger.php';
 
 class EnrollmentController {
     
@@ -27,6 +28,7 @@ class EnrollmentController {
             // 3. Thực hiện đăng ký
             if ($enrollmentModel->enrollUser($user_id, $course_id)) {
                 // Đăng ký thành công -> Tạo thông báo và chuyển sang Khóa học của tôi
+                AuditLogger::log('Ghi danh khóa học', "Người dùng (ID: $user_id) đã đăng ký khóa học miễn phí (ID: $course_id)", 'enrollment', $course_id);
                 $_SESSION['success'] = "Đăng ký khóa học thành công! Chào mừng bạn.";
                 header('Location: ?action=my_courses');
                 exit();

@@ -41,6 +41,13 @@ class AuthController {
             exit();
         }
 
+        require_once __DIR__ . '/../utils/Security.php';
+        if (!Security::checkLoginRateLimit()) {
+            $_SESSION['error'] = 'Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau 15 phút.';
+            header('Location: ?action=login');
+            exit();
+        }
+
         $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -56,12 +63,14 @@ class AuthController {
 
         // Kiểm tra user tồn tại và mật khẩu khớp
         if ($user && !empty($user['password']) && password_verify($password, $user['password'])) {
+            Security::resetLoginAttempts();
             $_SESSION['user_id']     = $user['id'];
             $_SESSION['user_name']   = $user['fullname'];
             $_SESSION['user_role']   = $user['role'];
             $_SESSION['user_avatar'] = $user['avatar'] ?? '';
             header('Location: ?action=home');
         } else {
+            Security::recordFailedLogin();
             $_SESSION['error'] = 'Email hoặc mật khẩu không đúng!';
             header('Location: ?action=login');
         }

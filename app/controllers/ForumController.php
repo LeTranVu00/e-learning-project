@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/Forum.php';
+require_once __DIR__ . '/../utils/HtmlSanitizer.php';
 
 class ForumController {
     
@@ -48,8 +49,8 @@ class ForumController {
             $db = (new Database())->getConnection();
             $forumModel = new Forum($db);
             
-            $title = $_POST['title'];
-            $content = $_POST['content']; // Sẽ lấy từ CKEditor
+            $title = HtmlSanitizer::clean($_POST['title']);
+            $content = HtmlSanitizer::clean($_POST['content']); // Sẽ lấy từ CKEditor
 
             if($forumModel->createPost($_SESSION['user_id'], $title, $content)) {
                 $_SESSION['success'] = "Đăng bài thảo luận thành công!";
@@ -73,7 +74,7 @@ class ForumController {
 
             // Kiểm tra quyền: Phải là chủ bài viết HOẶC là Admin
             if ($post && ($post['user_id'] == $_SESSION['user_id'] || $_SESSION['user_role'] === 'admin')) {
-                $forumModel->updatePost($post_id, $_POST['title'], $_POST['content']);
+                $forumModel->updatePost($post_id, HtmlSanitizer::clean($_POST['title']), HtmlSanitizer::clean($_POST['content']));
                 $_SESSION['success'] = "Đã cập nhật bài viết thành công!";
             } else {
                 $_SESSION['error'] = "Bạn không có quyền sửa bài viết này!";
@@ -158,7 +159,7 @@ class ForumController {
 
             $post_id   = (int) ($_POST['post_id']  ?? 0);
             $parent_id = !empty($_POST['parent_id']) ? (int) $_POST['parent_id'] : null;
-            $content   = trim($_POST['content'] ?? '');
+            $content   = HtmlSanitizer::clean($_POST['content'] ?? '');
 
             // Validate nội dung
             if (empty($content)) {
@@ -264,7 +265,7 @@ class ForumController {
             $forumModel = new Forum($db);
 
             $comment_id = (int) ($_POST['comment_id'] ?? 0);
-            $content    = trim($_POST['content'] ?? '');
+            $content    = HtmlSanitizer::clean($_POST['content'] ?? '');
             $comment    = $forumModel->getCommentById($comment_id);
 
             if (!$comment) {

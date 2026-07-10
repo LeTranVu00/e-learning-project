@@ -100,10 +100,12 @@ function removeFromCart(courseId) {
         cancelButtonText: 'Hủy'
     }).then((result) => {
         if (result.isConfirmed) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             fetch('?action=remove_from_cart', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 body: JSON.stringify({ course_id: courseId })
             })

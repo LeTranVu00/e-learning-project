@@ -72,6 +72,7 @@ class CartController {
 
     // Xóa khỏi giỏ (AJAX)
     public function remove() {
+        error_log("CartController::remove() called");
         header('Content-Type: application/json');
         
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

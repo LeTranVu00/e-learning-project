@@ -1,6 +1,10 @@
 <?php
 // File: app/controllers/AdminController.php
 
+require_once __DIR__ . '/../utils/Uploader.php';
+require_once __DIR__ . '/../utils/HtmlSanitizer.php';
+require_once __DIR__ . '/../utils/AuditLogger.php';
+
 class AdminController {
     
     // Hàm khởi tạo: Chạy đầu tiên mỗi khi gọi AdminController
@@ -137,13 +141,18 @@ class AdminController {
     // Hàm xử lý lưu khóa học mới (Có upload ảnh)
     public function storeCourse() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $title          = $_POST['title'];
-            $price          = isset($_POST['price']) ? intval($_POST['price']) : 0;
-            $original_price = isset($_POST['original_price']) ? intval($_POST['original_price']) : 0;
-            $description    = $_POST['description'];
+            $title          = HtmlSanitizer::clean($_POST['title']);
+            $price            = isset($_POST['price']) ? intval($_POST['price']) : 0;
+            $discount_percent = isset($_POST['discount_percent']) ? floatval($_POST['discount_percent']) : 0;
+            
+            $original_price = $price;
+            if ($discount_percent > 0 && $discount_percent < 100) {
+                $original_price = $price / (1 - $discount_percent / 100);
+            }
+            $description    = HtmlSanitizer::clean($_POST['description']);
             // BUG FIX: Khai báo trước khối if upload để không bị undefined khi không có file
-            $benefits       = $_POST['benefits'] ?? '';
-            $requirements   = $_POST['requirements'] ?? '';
+            $benefits       = HtmlSanitizer::clean($_POST['benefits'] ?? '');
+            $requirements   = HtmlSanitizer::clean($_POST['requirements'] ?? '');
             $instructor     = $_SESSION['user_name'] ?? 'Admin';
             $level          = $_POST['level']          ?? 'Sơ cấp';
             $duration_hours = isset($_POST['duration_hours']) ? intval($_POST['duration_hours']) : 0;
@@ -186,6 +195,7 @@ class AdminController {
             if ($courseModel->createCourse($title, $description, $thumbnail_path, $benefits, $requirements, $price, $original_price, $instructor, $level, $duration_hours, $total_lessons, $language, $start_date, $schedule, $study_time, $contact_phone, $category_id)) {
                 $isSuccess = true;
                 $message = "Tuyệt vời! Khóa học đã được tạo thành công.";
+                AuditLogger::log('Tạo khóa học', "Tạo khóa học mới '$title'", 'course');
             } else {
                 $isSuccess = false;
                 $message = "Xin lỗi! Có lỗi xảy ra khi tạo khóa học.";
@@ -381,8 +391,13 @@ class AdminController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id             = $_POST['id'];
             $title          = $_POST['title'];
-            $price          = isset($_POST['price']) ? intval($_POST['price']) : 0;
-            $original_price = isset($_POST['original_price']) ? intval($_POST['original_price']) : 0;
+            $price            = isset($_POST['price']) ? intval($_POST['price']) : 0;
+            $discount_percent = isset($_POST['discount_percent']) ? floatval($_POST['discount_percent']) : 0;
+            
+            $original_price = $price;
+            if ($discount_percent > 0 && $discount_percent < 100) {
+                $original_price = $price / (1 - $discount_percent / 100);
+            }
             $description    = $_POST['description'];
             $benefits       = $_POST['benefits'] ?? '';
             $requirements   = $_POST['requirements'] ?? '';
@@ -415,6 +430,7 @@ class AdminController {
             $stmt->execute([$title, $price, $original_price, $description, $benefits, $requirements, $thumbnail_path, $instructor, $level, $duration_hours, $total_lessons, $language, $start_date, $schedule, $study_time, $contact_phone, $id]);
 
             $_SESSION['success'] = "Đã cập nhật khóa học thành công!";
+            AuditLogger::log('Cập nhật khóa học', "Cập nhật thông tin khóa học '$title'", 'course', $id);
             header('Location: ?action=admin_manage_courses');
             exit();
         }
@@ -424,10 +440,11 @@ class AdminController {
     public function deleteCourse() {
         if (isset($_GET['id'])) {
             require_once __DIR__ . '/../config/Database.php';
+            require_once __DIR__ . '/../models/Course.php';
             $db = (new Database())->getConnection();
             
-            $stmt = $db->prepare("DELETE FROM courses WHERE id = ?");
-            $success = $stmt->execute([$_GET['id']]);
+            $courseModel = new Course($db);
+            $success = $courseModel->deleteCourse($_GET['id']);
 
             // AJAX request check
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
@@ -440,7 +457,8 @@ class AdminController {
                 exit();
             }
 
-            $_SESSION['success'] = "Khóa học đã được xóa khỏi hệ thống!";
+            $_SESSION['success'] = "Đã xóa khóa học thành công!";
+            AuditLogger::log('Xóa khóa học', "Xóa khóa học có ID " . $_GET['id'], 'course', $_GET['id']);
             header('Location: ?action=admin_manage_courses');
             exit();
         }
@@ -679,6 +697,7 @@ class AdminController {
             $userModel->updateUser($_POST['id'], $_POST['fullname'], $_POST['role']);
             
             $_SESSION['success'] = "Cập nhật người dùng thành công!";
+            AuditLogger::log('Cập nhật người dùng', "Thay đổi thông tin user ID " . $_POST['id'], 'user', $_POST['id']);
             header('Location: ?action=admin_manage_users');
             exit();
         }
@@ -701,6 +720,7 @@ class AdminController {
             $userModel->deleteUser($_GET['id']);
             
             $_SESSION['success'] = "Đã xóa người dùng thành công!";
+            AuditLogger::log('Xóa người dùng', "Xóa user ID " . $_GET['id'], 'user', $_GET['id']);
             header('Location: ?action=admin_manage_users');
             exit();
         }
@@ -745,6 +765,7 @@ class AdminController {
             
             $catModel->createCategory($_POST['name'], $_POST['icon'] ?? 'fa-folder', $_POST['color'] ?? 'bg-gray-100 text-gray-600');
             $_SESSION['success'] = "Đã thêm danh mục mới!";
+            AuditLogger::log('Tạo danh mục', "Tạo danh mục '" . $_POST['name'] . "'", 'category');
             header('Location: ?action=admin_manage_categories');
             exit();
         }
@@ -759,6 +780,7 @@ class AdminController {
             
             $catModel->updateCategory($_POST['id'], $_POST['name'], $_POST['icon'] ?? 'fa-folder', $_POST['color'] ?? 'bg-gray-100 text-gray-600');
             $_SESSION['success'] = "Đã cập nhật danh mục!";
+            AuditLogger::log('Cập nhật danh mục', "Sửa danh mục '" . $_POST['name'] . "'", 'category', $_POST['id']);
             header('Location: ?action=admin_manage_categories');
             exit();
         }
@@ -773,6 +795,7 @@ class AdminController {
             
             $catModel->deleteCategory($_GET['id']);
             $_SESSION['success'] = "Đã xóa danh mục!";
+            AuditLogger::log('Xóa danh mục', "Xóa danh mục ID " . $_GET['id'], 'category', $_GET['id']);
             header('Location: ?action=admin_manage_categories');
             exit();
         }
@@ -876,6 +899,80 @@ class AdminController {
         }
         header("Location: ?action=admin_manage_contacts");
         exit;
+    }
+
+    // ==========================================
+    // KHU VỰC NHẬT KÝ HỆ THỐNG
+    // ==========================================
+    public function systemLogs() {
+        require_once __DIR__ . '/../config/Database.php';
+        $db = (new Database())->getConnection();
+
+        $search = trim($_GET['search'] ?? '');
+        $actionFilter = trim($_GET['action_filter'] ?? 'all');
+        $dateFrom = trim($_GET['date_from'] ?? '');
+        $dateTo = trim($_GET['date_to'] ?? '');
+
+        // Xây dựng câu lệnh WHERE
+        $whereClause = "WHERE 1=1";
+        $params = [];
+
+        if (!empty($search)) {
+            $whereClause .= " AND (l.description LIKE :search OR u.fullname LIKE :search)";
+            $params[':search'] = "%{$search}%";
+        }
+
+        if ($actionFilter !== 'all') {
+            $whereClause .= " AND l.action LIKE :action_filter";
+            $params[':action_filter'] = "%{$actionFilter}%";
+        }
+
+        if (!empty($dateFrom)) {
+            $whereClause .= " AND DATE(l.created_at) >= :date_from";
+            $params[':date_from'] = $dateFrom;
+        }
+
+        if (!empty($dateTo)) {
+            $whereClause .= " AND DATE(l.created_at) <= :date_to";
+            $params[':date_to'] = $dateTo;
+        }
+
+        // Phân trang
+        $limit = 15;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $offset = ($page - 1) * $limit;
+
+        // Tổng số log
+        $countQuery = "SELECT COUNT(*) FROM system_logs l LEFT JOIN users u ON l.user_id = u.id $whereClause";
+        $stmtCount = $db->prepare($countQuery);
+        foreach ($params as $key => $val) {
+            $stmtCount->bindValue($key, $val);
+        }
+        $stmtCount->execute();
+        $totalLogs = $stmtCount->fetchColumn();
+        $totalPages = ceil($totalLogs / $limit);
+
+        // Lấy danh sách log
+        $query = "
+            SELECT l.*, u.fullname, u.avatar 
+            FROM system_logs l
+            LEFT JOIN users u ON l.user_id = u.id
+            $whereClause
+            ORDER BY l.created_at DESC
+            LIMIT :limit OFFSET :offset
+        ";
+        
+        $stmt = $db->prepare($query);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        require_once __DIR__ . '/../../views/admin/system_logs.php';
     }
 }
 ?>

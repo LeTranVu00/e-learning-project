@@ -116,11 +116,11 @@
     to   { opacity: 0; transform: translateX(110%); }
 }
 .toast-item {
-    animation: toastSlideIn 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+    animation: toastSlideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     pointer-events: all;
 }
 .toast-item.hide {
-    animation: toastSlideOut 0.4s ease forwards;
+    animation: toastSlideOut 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 </style>
 
@@ -131,7 +131,7 @@
  * @param {string} type     - 'success' | 'error' | 'warning' | 'info'
  * @param {number} duration - Thời gian tự ẩn (ms), mặc định 4000
  */
-function showToast(message, type = 'success', duration = 4000) {
+function showToast(message, type = 'success', duration = 2000) {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
@@ -187,10 +187,14 @@ function toggleCart(courseId, btnElement) {
     const isInCart = btnElement.getAttribute('data-in-cart') === 'true';
     const action = isInCart ? 'remove_from_cart' : 'add_to_cart';
     const type = btnElement.getAttribute('data-type') || 'home';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     
     fetch('?action=' + action, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken 
+        },
         body: JSON.stringify({ course_id: courseId })
     })
     .then(response => response.json())
@@ -270,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
     if (typeof AOS !== 'undefined') {
-        AOS.init({ duration: 800, easing: 'ease-in-out', once: true, mirror: false });
+        AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 50, mirror: false });
     }
 </script>
 <script src="/public/js/main.js"></script>

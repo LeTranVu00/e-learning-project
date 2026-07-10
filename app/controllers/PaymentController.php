@@ -4,6 +4,7 @@
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/Course.php';
 require_once __DIR__ . '/../models/Enrollment.php';
+require_once __DIR__ . '/../utils/AuditLogger.php';
 
 class PaymentController {
 
@@ -285,9 +286,11 @@ class PaymentController {
                         @$enrollmentModel->enrollUser($payment['user_id'], $payment['course_id']);
                     }
 
-                    // Nếu là thanh toán từ giỏ hàng thì xóa giỏ
                     if (strpos($vnp_TxnRef, '_cart_') !== false) {
                         $_SESSION['cart'] = [];
+                        AuditLogger::log('Thanh toán giỏ hàng', "Người dùng (ID: {$payments[0]['user_id']}) đã thanh toán thành công giỏ hàng qua VNPAY", 'payment', $vnp_TxnRef);
+                    } else {
+                        AuditLogger::log('Mua khóa học', "Người dùng (ID: {$payments[0]['user_id']}) đã mua khóa học (ID: {$payments[0]['course_id']}) qua VNPAY", 'payment', $vnp_TxnRef);
                     }
                 }
 

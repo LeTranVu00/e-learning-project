@@ -154,7 +154,12 @@
                                                     this.loading = true;
                                                     let formData = new FormData(e.target);
                                                     formData.append('material_id', matId);
-                                                    fetch('?action=submit_quiz', { method: 'POST', body: formData })
+                                                    const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '';
+                                                    fetch('?action=submit_quiz', { 
+                                                        method: 'POST', 
+                                                        headers: { 'X-CSRF-TOKEN': csrfToken },
+                                                        body: formData 
+                                                    })
                                                     .then(res => res.json())
                                                     .then(data => {
                                                         if(data.success) {
@@ -192,8 +197,13 @@
                                                     this.loading = true;
                                                     let formData = new FormData();
                                                     formData.append('material_id', <?= (int)$material['id'] ?>);
+                                                    const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '';
                                                     
-                                                    fetch('?action=mark_done', { method: 'POST', body: formData })
+                                                    fetch('?action=mark_done', { 
+                                                        method: 'POST', 
+                                                        headers: { 'X-CSRF-TOKEN': csrfToken },
+                                                        body: formData 
+                                                    })
                                                     .then(res => res.json())
                                                     .then(data => {
                                                         if(data.success) { 
