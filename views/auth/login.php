@@ -21,7 +21,7 @@
                 <div class="relative">
                     <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm"></i>
                     <input type="email" name="email" required 
-                           placeholder="ví dụ: sinhvien@gmail.com" 
+                           placeholder="Nhập email của bạn" 
                            class="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary dark:focus:border-primary outline-none transition text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm">
                 </div>
             </div>

@@ -13,13 +13,13 @@
         <form action="?action=handle_register" method="POST" class="space-y-5">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Họ và tên</label>
-                <input type="text" name="fullname" required placeholder="ví dụ: Lê Trần"
+                <input type="text" name="fullname" placeholder="Nhập họ và tên của bạn"
                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary dark:focus:border-primary outline-none transition text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email của bạn</label>
-                <input type="email" name="email" required placeholder="ví dụ: sinhvien@gmail.com"
+                <input type="email" name="email" required placeholder="Nhập email của bạn"
                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary dark:focus:border-primary outline-none transition text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
             </div>
 

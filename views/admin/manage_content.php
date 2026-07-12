@@ -113,8 +113,8 @@ require_once 'layouts/header.php'; ?>
                                 class="w-8 h-8 rounded-full flex items-center justify-center bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition">
                                 <i class="fa-solid fa-pen-to-square text-xs"></i>
                             </button>
-                            <a href="?action=admin_delete_chapter&id=<?= $chapter['id'] ?>&course_id=<?= $course['id'] ?>"
-                                onclick="return confirm('Xóa chương này sẽ mất toàn bộ bài giảng bên trong. Bạn chắc chứ?');"
+                            <a href="#"
+                                onclick="confirmDeleteChapter('?action=admin_delete_chapter&id=<?= $chapter['id'] ?>&course_id=<?= $course['id'] ?>')"
                                 title="Xóa Chương"
                                 class="w-8 h-8 rounded-full flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition">
                                 <i class="fa-solid fa-trash-can text-xs"></i>
@@ -146,8 +146,8 @@ require_once 'layouts/header.php'; ?>
                                                 class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-yellow-500 hover:text-white transition opacity-0 group-hover:opacity-100">
                                                 <i class="fa-solid fa-pen-to-square text-[10px]"></i>
                                             </button>
-                                            <a href="?action=admin_delete_material&id=<?= $material['id'] ?>&course_id=<?= $course['id'] ?>"
-                                                onclick="return confirm('Xóa bài giảng này?');" title="Xóa bài"
+                                            <a href="#"
+                                                onclick="confirmDeleteMaterial('?action=admin_delete_material&id=<?= $material['id'] ?>&course_id=<?= $course['id'] ?>')" title="Xóa bài"
                                                 class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white transition opacity-0 group-hover:opacity-100">
                                                 <i class="fa-solid fa-trash-can text-[10px]"></i>
                                             </a>
@@ -481,7 +481,38 @@ require_once 'layouts/header.php'; ?>
                 .then(editor => { window.editorEditMaterial = editor; })
                 .catch(error => { console.error(error); });
         }
+        }
     });
+
+    function confirmDeleteChapter(url) {
+        Swal.fire({
+            title: 'Xóa chương?',
+            text: 'Xóa chương này sẽ mất toàn bộ bài giảng bên trong. Bạn chắc chứ?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Xóa chương',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) window.location.href = url;
+        });
+    }
+
+    function confirmDeleteMaterial(url) {
+        Swal.fire({
+            title: 'Xóa bài giảng?',
+            text: 'Bạn có chắc chắn muốn xóa bài giảng này?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) window.location.href = url;
+        });
+    }
 </script>
 <style>
     .ck-editor__editable {

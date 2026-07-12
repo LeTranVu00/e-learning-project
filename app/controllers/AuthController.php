@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../utils/Mailer.php';
 
 class AuthController {
     
@@ -128,6 +129,8 @@ class AuthController {
         $userId = $userModel->createUser($fullname, $email, $hashed);
 
         if ($userId) {
+            // Gửi email chào mừng
+            Mailer::sendWelcomeEmail($email, $fullname);
             $_SESSION['success'] = 'Tạo tài khoản thành công! Hãy đăng nhập.';
             header('Location: ?action=login');
         } else {
@@ -170,10 +173,16 @@ class AuthController {
             $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
             
             if ($userModel->saveResetToken($email, $token, $expiry)) {
-                // Trong thực tế, gửi email ở đây.
-                // Để demo/local test, hiển thị link ra màn hình.
-                $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/e-learning-project/public/index.php?action=reset_password&token=" . $token;
-                $_SESSION['success'] = 'Yêu cầu khôi phục mật khẩu đã được gửi! <br><a href="' . $resetLink . '" class="underline font-bold text-blue-600">BẤM VÀO ĐÂY ĐỂ ĐẶT LẠI MẬT KHẨU (DEMO)</a>';
+                $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+                $baseUrl = $scheme . '://' . $_SERVER['HTTP_HOST'] . strtok($_SERVER['REQUEST_URI'], '?');
+                $resetLink = $baseUrl . "?action=reset_password&token=" . $token;
+                
+                // Gửi email reset password thực tế
+                if (Mailer::sendPasswordResetEmail($email, $resetLink)) {
+                    $_SESSION['success'] = 'Yêu cầu khôi phục mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư (bao gồm cả thư rác).';
+                } else {
+                    $_SESSION['error'] = 'Lỗi gửi email, không thể gửi mã khôi phục.';
+                }
             } else {
                 $_SESSION['error'] = 'Lỗi hệ thống, không thể tạo mã khôi phục.';
             }
@@ -286,7 +295,7 @@ class AuthController {
                         $_SESSION['user_name'] = $name;
                         $_SESSION['user_role'] = 'student';
                         $_SESSION['user_avatar'] = $avatar;
-                        header('Location: index.php?action=home');
+                        header('Location: ?action=home');
                         exit();
                     } else {
                         $_SESSION['error'] = 'Lỗi tạo tài khoản từ Google.';
@@ -310,11 +319,11 @@ class AuthController {
             $_SESSION['user_avatar'] = $avatar; 
 
             // Đăng nhập thành công -> Chuyển về trang chủ
-            header('Location: index.php?action=home');
+            header('Location: ?action=home');
             exit();
         } else {
             // Có lỗi xảy ra -> Quay lại trang đăng nhập
-            header('Location: index.php?action=login');
+            header('Location: ?action=login');
             exit();
         }
     }
@@ -323,7 +332,7 @@ class AuthController {
         // Xóa sạch toàn bộ Session
         session_destroy();
         // Đá về trang chủ
-        header('Location: index.php?action=home');
+        header('Location: ?action=home');
         exit();
     }
 }

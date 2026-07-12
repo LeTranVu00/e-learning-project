@@ -141,22 +141,13 @@ function removeFromCart(courseId) {
                         }
                     }, 300);
 
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'bottom-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                    });
-                    Toast.fire({
-                        icon: 'success',
-                        title: data.message
-                    });
+                    // Dùng showToast global thay vì Toast.fire() của SweetAlert2
+                    showToast(data.message, 'info');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                Swal.fire('Lỗi!', 'Không thể kết nối đến server.', 'error');
+                showToast('Không thể kết nối đến server.', 'error');
             });
         }
     })

@@ -1,3 +1,17 @@
+<?php
+if (!function_exists('timeAgo')) {
+    function timeAgo($datetime) {
+        $time = strtotime($datetime);
+        $diff = time() - $time;
+        if ($diff < 60) return 'Vừa xong';
+        if ($diff < 3600) return floor($diff / 60) . ' phút trước';
+        if ($diff < 86400) return floor($diff / 3600) . ' giờ trước';
+        if ($diff < 2592000) return floor($diff / 86400) . ' ngày trước';
+        if ($diff < 31536000) return floor($diff / 2592000) . ' tháng trước';
+        return floor($diff / 31536000) . ' năm trước';
+    }
+}
+?>
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8" 
      x-data="{ 
          showPostModal: false, 
@@ -125,7 +139,7 @@
                                 
                                 <div class="ml-auto flex items-center gap-2">
                                     <span class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                                        <i class="fa-regular fa-clock"></i> <?= date('d/m/Y H:i', strtotime($post['created_at'])) ?>
+                                        <i class="fa-regular fa-clock"></i> <?= timeAgo($post['created_at']) ?>
                                     </span>
                                     
                                     <?php if($_SESSION['user_id'] == $post['user_id'] || $_SESSION['user_role'] === 'admin'): ?>
@@ -145,8 +159,8 @@
                                                         class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-400 flex items-center gap-2 transition">
                                                     <i class="fa-solid fa-pen w-4"></i> Sửa bài
                                                 </button>
-                                                <a href="?action=forum_delete_post&id=<?= $post['id'] ?>" 
-                                                   onclick="return confirm('Bạn có chắc muốn xóa vĩnh viễn bài viết này?');" 
+                                                <a href="#"
+                                                   onclick="confirmDeletePost('?action=forum_delete_post&id=<?= $post['id'] ?>')" 
                                                    class="block px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition">
                                                     <i class="fa-solid fa-trash-can w-4"></i> Xóa bài
                                                 </a>
@@ -359,4 +373,22 @@
             .then(editor => { window.editorEditForum = editor; })
             .catch(err => console.error(err));
     });
+
+    // Xóa bài viết bằng Swal.fire thay vì native confirm()
+    function confirmDeletePost(url) {
+        Swal.fire({
+            title: 'Xóa bài viết?',
+            text: 'Bạn có chắc muốn xóa vĩnh viễn bài viết này? Hành động này không thể hoàn tác!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Xóa vĩnh viễn',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
 </script>

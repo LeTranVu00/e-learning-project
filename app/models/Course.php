@@ -111,8 +111,11 @@ class Course {
     
     // Lấy chi tiết 1 khóa học dựa vào ID
     public function getCourseById($id) {
-        // Dùng tham số :id để tránh SQL Injection
-        $query = "SELECT * FROM courses WHERE id = :id";
+        // JOIN với categories để lấy category_name (giống getAllCourses)
+        $query = "SELECT c.*, cat.name as category_name 
+                  FROM courses c 
+                  LEFT JOIN categories cat ON c.category_id = cat.id 
+                  WHERE c.id = :id";
         $stmt = $this->conn->prepare($query);
         
         // Gán giá trị thực tế vào tham số :id
@@ -148,6 +151,14 @@ class Course {
             ':study_time'     => $study_time,
             ':contact_phone'  => $contact_phone,
         ]);
+    }
+
+    // Hàm xóa khóa học
+    public function deleteCourse($id) {
+        $query = "DELETE FROM courses WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
     }
 }
 

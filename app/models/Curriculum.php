@@ -19,7 +19,7 @@ class Curriculum {
 
         // 2. Chạy vòng lặp: Với mỗi Chương, lấy các Tài liệu (Materials) của nó nhét vào
         foreach ($chapters as $key => $chapter) {
-            $q_materials = "SELECT * FROM materials WHERE chapter_id = :chapter_id";
+            $q_materials = "SELECT * FROM materials WHERE chapter_id = :chapter_id ORDER BY id ASC";
             $stmt_m = $this->conn->prepare($q_materials);
             $stmt_m->bindParam(':chapter_id', $chapter['id']);
             $stmt_m->execute();

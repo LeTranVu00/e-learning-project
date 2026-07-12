@@ -180,9 +180,20 @@
                 }
 
                 function confirmDelete(id) {
-                    if(confirm('Bạn có chắc chắn muốn xóa danh mục này? Khóa học sẽ không bị xóa mà chỉ mất liên kết.')) {
-                        window.location.href = "?action=admin_delete_category&id=" + id;
-                    }
+                    Swal.fire({
+                        title: 'Xóa danh mục?',
+                        text: 'Bạn có chắc chắn muốn xóa danh mục này? Khóa học sẽ không bị xóa mà chỉ mất liên kết.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "?action=admin_delete_category&id=" + id;
+                        }
+                    });
                 }
             </script>
 

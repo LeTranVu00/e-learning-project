@@ -132,33 +132,61 @@ class User {
     }
 
     // Cập nhật Hồ sơ cá nhân (dành cho người dùng)
-    public function updateProfile($id, $fullname, $phone, $address, $bio) {
-        $query = "UPDATE users SET fullname = :fullname, phone = :phone, address = :address, bio = :bio WHERE id = :id";
+    public function updateProfile($id, $fullname, $phone, $address, $bio, $avatar = null) {
+        $query = "UPDATE users SET fullname = :fullname, phone = :phone, address = :address, bio = :bio";
+        if ($avatar !== null) {
+            $query .= ", avatar = :avatar";
+        }
+        $query .= " WHERE id = :id";
+        
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':fullname', $fullname);
         $stmt->bindParam(':phone', $phone);
         $stmt->bindParam(':address', $address);
         $stmt->bindParam(':bio', $bio);
+        if ($avatar !== null) {
+            $stmt->bindParam(':avatar', $avatar);
+        }
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
     }
 
-    // Xóa người dùng
+    // Xóa người dùng và các dữ liệu liên quan
     public function deleteUser($id) {
-        $query = "DELETE FROM users WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $id);
-        return $stmt->execute();
+        try {
+            $this->conn->beginTransaction();
+            
+            // Xóa các dữ liệu tham chiếu
+            $this->conn->prepare("DELETE FROM material_completions WHERE user_id = :id")->execute([':id' => $id]);
+            $this->conn->prepare("DELETE FROM enrollments WHERE user_id = :id")->execute([':id' => $id]);
+            $this->conn->prepare("DELETE FROM comments WHERE user_id = :id")->execute([':id' => $id]);
+            $this->conn->prepare("DELETE FROM forum_posts WHERE user_id = :id")->execute([':id' => $id]);
+            $this->conn->prepare("DELETE FROM system_logs WHERE user_id = :id")->execute([':id' => $id]);
+            
+            // Cuối cùng xóa user
+            $query = "DELETE FROM users WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            return false;
+        }
     }
 
     // --- CÁC HÀM KHÔI PHỤC MẬT KHẨU ---
 
     // Lưu mã xác nhận khôi phục mật khẩu
     public function saveResetToken($email, $token, $expiry) {
-        $query = "UPDATE users SET reset_token = :token, reset_token_expiry = :expiry WHERE email = :email";
+        // Sử dụng DATE_ADD(NOW(), INTERVAL 1 HOUR) của MySQL để đồng bộ múi giờ
+        $query = "UPDATE users SET reset_token = :token, reset_token_expiry = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE email = :email";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':token', $token);
-        $stmt->bindParam(':expiry', $expiry);
         $stmt->bindParam(':email', $email);
         return $stmt->execute();
     }

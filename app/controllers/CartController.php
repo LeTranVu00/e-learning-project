@@ -40,6 +40,12 @@ class CartController {
     public function add() {
         header('Content-Type: application/json');
         
+        // Kiểm tra đăng nhập
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập để thêm vào giỏ hàng', 'require_login' => true]);
+            exit();
+        }
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Invalid request method']);
             exit();
@@ -75,6 +81,12 @@ class CartController {
         error_log("CartController::remove() called");
         header('Content-Type: application/json');
         
+        // Kiểm tra đăng nhập
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập', 'require_login' => true]);
+            exit();
+        }
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'message' => 'Invalid request method']);
             exit();

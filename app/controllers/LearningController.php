@@ -37,9 +37,10 @@ class LearningController {
         $curriculumModel = new Curriculum($db);
         $curriculum = $curriculumModel->getCourseCurriculum($course_id);
 
-        // 5. Lấy mảng các tài liệu đã hoàn thành
+        // 5. Lấy mảng các tài liệu đã hoàn thành kèm điểm số
         $progressModel = new Progress($db);
-        $completed_materials = $progressModel->getCompletedMaterials($user_id, $course_id);
+        $completed_materials_scores = $progressModel->getCompletedMaterialsWithScores($user_id, $course_id);
+        $completed_materials = array_keys($completed_materials_scores);
 
         // 6. Hiển thị giao diện
         require_once __DIR__ . '/../../views/layouts/header.php';

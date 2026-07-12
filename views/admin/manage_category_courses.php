@@ -147,9 +147,20 @@
                 }
 
                 function confirmRemoveCourse(courseId, categoryId) {
-                    if(confirm('Bạn có chắc chắn muốn gỡ khóa học này khỏi danh mục không?')) {
-                        window.location.href = "?action=admin_remove_course_category&course_id=" + courseId + "&category_id=" + categoryId;
-                    }
+                    Swal.fire({
+                        title: 'Gỡ khóa học?',
+                        text: 'Bạn có chắc chắn muốn gỡ khóa học này khỏi danh mục không?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Gỡ',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "?action=admin_remove_course_category&course_id=" + courseId + "&category_id=" + categoryId;
+                        }
+                    });
                 }
             </script>
 

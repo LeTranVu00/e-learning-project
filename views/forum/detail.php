@@ -1,3 +1,17 @@
+<?php
+if (!function_exists('timeAgo')) {
+    function timeAgo($datetime) {
+        $time = strtotime($datetime);
+        $diff = time() - $time;
+        if ($diff < 60) return 'Vừa xong';
+        if ($diff < 3600) return floor($diff / 60) . ' phút trước';
+        if ($diff < 86400) return floor($diff / 3600) . ' giờ trước';
+        if ($diff < 2592000) return floor($diff / 86400) . ' ngày trước';
+        if ($diff < 31536000) return floor($diff / 2592000) . ' tháng trước';
+        return floor($diff / 31536000) . ' năm trước';
+    }
+}
+?>
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
     <?php if (empty($isAdminMode)): ?>
@@ -23,7 +37,7 @@
                         <span class="text-[10px] bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-bold px-2 py-0.5 rounded uppercase"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>
                     <?php endif; ?>
                 </div>
-                <p class="text-sm text-gray-400 dark:text-gray-500"><i class="fa-regular fa-clock mr-1"></i> <?= date('d/m/Y H:i', strtotime($post['created_at'])) ?></p>
+                <p class="text-sm text-gray-400 dark:text-gray-500"><i class="fa-regular fa-clock mr-1"></i> <?= timeAgo($post['created_at']) ?></p>
             </div>
             
             <?php $canEditPost = ($post['user_id'] == $_SESSION['user_id'] || in_array($_SESSION['user_role'] ?? '', ['admin', 'instructor'])); ?>
@@ -40,8 +54,8 @@
                             class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-400 transition flex items-center gap-2">
                         <i class="fa-solid fa-pen w-4"></i> Sửa bài
                     </button>
-                    <a href="?action=forum_delete_post&id=<?= $post['id'] ?><?= !empty($isAdminMode) ? '&admin=1' : '' ?>" 
-                       onclick="return confirm('Bạn có chắc chắn muốn xóa bài viết này không?');" 
+                    <a href="#"
+                       onclick="confirmDeletePost('?action=forum_delete_post&id=<?= $post['id'] ?><?= !empty($isAdminMode) ? '&admin=1' : '' ?>')" 
                        class="block w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center gap-2">
                         <i class="fa-solid fa-trash w-4"></i> Xóa bài
                     </a>
@@ -155,9 +169,9 @@
                                         }
                                     }
                                     ?>
+                                    <span class="text-[11px] text-gray-400 font-normal whitespace-nowrap ml-1"><?= timeAgo($comment['created_at']) ?></span>
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0">
-                                    <span class="text-[11px] text-gray-400 font-normal whitespace-nowrap"><?= date('H:i d/m/Y', strtotime($comment['created_at'])) ?></span>
                                     <?php if ($canModify): ?>
                                         <div class="relative">
                                             <button @click.prevent="openDropdownId = (openDropdownId === <?= $comment['id'] ?> ? null : <?= $comment['id'] ?>)" @click.outside="if (openDropdownId === <?= $comment['id'] ?>) openDropdownId = null" class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-1 transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
@@ -167,7 +181,7 @@
                                                 <button @click="editCommentId = <?= $comment['id'] ?>; openDropdownId = null" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary transition flex items-center gap-2">
                                                     <i class="fa-solid fa-pen w-4"></i> Sửa
                                                 </button>
-                                                <a href="?action=forum_delete_comment&id=<?= $comment['id'] ?><?= !empty($isAdminMode) ? '&admin=1' : '' ?>" onclick="return confirm('Bạn có chắc chắn muốn xóa bình luận này?');" class="block w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition flex items-center gap-2">
+                                                <a href="#" onclick="confirmDeleteComment('?action=forum_delete_comment&id=<?= $comment['id'] ?><?= !empty($isAdminMode) ? '&admin=1' : '' ?>')" class="block w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition flex items-center gap-2">
                                                     <i class="fa-solid fa-trash w-4"></i> Xóa
                                                 </a>
                                             </div>
@@ -250,17 +264,18 @@
                     $replies = $getFlatReplies($rootComment['id']);
                     if (!empty($replies)) {
                         $totalReplies = count($replies);
-                        echo '<div class="mt-3 ml-[20px] pl-6 relative replies-container" x-data="{ visibleReplies: 3 }">';
+                        echo '<div class="mt-3 ml-4 pl-6 relative replies-container" x-data="{ visibleReplies: 3 }">';
                         // Đã chuyển đường dọc vào từng item để cắt phần thừa
                         
                         $replyIndex = 0;
                         foreach ($replies as $reply) {
                             $displayStyle = $replyIndex >= 3 ? 'style="display: none;"' : '';
                             echo '<div class="relative pt-3 comment-item reply-item" x-show="visibleReplies > ' . $replyIndex . '" ' . $displayStyle . '>';
-                            // Đường thẳng dọc nối giữa các reply (dừng ở avatar nếu là item cuối)
-                            echo '<div class="absolute left-[-24px] top-0 w-[2px] bg-gray-200 z-0" :class="(' . $replyIndex . ' === Math.min(' . ($totalReplies - 1) . ', visibleReplies - 1)) ? \'h-8\' : \'h-full\'"></div>';
-                            // Đường thẳng ngang nối vào reply
-                            echo '<div class="absolute left-[-24px] top-8 w-6 h-[2px] bg-gray-200 z-0"></div>';
+                            // Nhánh cong nối vào avatar của reply hiện tại
+                            echo '<div class="absolute left-[-24px] top-0 w-6 h-8 border-l-2 border-b-2 border-gray-200 rounded-bl-xl z-0"></div>';
+                            
+                            // Đường dọc đi tiếp xuống dưới (nếu KHÔNG phải là item cuối cùng)
+                            echo '<div class="absolute left-[-24px] top-8 bottom-0 w-[2px] bg-gray-200 z-0 js-vertical-tail" x-show="' . $replyIndex . ' < Math.min(' . ($totalReplies - 1) . ', visibleReplies - 1)"></div>';
                             
                             $renderSingleComment($reply, true);
                             
@@ -409,8 +424,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (!repliesContainer) {
                             // Tạo container mới nếu chưa có
                             parentItem.insertAdjacentHTML('beforeend', `
-                                <div class="mt-3 ml-[20px] pl-6 relative replies-container" x-data="{ visibleReplies: 3 }">
-                                    <div class="absolute left-0 top-0 bottom-6 w-[2px] bg-gray-200 z-0"></div>
+                                <div class="mt-3 ml-4 pl-6 relative replies-container" x-data="{ visibleReplies: 3 }">
                                 </div>
                             `);
                             repliesContainer = parentItem.querySelector('.replies-container');
@@ -420,6 +434,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     const parentAuthorEl = parentItem.querySelector('.text-gray-900');
                     const parentAuthorName = parentAuthorEl ? parentAuthorEl.innerText : '';
                     
+                    // Cập nhật đường dọc của item cuối cùng hiện tại thành hiện (show tail)
+                    const existingReplies = repliesContainer.querySelectorAll('.reply-item');
+                    if (existingReplies.length > 0) {
+                        const lastReply = existingReplies[existingReplies.length - 1];
+                        const lastTail = lastReply.querySelector('.js-vertical-tail');
+                        if (lastTail) {
+                            lastTail.classList.remove('hidden');
+                            lastTail.style.display = 'block';
+                            lastTail.removeAttribute('x-show');
+                        }
+                    }
+
                     const replyHtml = _buildCommentHtml(data.comment_id, formData.get('content'), parentId, parentAuthorName);
                     
                     // Thêm vào container (nếu có nút load more thì insert trước nút đó)
@@ -546,13 +572,13 @@ function _buildCommentHtml(commentId, content, parentId, parentAuthorName = '') 
         ? 'relative pt-3 comment-item reply-item' 
         : 'mt-6 comment-item';
     const borderHtml = isReply 
-        ? `<div class="absolute left-[-24px] top-8 w-6 h-[2px] bg-gray-200 z-0"></div>` 
+        ? `<div class="absolute left-[-24px] top-0 w-6 h-8 border-l-2 border-b-2 border-gray-200 rounded-bl-xl z-0"></div>
+           <div class="absolute left-[-24px] top-8 bottom-0 w-[2px] bg-gray-200 z-0 hidden js-vertical-tail"></div>` 
         : '';
     
     // Thoát HTML cơ bản
     const safeContent = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const timeNow = new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' ' + 
-                    new Date().toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit', year: 'numeric'});
+    const timeNow = 'Vừa xong';
 
     let adminBadge = CURRENT_USER.role === 'admin' 
         ? '<i class="fa-solid fa-circle-check text-blue-500 text-xs shrink-0" title="Admin"></i>' : '';
@@ -575,7 +601,7 @@ function _buildCommentHtml(commentId, content, parentId, parentAuthorName = '') 
                 <button @click="editCommentId = ${commentId}; openDropdownId = null" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary transition">
                     <i class="fa-regular fa-pen-to-square w-5 text-gray-400"></i>Sửa
                 </button>
-                <a href="?action=forum_delete_comment&id=${commentId}" onclick="return confirm('Bạn có chắc muốn xóa bình luận này?')" class="block px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition">
+                <a href="#" onclick="confirmDeleteComment('?action=forum_delete_comment&id=${commentId}')" class="block px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition">
                     <i class="fa-regular fa-trash-can w-5 text-red-400"></i>Xóa
                 </a>
             </div>
@@ -594,9 +620,9 @@ function _buildCommentHtml(commentId, content, parentId, parentAuthorName = '') 
                             <span class="font-bold text-sm text-gray-900 dark:text-white truncate">${CURRENT_USER.name}</span>
                             ${arrowHtml}
                             ${adminBadge}
+                            <span class="text-[11px] text-gray-400 font-normal whitespace-nowrap ml-1">${timeNow}</span>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-[11px] text-gray-400 font-normal whitespace-nowrap">${timeNow}</span>
                             ${dropdownHtml}
                         </div>
                     </div>
@@ -717,3 +743,33 @@ function _buildCommentHtml(commentId, content, parentId, parentAuthorName = '') 
     .ck-editor__editable_inline { min-height: 200px; } 
     .ck.ck-balloon-panel { z-index: 999999 !important; }
 </style>
+<script>
+    function confirmDeletePost(url) {
+        Swal.fire({
+            title: 'Xóa bài viết?',
+            text: 'Hành động này không thể hoàn tác!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Xóa vĩnh viễn',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) window.location.href = url;
+        });
+    }
+    function confirmDeleteComment(url) {
+        Swal.fire({
+            title: 'Xóa bình luận?',
+            text: 'Bình luận sẽ bị xóa vĩnh viễn!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) window.location.href = url;
+        });
+    }
+</script>

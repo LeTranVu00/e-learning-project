@@ -103,7 +103,7 @@
      Dùng được ở mọi trang qua showToast(message, type)
      ===================================================== -->
 <div id="toast-container" 
-     class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"
+     class="fixed top-5 right-5 z-[999999] flex flex-col gap-3 pointer-events-none"
      style="min-width: 300px; max-width: 380px;"></div>
 
 <style>
@@ -131,7 +131,7 @@
  * @param {string} type     - 'success' | 'error' | 'warning' | 'info'
  * @param {number} duration - Thời gian tự ẩn (ms), mặc định 4000
  */
-function showToast(message, type = 'success', duration = 2000) {
+function showToast(message, type = 'success', duration = 4000) {
     const container = document.getElementById('toast-container');
     if (!container) return;
 

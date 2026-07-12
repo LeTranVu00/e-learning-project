@@ -139,7 +139,7 @@
                                     </button>
                                     
                                     <?php if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != $user['id']): ?>
-                                    <a href="?action=admin_delete_user&id=<?= $user['id'] ?>" onclick="return confirm('Bạn có chắc chắn muốn XÓA tài khoản này không? Mọi dữ liệu liên quan có thể sẽ bị ảnh hưởng!');" title="Xóa tài khoản" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition shadow-sm border border-red-100">
+                                    <a href="#" onclick="confirmDeleteUser('?action=admin_delete_user&id=<?= $user['id'] ?>')" title="Xóa tài khoản" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition shadow-sm border border-red-100">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </a>
                                     <?php else: ?>
@@ -297,4 +297,21 @@
         </div>
     </div>
 </div>
+
+<script>
+function confirmDeleteUser(url) {
+    Swal.fire({
+        title: 'Xóa tài khoản?',
+        text: 'Thông tin người dùng sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Xóa tài khoản',
+        cancelButtonText: 'Hủy'
+    }).then((result) => {
+        if (result.isConfirmed) window.location.href = url;
+    });
+}
+</script>
 <?php require_once 'layouts/footer.php'; ?>

@@ -25,6 +25,25 @@ class Progress {
         return $stmt->fetchAll(PDO::FETCH_COLUMN); 
     }
 
+    // Lấy ra danh sách ID và Điểm số các tài liệu mà User ĐÃ hoàn thành
+    public function getCompletedMaterialsWithScores($user_id, $course_id) {
+        $query = "SELECT mc.material_id, mc.score FROM material_completions mc
+                  JOIN materials m ON mc.material_id = m.id
+                  JOIN chapters c ON m.chapter_id = c.id
+                  WHERE mc.user_id = :user_id AND c.course_id = :course_id";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':course_id', $course_id);
+        $stmt->execute();
+        
+        $results = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $results[$row['material_id']] = $row['score'];
+        }
+        return $results;
+    }
+
     // Bật/Tắt trạng thái hoàn thành (Toggle)
     public function toggleDone($user_id, $material_id) {
         $check = "SELECT id FROM material_completions WHERE user_id = :uid AND material_id = :mid";

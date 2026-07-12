@@ -132,7 +132,17 @@ require_once 'layouts/header.php'; ?>
               }
           },
           async deleteCourse(id) {
-              if (!confirm('Bạn có chắc chắn muốn XÓA khóa học này không? Mọi bài giảng bên trong sẽ bị mất!')) return;
+              const result = await Swal.fire({
+                  title: 'Xóa khóa học?',
+                  text: 'Mọi bài giảng bên trong sẽ bị mất! Hành động không thể hoàn tác.',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#ef4444',
+                  cancelButtonColor: '#6b7280',
+                  confirmButtonText: 'Xóa khóa học',
+                  cancelButtonText: 'Hủy'
+              });
+              if (!result.isConfirmed) return;
               try {
                   const response = await fetch('?action=admin_delete_course&id=' + id, {
                       headers: { 'X-Requested-With': 'XMLHttpRequest' }

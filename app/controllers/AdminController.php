@@ -97,36 +97,6 @@ class AdminController {
         ")->fetchAll(PDO::FETCH_ASSOC);
 
         $chart_course_labels = [];
-        $chart_course_series = [];
-        foreach ($top_courses as $tc) {
-            $chart_course_labels[] = $tc['title'];
-            $chart_course_series[] = (int) $tc['count'];
-        }
-
-        $search = $_GET['search'] ?? '';
-        $sort   = $_GET['sort'] ?? 'latest';
-        $query  = "SELECT * FROM courses WHERE 1=1";
-        $params = [];
-        
-        if (!empty($search)) {
-            $query .= " AND (title LIKE ? OR instructor LIKE ?)";
-            $params[] = "%$search%";
-            $params[] = "%$search%";
-        }
-        
-        if ($sort === 'oldest') {
-            $query .= " ORDER BY id ASC";
-        } elseif ($sort === 'price_high') {
-            $query .= " ORDER BY price DESC";
-        } elseif ($sort === 'price_low') {
-            $query .= " ORDER BY price ASC";
-        } else {
-            $query .= " ORDER BY id DESC"; // latest
-        }
-        
-        $stmt = $db->prepare($query);
-        $stmt->execute($params);
-        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         require_once __DIR__ . '/../../views/admin/dashboard.php';
     }
@@ -390,7 +360,7 @@ class AdminController {
     public function updateCourse() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id             = $_POST['id'];
-            $title          = $_POST['title'];
+            $title          = HtmlSanitizer::clean($_POST['title']);
             $price            = isset($_POST['price']) ? intval($_POST['price']) : 0;
             $discount_percent = isset($_POST['discount_percent']) ? floatval($_POST['discount_percent']) : 0;
             
@@ -398,9 +368,9 @@ class AdminController {
             if ($discount_percent > 0 && $discount_percent < 100) {
                 $original_price = $price / (1 - $discount_percent / 100);
             }
-            $description    = $_POST['description'];
-            $benefits       = $_POST['benefits'] ?? '';
-            $requirements   = $_POST['requirements'] ?? '';
+            $description    = HtmlSanitizer::clean($_POST['description']);
+            $benefits       = HtmlSanitizer::clean($_POST['benefits'] ?? '');
+            $requirements   = HtmlSanitizer::clean($_POST['requirements'] ?? '');
             $instructor     = $_SESSION['user_name'] ?? 'Admin';
             $level          = $_POST['level']          ?? 'Sơ cấp';
             $duration_hours = isset($_POST['duration_hours']) ? intval($_POST['duration_hours']) : 0;
@@ -656,7 +626,7 @@ class AdminController {
     
     public function manageUsersList() {
         require_once __DIR__ . '/../config/Database.php';
-        require_once __DIR__ . '/../Models/User.php';
+        require_once __DIR__ . '/../models/User.php';
         $db = (new Database())->getConnection();
         
         $userModel = new User($db);
@@ -676,7 +646,7 @@ class AdminController {
         
         $users = $userModel->getAllUsers($limit, $offset, $search, $role, $sort);
         
-        require_once __DIR__ . '/../Models/Enrollment.php';
+        require_once __DIR__ . '/../models/Enrollment.php';
         $enrollmentModel = new Enrollment($db);
         foreach ($users as &$user) {
             $user['enrolled_courses'] = $enrollmentModel->getEnrolledCourses($user['id']);
@@ -690,7 +660,7 @@ class AdminController {
     public function updateUser() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             require_once __DIR__ . '/../config/Database.php';
-            require_once __DIR__ . '/../Models/User.php';
+            require_once __DIR__ . '/../models/User.php';
             $db = (new Database())->getConnection();
             
             $userModel = new User($db);
@@ -706,7 +676,7 @@ class AdminController {
     public function deleteUser() {
         if (isset($_GET['id'])) {
             require_once __DIR__ . '/../config/Database.php';
-            require_once __DIR__ . '/../Models/User.php';
+            require_once __DIR__ . '/../models/User.php';
             $db = (new Database())->getConnection();
             
             // Không cho phép xóa chính mình (nếu cần thì thêm check $_SESSION['user_id'] != $_GET['id'])
@@ -729,7 +699,7 @@ class AdminController {
     public function toggleFeaturedPost() {
         if (isset($_GET['id'])) {
             require_once __DIR__ . '/../config/Database.php';
-            require_once __DIR__ . '/../Models/Forum.php';
+            require_once __DIR__ . '/../models/Forum.php';
             $db = (new Database())->getConnection();
             $forumModel = new Forum($db);
             

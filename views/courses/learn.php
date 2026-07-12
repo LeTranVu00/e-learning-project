@@ -147,8 +147,8 @@
                                                 loading: false,
                                                 showQuiz: false,
                                                 quizResults: null,
-                                                quizScore: null,
-                                                quizPassed: false,
+                                                quizScore: <?= isset($completed_materials_scores[$material['id']]) ? $completed_materials_scores[$material['id']] : 'null' ?>,
+                                                quizPassed: <?= isset($completed_materials_scores[$material['id']]) && $completed_materials_scores[$material['id']] > 0 ? 'true' : 'false' ?>,
                                                 materialIndex: <?= $currentGlobalIndex ?>,
                                                 submitQuiz(e, matId) {
                                                     this.loading = true;
@@ -167,31 +167,19 @@
                                                             this.quizScore = data.score;
                                                             this.quizPassed = data.passed;
                                                             if (data.passed) {
-                                                                Swal.fire({
-                                                                    title: 'Chúc mừng!',
-                                                                    text: 'Bạn đạt ' + data.score + ' điểm và đã qua bài kiểm tra.',
-                                                                    icon: 'success',
-                                                                    confirmButtonColor: '#f59e0b',
-                                                                    confirmButtonText: 'Xem đáp án'
-                                                                });
+                                                                showToast('✨ Chúc mừng! Bạn đạt ' + data.score + ' điểm — Đã qua bài kiểm tra!', 'success', 4000);
                                                                 if (!this.done) {
                                                                     this.done = true;
                                                                     window.dispatchEvent(new CustomEvent('material-completed', { detail: { increment: 1, index: this.materialIndex, chapterIndex: <?= $index ?> } }));
                                                                 }
                                                             } else {
-                                                                Swal.fire({
-                                                                    title: 'Chưa đạt yêu cầu',
-                                                                    text: 'Bạn chỉ đạt ' + data.score + ' điểm. ' + data.message,
-                                                                    icon: 'error',
-                                                                    confirmButtonColor: '#f59e0b',
-                                                                    confirmButtonText: 'Xem chi tiết'
-                                                                });
+                                                                showToast('❌ Chưa đạt: ' + data.score + ' điểm. ' + data.message, 'error', 4000);
                                                             }
                                                         } else {
-                                                            Swal.fire('Lỗi', data.message, 'error');
+                                                            showToast(data.message || 'Lỗi khi nộp bài!', 'error');
                                                         }
                                                         this.loading = false;
-                                                    }).catch(() => { this.loading = false; alert('Lỗi kết nối!'); });
+                                                    }).catch(() => { this.loading = false; showToast('Lỗi kết nối!', 'error'); });
                                                 },
                                                 markDone(e, showFireworks = true) {
                                                     this.loading = true;
@@ -224,7 +212,7 @@
                                                                 window.dispatchEvent(new CustomEvent('material-completed', { detail: { increment: -1, index: this.materialIndex, chapterIndex: <?= $index ?> } }));
                                                             }
                                                         } else {
-                                                            alert('Có lỗi xảy ra: ' + (data.message || 'Unknown error'));
+                                                            showToast('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại'), 'error');
                                                         }
                                                         this.loading = false;
                                                     })

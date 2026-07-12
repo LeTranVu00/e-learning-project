@@ -577,31 +577,71 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <?php for ($i = 1; $i <= 4; $i++): ?>
+            <?php 
+            $instructors = [
+                [
+                    'name' => 'Lê Trấn Vũ',
+                    'role' => 'Fullstack Developer',
+                    'exp' => '5+ năm kinh nghiệm',
+                    'rating' => 4.9,
+                    'students' => '3.2k',
+                    'courses' => 8,
+                    'avatar' => 'https://ui-avatars.com/api/?name=Le+Tran+Vu&size=120&background=random'
+                ],
+                [
+                    'name' => 'Nguyễn Minh Hải',
+                    'role' => 'Data Scientist',
+                    'exp' => '8+ năm kinh nghiệm',
+                    'rating' => 4.8,
+                    'students' => '5.1k',
+                    'courses' => 12,
+                    'avatar' => 'https://ui-avatars.com/api/?name=Nguyen+Minh+Hai&size=120&background=random'
+                ],
+                [
+                    'name' => 'Trần Thị Mai',
+                    'role' => 'UX/UI Designer',
+                    'exp' => '6+ năm kinh nghiệm',
+                    'rating' => 5.0,
+                    'students' => '2.8k',
+                    'courses' => 5,
+                    'avatar' => 'https://ui-avatars.com/api/?name=Tran+Thi+Mai&size=120&background=random'
+                ],
+                [
+                    'name' => 'Hoàng Ngọc Đức',
+                    'role' => 'Mobile Developer',
+                    'exp' => '7+ năm kinh nghiệm',
+                    'rating' => 4.7,
+                    'students' => '4.5k',
+                    'courses' => 10,
+                    'avatar' => 'https://ui-avatars.com/api/?name=Hoang+Ngoc+Duc&size=120&background=random'
+                ]
+            ];
+            ?>
+            <?php foreach ($instructors as $index => $instructor): ?>
                 <div class="bg-white dark:bg-gray-800 dark:border dark:border-gray-700 rounded-3xl shadow-lg hover:shadow-2xl p-6 text-center transition-all duration-300 card-hover"
-                    data-aos="fade-up" data-aos-delay="<?= $i * 100 ?>">
+                    data-aos="fade-up" data-aos-delay="<?= ($index + 1) * 100 ?>">
                     <div class="relative inline-block mb-4">
-                        <img src="https://ui-avatars.com/api/?name=Instructor+<?= $i ?>&size=120&background=random"
-                            alt="Instructor <?= $i ?>"
-                            class="w-28 h-28 rounded-full mx-auto border-4 border-primary/20 shadow-xl">
+                        <img src="<?= htmlspecialchars($instructor['avatar']) ?>"
+                            alt="<?= htmlspecialchars($instructor['name']) ?>"
+                            class="w-28 h-28 rounded-full mx-auto border-4 border-primary/20 shadow-xl object-cover">
                         <div
                             class="absolute bottom-0 right-0 w-8 h-8 bg-green-500 rounded-full border-4 border-white dark:border-gray-800">
                         </div>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Nguyễn Văn <?= chr(64 + $i) ?></h3>
-                    <p class="text-primary font-semibold text-sm mb-2">Senior Developer</p>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">10+ năm kinh nghiệm</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1"><?= htmlspecialchars($instructor['name']) ?></h3>
+                    <p class="text-primary font-semibold text-sm mb-2"><?= htmlspecialchars($instructor['role']) ?></p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4"><?= htmlspecialchars($instructor['exp']) ?></p>
                     <div class="flex items-center justify-center gap-1 text-yellow-400 text-sm mb-3">
                         <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
                             class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                        <span class="text-gray-500 dark:text-gray-400 ml-1">4.9</span>
+                        <span class="text-gray-500 dark:text-gray-400 ml-1"><?= $instructor['rating'] ?></span>
                     </div>
                     <div class="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 text-xs">
-                        <span><i class="fa-solid fa-user-graduate mr-1"></i> 2.5k học viên</span>
-                        <span><i class="fa-solid fa-book mr-1"></i> 12 khóa học</span>
+                        <span><i class="fa-solid fa-user-graduate mr-1"></i> <?= $instructor['students'] ?> học viên</span>
+                        <span><i class="fa-solid fa-book mr-1"></i> <?= $instructor['courses'] ?> khóa học</span>
                     </div>
                 </div>
-            <?php endfor; ?>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>

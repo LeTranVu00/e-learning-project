@@ -41,7 +41,7 @@ class PaymentController {
                 header('Location: ?action=my_courses');
             } else {
                 $_SESSION['error'] = "Bạn đã đăng ký khóa học này rồi hoặc có lỗi xảy ra!";
-                header('Location: ?action=course_detail&id=' . $course_id);
+                header('Location: ?action=detail&id=' . $course_id);
             }
             exit();
         }

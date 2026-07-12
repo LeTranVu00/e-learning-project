@@ -34,7 +34,7 @@ class EnrollmentController {
                 exit();
             } else {
                 $_SESSION['error'] = "Có lỗi xảy ra, vui lòng thử lại!";
-                header('Location: ?action=course_detail&id=' . $course_id);
+                header('Location: ?action=detail&id=' . $course_id);
                 exit();
             }
         }
