@@ -26,8 +26,10 @@ class LearningController {
         $db = (new Database())->getConnection();
         
         // 3. Kiểm tra xem sinh viên này ĐÃ GHI DANH chưa? (Chặn gõ link bậy)
+        // Admin được bypass: admin có thể xem trước khóa học mà không cần ghi danh
         $enrollmentModel = new Enrollment($db);
-        if (!$enrollmentModel->isEnrolled($user_id, $course_id)) {
+        $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+        if (!$isAdmin && !$enrollmentModel->isEnrolled($user_id, $course_id)) {
             $_SESSION['error'] = "Bạn chưa ghi danh khóa học này!";
             header('Location: ?action=my_courses');
             exit();

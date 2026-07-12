@@ -278,5 +278,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 </script>
 <script src="/public/js/main.js"></script>
+    <!-- Global Scroll Lock cho Modal -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new MutationObserver(() => {
+                const openModals = document.querySelectorAll('.fixed.inset-0, .modal-overlay');
+                let hasVisibleModal = false;
+                for (let el of openModals) {
+                    if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+                        hasVisibleModal = true;
+                        break;
+                    }
+                }
+                document.body.style.overflow = hasVisibleModal ? 'hidden' : '';
+            });
+            
+            observer.observe(document.body, { 
+                childList: true, 
+                subtree: true, 
+                attributes: true, 
+                attributeFilter: ['style', 'class'] 
+            });
+        });
+    </script>
 </body>
 </html>

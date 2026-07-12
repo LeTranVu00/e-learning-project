@@ -83,6 +83,31 @@
             <?php unset($_SESSION['warning']); ?>
         <?php endif; ?>
     </script>
+    <!-- Global Scroll Lock cho Modal -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new MutationObserver(() => {
+                // Kiểm tra xem có modal overlay nào đang hiển thị không
+                const openModals = document.querySelectorAll('.fixed.inset-0, .modal-overlay');
+                let hasVisibleModal = false;
+                for (let el of openModals) {
+                    // Nếu thẻ có kích thước thực tế trên màn hình nghĩa là nó đang hiển thị
+                    if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+                        hasVisibleModal = true;
+                        break;
+                    }
+                }
+                document.body.style.overflow = hasVisibleModal ? 'hidden' : '';
+            });
+            
+            observer.observe(document.body, { 
+                childList: true, 
+                subtree: true, 
+                attributes: true, 
+                attributeFilter: ['style', 'class'] 
+            });
+        });
+    </script>
 </body>
 </html>
 

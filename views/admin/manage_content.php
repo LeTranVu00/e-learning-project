@@ -1,10 +1,15 @@
 <?php $pageTitle = 'Quản lý Nội dung';
 require_once 'layouts/header.php'; ?>
-<div class="max-w-4xl mx-auto" x-data="{ 
+<div class="max-w-4xl mx-auto" 
+    x-effect="document.body.style.overflow = (showChapterModal || showMaterialModal || showEditChapterModal || showEditMaterialModal || showQuizPreviewModal) ? 'hidden' : ''"
+    x-data="{
         showChapterModal: false, 
         showMaterialModal: false, 
         showEditChapterModal: false,
         showEditMaterialModal: false,
+        showQuizPreviewModal: false,
+        quizPreviewData: [],
+        quizPreviewTitle: '',
         currentChapterId: null,
         newMaterialType: 'file',
         materialTab: 'file', // 'file', 'link', 'quiz'
@@ -15,6 +20,7 @@ require_once 'layouts/header.php'; ?>
         editFileName: '',
         editChapterData: { id: '', title: '', description: '' },
         editMaterialData: { id: '', title: '', type: '', content: '', description: '' },
+        editQuizzes: [],
 
         openEditChapter(id, title, description) {
             this.editChapterData.id = id;
@@ -32,10 +38,27 @@ require_once 'layouts/header.php'; ?>
             this.editMaterialData.content = content;
             this.editMaterialData.description = description || '';
             this.editFileName = '';
+            
+            if (type === 'quiz') {
+                try {
+                    this.editQuizzes = JSON.parse(content);
+                    if (!Array.isArray(this.editQuizzes)) this.editQuizzes = [];
+                } catch(e) {
+                    this.editQuizzes = [];
+                }
+            } else {
+                this.editQuizzes = [];
+            }
+
             if (window.editorEditMaterial) {
                 window.editorEditMaterial.setData(this.editMaterialData.description);
             }
             this.showEditMaterialModal = true;
+        },
+        openQuizPreview(data, title) {
+            this.quizPreviewData = Array.isArray(data) ? data : [];
+            this.quizPreviewTitle = title;
+            this.showQuizPreviewModal = true;
         }
     }">
 
@@ -114,7 +137,7 @@ require_once 'layouts/header.php'; ?>
                                 <i class="fa-solid fa-pen-to-square text-xs"></i>
                             </button>
                             <a href="#"
-                                onclick="confirmDeleteChapter('?action=admin_delete_chapter&id=<?= $chapter['id'] ?>&course_id=<?= $course['id'] ?>')"
+                                onclick="confirmDeleteChapter('?action=admin_delete_chapter&id=<?= $chapter['id'] ?>&course_id=<?= $course['id'] ?>'); return false;"
                                 title="Xóa Chương"
                                 class="w-8 h-8 rounded-full flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition">
                                 <i class="fa-solid fa-trash-can text-xs"></i>
@@ -130,25 +153,47 @@ require_once 'layouts/header.php'; ?>
                                 <?php foreach ($chapter['materials'] as $material): ?>
                                     <li
                                         class="flex items-center justify-between border border-gray-100 p-3 rounded-xl bg-gray-50 hover:bg-white hover:border-gray-300 transition group">
-                                        <a href="<?= htmlspecialchars($material['content']) ?>" target="_blank"
-                                            class="font-medium text-gray-700 hover:text-primary flex items-center gap-2 truncate pr-4 transition cursor-pointer">
-                                            <i
-                                                class="fa-solid <?= $material['type'] == 'file' ? 'fa-file-pdf text-red-500' : 'fa-circle-play text-blue-500' ?>"></i>
-                                            <span class="truncate"><?= htmlspecialchars($material['title']) ?></span>
-                                        </a>
+                                        <?php
+                                        if ($material['type'] === 'quiz') {
+                                            // Encode an toàn cho HTML attribute
+                                            $rawJson = json_encode(json_decode($material['content'], true) ?? []);
+                                            $quizJsonAttr = htmlspecialchars($rawJson, ENT_QUOTES, 'UTF-8');
+                                            $escapedTitle = htmlspecialchars(addslashes($material['title']), ENT_QUOTES, 'UTF-8');
+                                        } elseif ($material['type'] === 'file') {
+                                            $previewUrl = '/e-learning-project/public/' . $material['content'];
+                                        } else {
+                                            $previewUrl = $material['content'];
+                                        }
+                                        ?>
+
+                                        <?php if ($material['type'] === 'quiz'): ?>
+                                            <button type="button"
+                                                @click="openQuizPreview(<?= $quizJsonAttr ?>, '<?= $escapedTitle ?>')"
+                                                title="Xem trước bài trắc nghiệm"
+                                                class="font-medium text-gray-700 hover:text-primary flex items-center gap-2 truncate pr-4 transition cursor-pointer text-left">
+                                                <i class="fa-solid fa-circle-question text-purple-500"></i>
+                                                <span class="truncate"><?= htmlspecialchars($material['title']) ?></span>
+                                            </button>
+                                        <?php else: ?>
+                                            <a href="<?= htmlspecialchars($previewUrl) ?>" target="_blank"
+                                                class="font-medium text-gray-700 hover:text-primary flex items-center gap-2 truncate pr-4 transition cursor-pointer">
+                                                <i class="fa-solid <?= $material['type'] === 'file' ? 'fa-file-pdf text-red-500' : 'fa-circle-play text-blue-500' ?>"></i>
+                                                <span class="truncate"><?= htmlspecialchars($material['title']) ?></span>
+                                            </a>
+                                        <?php endif; ?>
 
                                         <div class="flex items-center gap-2 shrink-0">
                                             <span
                                                 class="text-[10px] uppercase bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold mr-2"><?= $material['type'] ?></span>
                                             <button
-                                                @click="openEditMaterial(<?= $material['id'] ?>, '<?= htmlspecialchars(addslashes($material['title'])) ?>', '<?= $material['type'] ?>', '<?= htmlspecialchars(addslashes($material['content'])) ?>', '<?= htmlspecialchars(addslashes($material['description'] ?? '')) ?>')"
+                                                @click="openEditMaterial(<?= $material['id'] ?>, '<?= htmlspecialchars(addslashes($material['title']), ENT_QUOTES, 'UTF-8') ?>', '<?= $material['type'] ?>', '<?= htmlspecialchars(addslashes($material['content']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($material['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?>')"
                                                 title="Sửa bài"
-                                                class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-yellow-500 hover:text-white transition opacity-0 group-hover:opacity-100">
+                                                class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-yellow-500 hover:text-white transition">
                                                 <i class="fa-solid fa-pen-to-square text-[10px]"></i>
                                             </button>
                                             <a href="#"
-                                                onclick="confirmDeleteMaterial('?action=admin_delete_material&id=<?= $material['id'] ?>&course_id=<?= $course['id'] ?>')" title="Xóa bài"
-                                                class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white transition opacity-0 group-hover:opacity-100">
+                                                onclick="confirmDeleteMaterial('?action=admin_delete_material&id=<?= $material['id'] ?>&course_id=<?= $course['id'] ?>'); return false;" title="Xóa bài"
+                                                class="w-7 h-7 rounded-full flex items-center justify-center bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white transition">
                                                 <i class="fa-solid fa-trash-can text-[10px]"></i>
                                             </a>
                                         </div>
@@ -407,15 +452,8 @@ require_once 'layouts/header.php'; ?>
                     <textarea name="description" id="editor-edit-material"></textarea>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Loại định dạng</label>
-                    <select name="type" x-model="editMaterialData.type"
-                        class="w-full px-4 py-2 border border-gray-300 bg-white rounded-xl outline-none focus:ring-2 focus:ring-primary transition">
-                        <option value="file">📂 Tải lên từ thiết bị (Tất cả định dạng)</option>
-                        <option value="link">🔗 Đường dẫn bên ngoài (YouTube, GG Drive...)</option>
-                        <option value="video" x-show="editMaterialData.type === 'video'">🎥 Video (Dữ liệu cũ)</option>
-                    </select>
-                </div>
+                <!-- Ẩn tùy chọn đổi Loại định dạng để tránh lỗi dữ liệu -->
+                <input type="hidden" name="type" :value="editMaterialData.type">
 
                 <div x-show="editMaterialData.type === 'video' || editMaterialData.type === 'link'" x-collapse>
                     <label class="block text-sm font-semibold mb-2">Đường dẫn (URL)</label>
@@ -448,6 +486,44 @@ require_once 'layouts/header.php'; ?>
                     </div>
                 </div>
 
+                <div x-show="editMaterialData.type === 'quiz'" x-collapse>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-semibold">Danh sách câu hỏi</label>
+                        <button type="button" @click="editQuizzes.push({question: '', options: ['','','',''], correct_index: 0})" 
+                                class="text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Thêm Câu Hỏi
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4 max-h-64 overflow-y-auto pr-2" x-show="editQuizzes.length > 0" x-cloak>
+                        <template x-for="(q, qIndex) in editQuizzes" :key="qIndex">
+                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 relative">
+                                <button type="button" @click="editQuizzes.splice(qIndex, 1)" 
+                                        class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-100 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition" title="Xóa câu hỏi">
+                                    <i class="fa-solid fa-xmark text-sm"></i>
+                                </button>
+                                
+                                <label class="block text-xs font-bold mb-1 text-gray-600">Câu hỏi <span x-text="qIndex+1"></span></label>
+                                <input type="text" x-model="q.question" placeholder="Nội dung câu hỏi..."
+                                    class="w-full px-3 py-2 mb-3 text-sm border border-gray-300 bg-white rounded-lg outline-none focus:ring-2 focus:ring-primary transition">
+                                
+                                <label class="block text-xs font-bold mb-1 text-gray-600">Các đáp án (Chọn đáp án đúng)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <template x-for="(opt, oIndex) in q.options" :key="oIndex">
+                                        <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-300">
+                                            <input type="radio" :name="'edit_correct_' + qIndex" :value="oIndex" x-model="q.correct_index" class="w-4 h-4 text-primary">
+                                            <input type="text" x-model="q.options[oIndex]" :placeholder="'Đáp án ' + String.fromCharCode(65 + oIndex)"
+                                                class="w-full text-sm bg-transparent outline-none">
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <input type="hidden" name="quiz_json" :value="JSON.stringify(editQuizzes)" :disabled="editMaterialData.type !== 'quiz'">
+                    <p x-show="editQuizzes.length === 0" class="text-sm text-gray-400 italic mt-1">Chưa có câu hỏi nào.</p>
+                </div>
+
                 <div class="flex justify-end gap-2 mt-4">
                     <button type="button" @click="showEditMaterialModal = false"
                         class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl font-medium transition">Hủy</button>
@@ -455,6 +531,78 @@ require_once 'layouts/header.php'; ?>
                         đổi</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL XEM TRƯỚC BÀI TRẮC NGHIỆM (Admin Preview)
+    ============================================================ -->
+    <div x-cloak x-show="showQuizPreviewModal"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm px-4"
+        @keydown.escape.window="showQuizPreviewModal = false">
+        <div @click.away="showQuizPreviewModal = false"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90"
+             class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col overflow-hidden"
+             style="max-height: min(90vh, 700px);">
+
+            <!-- Header -->
+            <div class="bg-purple-50 border-b border-purple-100 px-6 py-4 flex justify-between items-center shrink-0">
+                <h3 class="text-lg font-bold text-purple-800 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span x-text="quizPreviewTitle"></span>
+                </h3>
+                <button type="button" @click="showQuizPreviewModal = false"
+                    class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition">
+                    <i class="fa-solid fa-xmark text-xl pointer-events-none"></i>
+                </button>
+            </div>
+
+            <!-- Body: danh sách câu hỏi -->
+            <div class="px-6 py-5 overflow-y-auto grow space-y-5">
+                <template x-if="quizPreviewData.length === 0">
+                    <p class="text-gray-400 text-center py-8 italic">Không có câu hỏi nào.</p>
+                </template>
+                <template x-for="(q, qi) in quizPreviewData" :key="qi">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <!-- Tiêu đề câu hỏi -->
+                        <p class="font-semibold text-gray-800 mb-3">
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-700 rounded-full text-xs font-bold mr-2" x-text="qi + 1"></span>
+                            <span x-text="q.question"></span>
+                        </p>
+                        <!-- Các đáp án -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <template x-for="(opt, oi) in q.options" :key="oi">
+                                <div :class="oi == q.correct_index
+                                        ? 'bg-green-50 border-green-400 text-green-800'
+                                        : 'bg-white border-gray-200 text-gray-600'"
+                                     class="flex items-center gap-2 border rounded-lg px-3 py-2 text-sm">
+                                    <span :class="oi == q.correct_index ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'"
+                                          class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                                          x-text="String.fromCharCode(65 + oi)"></span>
+                                    <span x-text="opt"></span>
+                                    <template x-if="oi == q.correct_index">
+                                        <i class="fa-solid fa-check ml-auto text-green-600"></i>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 border-t px-6 py-3 flex justify-between items-center shrink-0">
+                <span class="text-xs text-gray-400 italic">Chế độ xem trước — đáp án đúng được highlight xanh</span>
+                <button type="button" @click="showQuizPreviewModal = false"
+                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl font-medium transition text-sm">Đóng</button>
+            </div>
         </div>
     </div>
 
@@ -480,7 +628,6 @@ require_once 'layouts/header.php'; ?>
             ClassicEditor.create(document.querySelector('#editor-edit-material'), config)
                 .then(editor => { window.editorEditMaterial = editor; })
                 .catch(error => { console.error(error); });
-        }
         }
     });
 
@@ -515,8 +662,8 @@ require_once 'layouts/header.php'; ?>
     }
 </script>
 <style>
-    .ck-editor__editable {
-        min-height: 150px;
-    }
+    .ck-editor__editable { min-height: 150px; }
 </style>
+
+
 <?php require_once 'layouts/footer.php'; ?>

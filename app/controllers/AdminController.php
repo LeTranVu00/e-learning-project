@@ -381,6 +381,7 @@ class AdminController {
             $schedule       = $_POST['schedule']       ?? null;
             $study_time     = $_POST['study_time']     ?? null;
             $contact_phone  = $_POST['contact_phone']  ?? null;
+            $category_id    = !empty($_POST['category_id']) ? intval($_POST['category_id']) : null;
             $thumbnail_path = $_POST['old_thumbnail'];
 
             if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
@@ -396,8 +397,8 @@ class AdminController {
 
             require_once __DIR__ . '/../config/Database.php';
             $db = (new Database())->getConnection();
-            $stmt = $db->prepare("UPDATE courses SET title = ?, price = ?, original_price = ?, description = ?, benefits = ?, requirements = ?, thumbnail = ?, instructor = ?, level = ?, duration_hours = ?, total_lessons = ?, language = ?, start_date = ?, schedule = ?, study_time = ?, contact_phone = ? WHERE id = ?");
-            $stmt->execute([$title, $price, $original_price, $description, $benefits, $requirements, $thumbnail_path, $instructor, $level, $duration_hours, $total_lessons, $language, $start_date, $schedule, $study_time, $contact_phone, $id]);
+            $stmt = $db->prepare("UPDATE courses SET title = ?, price = ?, original_price = ?, description = ?, benefits = ?, requirements = ?, thumbnail = ?, instructor = ?, level = ?, duration_hours = ?, total_lessons = ?, language = ?, start_date = ?, schedule = ?, study_time = ?, contact_phone = ?, category_id = ? WHERE id = ?");
+            $stmt->execute([$title, $price, $original_price, $description, $benefits, $requirements, $thumbnail_path, $instructor, $level, $duration_hours, $total_lessons, $language, $start_date, $schedule, $study_time, $contact_phone, $category_id, $id]);
 
             $_SESSION['success'] = "Đã cập nhật khóa học thành công!";
             AuditLogger::log('Cập nhật khóa học', "Cập nhật thông tin khóa học '$title'", 'course', $id);
@@ -481,6 +482,10 @@ class AdminController {
             $db = (new Database())->getConnection();
             
             $content = $_POST['content'] ?? '';
+            
+            if ($_POST['type'] === 'quiz' && isset($_POST['quiz_json'])) {
+                $content = $_POST['quiz_json'];
+            }
             
             // Xử lý upload file mới nếu người dùng chọn loại "file" và có file tải lên
             if ($_POST['type'] === 'file' && isset($_FILES['slide_file']) && $_FILES['slide_file']['error'] === UPLOAD_ERR_OK) {
@@ -664,7 +669,10 @@ class AdminController {
             $db = (new Database())->getConnection();
             
             $userModel = new User($db);
-            $userModel->updateUser($_POST['id'], $_POST['fullname'], $_POST['role']);
+            $phone = isset($_POST['phone']) ? $_POST['phone'] : null;
+            $address = isset($_POST['address']) ? $_POST['address'] : null;
+            $bio = isset($_POST['bio']) ? $_POST['bio'] : null;
+            $userModel->updateUser($_POST['id'], $_POST['fullname'], $_POST['role'], $phone, $address, $bio);
             
             $_SESSION['success'] = "Cập nhật người dùng thành công!";
             AuditLogger::log('Cập nhật người dùng', "Thay đổi thông tin user ID " . $_POST['id'], 'user', $_POST['id']);

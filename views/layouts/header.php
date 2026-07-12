@@ -236,6 +236,22 @@
         $_SESSION['cart'] = $valid_cart;
         $cart_count = count($_SESSION['cart']);
     }
+    
+    // Luôn lấy thông tin mới nhất của user từ DB để đồng bộ avatar
+    if (isset($_SESSION['user_id'])) {
+        if (!isset($db)) {
+            require_once __DIR__ . '/../../app/config/Database.php';
+            $db = (new Database())->getConnection();
+        }
+        require_once __DIR__ . '/../../app/models/User.php';
+        $headerUserModel = new User($db);
+        $headerUser = $headerUserModel->getUserById($_SESSION['user_id']);
+        if ($headerUser) {
+            $_SESSION['user_avatar'] = $headerUser['avatar'] ?? '';
+            $_SESSION['user_name'] = $headerUser['fullname'] ?? '';
+            $_SESSION['user_role'] = $headerUser['role'] ?? 'student';
+        }
+    }
     ?>
     <!-- ==================== NAVBAR ==================== -->
     <nav x-data="{ mobileMenuOpen: false }" class="bg-dark text-white shadow-md sticky top-0 z-50">
@@ -408,7 +424,10 @@
 
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="flex items-center gap-3 px-3 py-2">
-                        <img src="<?= htmlspecialchars($_SESSION['user_avatar'] ?? '') ?>" alt="Avatar"
+                        <?php
+                        $mobileAvatar = !empty($_SESSION['user_avatar']) ? $_SESSION['user_avatar'] : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['user_name'] ?? 'User') . '&background=random';
+                        ?>
+                        <img src="<?= htmlspecialchars($mobileAvatar) ?>" alt="Avatar" referrerpolicy="no-referrer"
                             class="w-10 h-10 rounded-full border border-gray-500 object-cover">
                         <div>
                             <p class="text-white font-semibold text-sm">Chào,

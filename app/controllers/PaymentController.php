@@ -8,6 +8,44 @@ require_once __DIR__ . '/../utils/AuditLogger.php';
 
 class PaymentController {
 
+    /**
+     * Chuyển chuỗi tiếng Việt có dấu → không dấu (ASCII)
+     * VNPay yêu cầu vnp_OrderInfo không được chứa ký tự có dấu
+     */
+    private function removeAccents(string $str): string {
+        $from = [
+            'á','à','ả','ã','ạ','ă','ắ','ặ','ằ','ẳ','ẵ','â','ấ','ầ','ẩ','ẫ','ậ',
+            'Á','À','Ả','Ã','Ạ','Ă','Ắ','Ặ','Ằ','Ẳ','Ẵ','Â','Ấ','Ầ','Ẩ','Ẫ','Ậ',
+            'đ','Đ',
+            'é','è','ẻ','ẽ','ẹ','ê','ế','ề','ể','ễ','ệ',
+            'É','È','Ẻ','Ẽ','Ẹ','Ê','Ế','Ề','Ể','Ễ','Ệ',
+            'í','ì','ỉ','ĩ','ị',
+            'Í','Ì','Ỉ','Ĩ','Ị',
+            'ó','ò','ỏ','õ','ọ','ô','ố','ồ','ổ','ỗ','ộ','ơ','ớ','ờ','ở','ỡ','ợ',
+            'Ó','Ò','Ỏ','Õ','Ọ','Ô','Ố','Ồ','Ổ','Ỗ','Ộ','Ơ','Ớ','Ờ','Ở','Ỡ','Ợ',
+            'ú','ù','ủ','ũ','ụ','ư','ứ','ừ','ử','ữ','ự',
+            'Ú','Ù','Ủ','Ũ','Ụ','Ư','Ứ','Ừ','Ử','Ữ','Ự',
+            'ý','ỳ','ỷ','ỹ','ỵ',
+            'Ý','Ỳ','Ỷ','Ỹ','Ỵ',
+        ];
+        $to = [
+            'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a',
+            'A','A','A','A','A','A','A','A','A','A','A','A','A','A','A','A','A',
+            'd','D',
+            'e','e','e','e','e','e','e','e','e','e','e',
+            'E','E','E','E','E','E','E','E','E','E','E',
+            'i','i','i','i','i',
+            'I','I','I','I','I',
+            'o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o',
+            'O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O',
+            'u','u','u','u','u','u','u','u','u','u','u',
+            'U','U','U','U','U','U','U','U','U','U','U',
+            'y','y','y','y','y',
+            'Y','Y','Y','Y','Y',
+        ];
+        return str_replace($from, $to, $str);
+    }
+
     public function createPayment() {
         if (!isset($_SESSION['user_id'])) {
             $_SESSION['error'] = "Vui lòng đăng nhập để thực hiện thanh toán!";
@@ -55,17 +93,18 @@ class PaymentController {
         $stmt->execute([$user_id, $course_id, $amount, $vnp_TxnRef]);
 
         // Cấu hình VNPAY từ biến môi trường
-        $vnp_TmnCode = $_ENV['VNP_TMN_CODE'] ?? '';
-        $vnp_HashSecret = $_ENV['VNP_HASH_SECRET'] ?? '';
-        $vnp_Url = $_ENV['VNP_URL'] ?? 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
-        $vnp_Returnurl = $_ENV['VNP_RETURN_URL'] ?? 'http://localhost/e-learning-project/public/index.php?action=vnpay_return';
+        $vnp_TmnCode = $_ENV['VNP_TMN_CODE'] ?? getenv('VNP_TMN_CODE') ?? '';
+        $vnp_HashSecret = $_ENV['VNP_HASH_SECRET'] ?? getenv('VNP_HASH_SECRET') ?? '';
+        $vnp_Url = $_ENV['VNP_URL'] ?? getenv('VNP_URL') ?? 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
+        $vnp_Returnurl = $_ENV['VNP_RETURN_URL'] ?? getenv('VNP_RETURN_URL') ?? 'http://localhost/e-learning-project/public/index.php?action=vnpay_return';
 
-        $vnp_OrderInfo = "Thanh toan khoa hoc: " . $course['title'];
+        // VNPay yêu cầu OrderInfo: Tiếng Việt không dấu, không ký tự đặc biệt
+        $vnp_OrderInfo = "ThanhToanKhoaHoc_" . $course_id;
         $vnp_OrderType = 'other';
-        $vnp_Amount = $amount * 100; // VNPAY yêu cầu nhân 100
+        $vnp_Amount = intval(round($amount * 100)); // VNPAY yêu cầu nhân 100
         $vnp_Locale = 'vn';
         $vnp_BankCode = '';
-        $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+        $vnp_IpAddr = filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
 
         // Thiết lập múi giờ Việt Nam để tạo ngày giờ chính xác cho VNPAY
         date_default_timezone_set('Asia/Ho_Chi_Minh');
@@ -92,6 +131,11 @@ class PaymentController {
             $inputData['vnp_BankCode'] = $vnp_BankCode;
         }
 
+        // Loại bỏ các trường trống
+        $inputData = array_filter($inputData, function($val) {
+            return $val !== "" && $val !== null;
+        });
+
         ksort($inputData);
         $query = "";
         $i = 0;
@@ -107,7 +151,8 @@ class PaymentController {
         }
 
         $vnp_Url = $vnp_Url . "?" . $query;
-        if (isset($vnp_HashSecret)) {
+        $vnp_HashSecret = trim($vnp_HashSecret);
+        if ($vnp_HashSecret != "") {
             $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
@@ -173,17 +218,18 @@ class PaymentController {
         }
 
         // Cấu hình VNPAY từ biến môi trường
-        $vnp_TmnCode = $_ENV['VNP_TMN_CODE'] ?? '';
-        $vnp_HashSecret = $_ENV['VNP_HASH_SECRET'] ?? '';
-        $vnp_Url = $_ENV['VNP_URL'] ?? 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
-        $vnp_Returnurl = $_ENV['VNP_RETURN_URL'] ?? 'http://localhost/e-learning-project/public/index.php?action=vnpay_return';
+        $vnp_TmnCode = $_ENV['VNP_TMN_CODE'] ?? getenv('VNP_TMN_CODE') ?? '';
+        $vnp_HashSecret = $_ENV['VNP_HASH_SECRET'] ?? getenv('VNP_HASH_SECRET') ?? '';
+        $vnp_Url = $_ENV['VNP_URL'] ?? getenv('VNP_URL') ?? 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
+        $vnp_Returnurl = $_ENV['VNP_RETURN_URL'] ?? getenv('VNP_RETURN_URL') ?? 'http://localhost/e-learning-project/public/index.php?action=vnpay_return';
 
-        $vnp_OrderInfo = "Thanh toan gio hang " . count($cartItems) . " khoa hoc";
+        // VNPay yêu cầu OrderInfo: Tiếng Việt không dấu, không ký tự đặc biệt
+        $vnp_OrderInfo = "ThanhToanGioHang_" . count($cartItems) . "_KhoaHoc";
         $vnp_OrderType = 'other';
-        $vnp_Amount = $totalAmount * 100;
+        $vnp_Amount = intval(round($totalAmount * 100));
         $vnp_Locale = 'vn';
         $vnp_BankCode = '';
-        $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+        $vnp_IpAddr = filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
 
         date_default_timezone_set('Asia/Ho_Chi_Minh');
         $startTime = date("YmdHis");
@@ -209,6 +255,11 @@ class PaymentController {
             $inputData['vnp_BankCode'] = $vnp_BankCode;
         }
 
+        // Loại bỏ các trường trống
+        $inputData = array_filter($inputData, function($val) {
+            return $val !== "" && $val !== null;
+        });
+
         ksort($inputData);
         $query = "";
         $i = 0;
@@ -224,7 +275,8 @@ class PaymentController {
         }
 
         $vnp_Url = $vnp_Url . "?" . $query;
-        if (isset($vnp_HashSecret)) {
+        $vnp_HashSecret = trim($vnp_HashSecret);
+        if ($vnp_HashSecret != "") {
             $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
@@ -234,7 +286,7 @@ class PaymentController {
     }
 
     public function vnpayReturn() {
-        $vnp_HashSecret = $_ENV['VNP_HASH_SECRET'] ?? '';
+        $vnp_HashSecret = $_ENV['VNP_HASH_SECRET'] ?? getenv('VNP_HASH_SECRET') ?? '';
         
         $inputData = array();
         foreach ($_GET as $key => $value) {

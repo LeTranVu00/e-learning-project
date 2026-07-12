@@ -13,7 +13,7 @@ $currentAction = $_GET['action'] ?? 'admin_dashboard';
     <div class="h-16 flex items-center pl-7 border-b border-gray-800 shrink-0 overflow-hidden">
         <i class="fa-solid fa-graduation-cap text-primary text-2xl"></i>
         <span x-show="sidebarOpen"
-            class="ml-3 font-bold text-lg tracking-wider transition-opacity duration-300 hidden lg:block whitespace-nowrap">ADMIN
+            class="ml-3 font-bold text-lg tracking-wider transition-opacity duration-300 whitespace-nowrap">ADMIN
             PANEL</span>
     </div>
 
@@ -21,37 +21,37 @@ $currentAction = $_GET['action'] ?? 'admin_dashboard';
         <a href="?action=admin_dashboard"
             class="flex items-center px-5 py-3 <?= $currentAction == 'admin_dashboard' ? 'bg-gray-800 text-primary' : 'text-gray-400 hover:bg-gray-800 hover:text-white' ?> rounded-xl transition group overflow-hidden">
             <i class="fa-solid fa-chart-pie w-6 text-center shrink-0"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-medium hidden lg:block whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Tổng quan</span>
+            <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Tổng quan</span>
         </a>
 
         <a href="?action=admin_manage_courses"
             class="flex items-center px-5 py-3 <?= $currentAction == 'admin_manage_courses' ? 'bg-gray-800 text-primary' : 'text-gray-400 hover:bg-gray-800 hover:text-white' ?> rounded-xl transition group overflow-hidden">
             <i class="fa-solid fa-book-open w-6 text-center shrink-0"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-medium hidden lg:block whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Quản lý Khóa học</span>
+            <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Quản lý Khóa học</span>
         </a>
 
         <a href="?action=admin_manage_categories"
             class="flex items-center px-5 py-3 <?= $currentAction == 'admin_manage_categories' ? 'bg-gray-800 text-primary' : 'text-gray-400 hover:bg-gray-800 hover:text-white' ?> rounded-xl transition group overflow-hidden">
             <i class="fa-solid fa-folder-tree w-6 text-center shrink-0"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-medium hidden lg:block whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Quản lý Danh mục</span>
+            <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Quản lý Danh mục</span>
         </a>
 
         <a href="?action=admin_manage_comments"
             class="flex items-center px-5 py-3 <?= $currentAction == 'admin_manage_comments' ? 'bg-gray-800 text-primary' : 'text-gray-400 hover:bg-gray-800 hover:text-white' ?> rounded-xl transition group overflow-hidden">
             <i class="fa-solid fa-comments w-6 text-center shrink-0"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-medium hidden lg:block whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Quản lý Bình luận</span>
+            <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Quản lý Bình luận</span>
         </a>
 
         <a href="?action=admin_manage_users"
             class="flex items-center px-5 py-3 <?= $currentAction == 'admin_manage_users' ? 'bg-gray-800 text-primary' : 'text-gray-400 hover:bg-gray-800 hover:text-white' ?> rounded-xl transition group overflow-hidden">
             <i class="fa-solid fa-users w-6 text-center shrink-0"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-medium hidden lg:block whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Người dùng</span>
+            <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Người dùng</span>
         </a>
 
         <a href="?action=admin_system_logs"
             class="flex items-center px-5 py-3 <?= $currentAction == 'admin_system_logs' ? 'bg-gray-800 text-primary' : 'text-gray-400 hover:bg-gray-800 hover:text-white' ?> rounded-xl transition group overflow-hidden">
             <i class="fa-solid fa-clipboard-list w-6 text-center shrink-0"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-medium hidden lg:block whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Nhật ký hệ thống</span>
+            <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Nhật ký hệ thống</span>
         </a>
 
     </nav>
@@ -60,7 +60,7 @@ $currentAction = $_GET['action'] ?? 'admin_dashboard';
         <a href="?action=home"
             class="flex items-center px-5 py-3 text-gray-400 hover:bg-red-500 hover:text-white rounded-xl transition overflow-hidden">
             <i class="fa-solid fa-arrow-right-from-bracket w-6 text-center shrink-0"></i>
-            <span x-show="sidebarOpen" class="ml-3 font-medium hidden lg:block whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Thoát Admin</span>
+            <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Thoát Admin</span>
         </a>
     </div>
 </aside>

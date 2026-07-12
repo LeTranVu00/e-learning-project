@@ -122,11 +122,23 @@ class User {
     }
 
     // Cập nhật người dùng (dành cho Admin)
-    public function updateUser($id, $fullname, $role) {
-        $query = "UPDATE users SET fullname = :fullname, role = :role WHERE id = :id";
+    public function updateUser($id, $fullname, $role, $phone = null, $address = null, $bio = null) {
+        $query = "UPDATE users SET fullname = :fullname, role = :role";
+        
+        if ($phone !== null) $query .= ", phone = :phone";
+        if ($address !== null) $query .= ", address = :address";
+        if ($bio !== null) $query .= ", bio = :bio";
+        
+        $query .= " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
+        
         $stmt->bindParam(':fullname', $fullname);
         $stmt->bindParam(':role', $role);
+        
+        if ($phone !== null) $stmt->bindParam(':phone', $phone);
+        if ($address !== null) $stmt->bindParam(':address', $address);
+        if ($bio !== null) $stmt->bindParam(':bio', $bio);
+        
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
     }

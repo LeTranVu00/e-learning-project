@@ -109,7 +109,7 @@
                                             ? (str_starts_with($avatar, 'http') ? $avatar : '/e-learning-project/public/' . $avatar) 
                                             : 'https://ui-avatars.com/api/?name=' . urlencode($user['fullname']) . '&background=random';
                                     ?>
-                                    <img src="<?= htmlspecialchars($avatarDisplay) ?>" class="w-12 h-12 rounded-full object-cover border border-gray-200">
+                                    <img src="<?= htmlspecialchars($avatarDisplay) ?>" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<?= urlencode($user['fullname']) ?>&background=random'" class="w-12 h-12 rounded-full object-cover border border-gray-200">
                                     <div>
                                         <p class="font-bold text-gray-800"><?= htmlspecialchars($user['fullname']) ?></p>
                                         <p class="text-xs text-gray-500"><?= htmlspecialchars($user['email']) ?></p>
@@ -209,13 +209,22 @@
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-semibold mb-1.5">Vai trò (Role)</label>
-                            <select name="role" x-model="editData.role" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
-                                <option value="student">Học viên (Student)</option>
-                                <option value="instructor">Giảng viên (Instructor)</option>
-                                <option value="admin">Quản trị viên (Admin)</option>
-                            </select>
+                            <label class="block text-sm font-semibold mb-1.5">Số điện thoại</label>
+                            <input type="text" name="phone" x-model="editData.phone" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
                         </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold mb-1.5">Địa chỉ</label>
+                            <input type="text" name="address" x-model="editData.address" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold mb-1.5">Giới thiệu (Bio)</label>
+                            <textarea name="bio" x-model="editData.bio" rows="3" class="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-primary resize-none"></textarea>
+                        </div>
+                        
+                        <!-- Đã ẩn chọn role theo yêu cầu -->
+                        <input type="hidden" name="role" x-model="editData.role">
                     </form>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 border-t flex justify-end gap-3 shrink-0">
@@ -232,14 +241,14 @@
     <div x-show="showDetailModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showDetailModal = false"></div>
         <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div x-show="showDetailModal" class="relative bg-white rounded-2xl text-left shadow-2xl w-full max-w-sm z-50 flex flex-col overflow-hidden">
+            <div x-show="showDetailModal" class="relative bg-white rounded-2xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col overflow-hidden">
                 <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-500"></i> Thông tin tài khoản</h3>
                     <button @click="showDetailModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 <div class="px-6 py-6 overflow-y-auto grow space-y-4">
                     <div class="flex flex-col items-center gap-3">
-                        <img :src="detailData.avatar && detailData.avatar.startsWith('http') ? detailData.avatar : (detailData.avatar ? '/e-learning-project/public/' + detailData.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(detailData.fullname || '') + '&background=random')" class="w-24 h-24 object-cover rounded-full border-4 border-white shadow-lg">
+                        <img :src="detailData.avatar && detailData.avatar.startsWith('http') ? detailData.avatar : (detailData.avatar ? '/e-learning-project/public/' + detailData.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(detailData.fullname || '') + '&background=random')" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent(detailData.fullname || 'User') + '&background=random'" class="w-24 h-24 object-cover rounded-full border-4 border-white shadow-lg">
                         <div class="text-center">
                             <h4 class="text-xl font-bold text-gray-800 leading-tight" x-text="detailData.fullname"></h4>
                             <p class="text-gray-500 text-sm mt-1" x-text="detailData.email"></p>
@@ -258,13 +267,29 @@
                     </div>
                     
                     <div class="bg-gray-50 rounded-xl p-4 border mt-4 space-y-3">
-                        <div class="flex flex-col border-b pb-2">
-                            <span class="text-gray-500 text-xs font-medium uppercase mb-1">Thời gian tạo tài khoản</span>
-                            <span class="font-semibold text-gray-800" x-text="detailData.created_at ? new Date(detailData.created_at.replace(' ', 'T')).toLocaleString('vi-VN') : '—'"></span>
+                        <div class="grid grid-cols-2 gap-4 border-b pb-3">
+                            <div class="flex flex-col">
+                                <span class="text-gray-500 text-xs font-medium uppercase mb-1">Thời gian tạo</span>
+                                <span class="font-semibold text-gray-800" x-text="detailData.created_at ? new Date(detailData.created_at.replace(' ', 'T')).toLocaleString('vi-VN') : '—'"></span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-gray-500 text-xs font-medium uppercase mb-1">Phương thức ĐN</span>
+                                <span class="font-semibold text-gray-800" x-text="detailData.google_id ? 'Google (SSO)' : 'Email & Mật khẩu'"></span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-b pb-3">
+                            <div class="flex flex-col">
+                                <span class="text-gray-500 text-xs font-medium uppercase mb-1">Số điện thoại</span>
+                                <span class="font-semibold text-gray-800" x-text="detailData.phone || 'Chưa cập nhật'"></span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-gray-500 text-xs font-medium uppercase mb-1">Địa chỉ</span>
+                                <span class="font-semibold text-gray-800 truncate" :title="detailData.address" x-text="detailData.address || 'Chưa cập nhật'"></span>
+                            </div>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-gray-500 text-xs font-medium uppercase mb-1">Phương thức đăng nhập</span>
-                            <span class="font-semibold text-gray-800" x-text="detailData.google_id ? 'Google (SSO)' : 'Email & Mật khẩu'"></span>
+                            <span class="text-gray-500 text-xs font-medium uppercase mb-1">Giới thiệu (Bio)</span>
+                            <span class="font-semibold text-gray-800 text-sm whitespace-pre-wrap" x-text="detailData.bio || 'Chưa cập nhật'"></span>
                         </div>
                     </div>
 

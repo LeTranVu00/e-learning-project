@@ -726,10 +726,15 @@ require_once 'layouts/header.php'; ?>
                         <span class="font-semibold text-gray-700"
                             x-text="(detailData.duration_hours || 0) + ' giờ'"></span>
                     </div>
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between border-b pb-2">
                         <span class="text-gray-500 font-medium">Số bài giảng:</span>
                         <span class="font-semibold text-gray-700"
                             x-text="(detailData.total_lessons || 0) + ' bài'"></span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 font-medium">Ngày tạo:</span>
+                        <span class="font-semibold text-gray-700"
+                            x-text="detailData.created_at ? new Date(detailData.created_at).toLocaleString('vi-VN', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit', year:'numeric'}) : '—'"></span>
                     </div>
                 </div>
             </div>

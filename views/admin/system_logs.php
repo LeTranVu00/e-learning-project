@@ -127,7 +127,7 @@ $dateTo = $_GET['date_to'] ?? '';
                                                             ? (str_starts_with($avatar, 'http') ? $avatar : '/e-learning-project/public/' . $avatar) 
                                                             : 'https://ui-avatars.com/api/?name=' . urlencode($log['fullname'] ?? 'User') . '&background=random';
                                                     ?>
-                                                    <img src="<?= htmlspecialchars($avatarDisplay) ?>" alt="Avatar" class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200 bg-white shrink-0">
+                                                    <img src="<?= htmlspecialchars($avatarDisplay) ?>" alt="Avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<?= urlencode($log['fullname'] ?? 'User') ?>&background=random'" class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200 bg-white shrink-0">
                                                     <div class="flex flex-col">
                                                         <span class="font-bold text-gray-800"><?= htmlspecialchars($log['fullname']) ?></span>
                                                         <span class="text-xs text-gray-400">ID: <?= $log['user_id'] ?></span>
@@ -188,7 +188,7 @@ $dateTo = $_GET['date_to'] ?? '';
                                                 }" 
                                                 class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-primary hover:text-white transition-colors cursor-pointer"
                                                 title="Xem chi tiết">
-                                                <i class="fa-solid fa-expand text-sm"></i>
+                                                <i class="fa-solid fa-eye text-sm"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -199,24 +199,34 @@ $dateTo = $_GET['date_to'] ?? '';
                 </div>
 
                 <!-- Pagination -->
-                <?php if ($totalPages > 1): ?>
-                <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
-                    <span class="text-sm text-gray-500 font-medium">
-                        Trang <?= $page ?> trên <?= $totalPages ?>
-                    </span>
-                    
-                    <div class="flex gap-2">
-                        <?php 
-                            $queryStr = http_build_query(['action' => 'admin_system_logs', 'search' => $search, 'action_filter' => $actionFilter, 'date_from' => $dateFrom, 'date_to' => $dateTo]);
-                        ?>
+                <?php if (isset($totalPages) && $totalPages > 1): ?>
+                <?php 
+                    $queryStr = '';
+                    if (!empty($_GET['search'])) $queryStr .= '&search=' . urlencode($_GET['search']);
+                    if (isset($_GET['action_filter']) && $_GET['action_filter'] !== 'all') $queryStr .= '&action_filter=' . urlencode($_GET['action_filter']);
+                    if (!empty($_GET['date_from'])) $queryStr .= '&date_from=' . urlencode($_GET['date_from']);
+                    if (!empty($_GET['date_to'])) $queryStr .= '&date_to=' . urlencode($_GET['date_to']);
+                ?>
+                <div class="px-6 py-6 border-t border-gray-100 flex justify-center bg-white">
+                    <nav class="flex items-center gap-2">
                         <?php if ($page > 1): ?>
-                            <a href="?<?= $queryStr ?>&page=<?= $page - 1 ?>" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-300 transition text-sm font-semibold shadow-sm">Trang trước</a>
+                            <a href="?action=admin_system_logs&page=<?= $page - 1 ?><?= $queryStr ?>" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </a>
                         <?php endif; ?>
                         
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <a href="?action=admin_system_logs&page=<?= $i ?><?= $queryStr ?>" class="px-4 py-2 <?= $i === $page ? 'bg-primary text-white border-primary' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50' ?> border rounded-lg font-medium transition">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+
                         <?php if ($page < $totalPages): ?>
-                            <a href="?<?= $queryStr ?>&page=<?= $page + 1 ?>" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-300 transition text-sm font-semibold shadow-sm">Trang sau</a>
+                            <a href="?action=admin_system_logs&page=<?= $page + 1 ?><?= $queryStr ?>" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </a>
                         <?php endif; ?>
-                    </div>
+                    </nav>
                 </div>
                 <?php endif; ?>
                 
@@ -276,14 +286,7 @@ $dateTo = $_GET['date_to'] ?? '';
                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-gray-700 text-sm leading-relaxed whitespace-pre-wrap" x-text="selectedLog.desc"></div>
                 </div>
                 
-                <div>
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Bảo mật (IP Address)</h4>
-                    <div class="flex items-center gap-2 text-gray-600 font-mono text-sm bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <i class="fa-solid fa-network-wired text-gray-400"></i>
-                        <span x-text="selectedLog.ip"></span>
-                    </div>
-                </div>
-                
+
             </div>
             
             <!-- Modal Footer -->

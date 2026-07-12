@@ -19,6 +19,9 @@
     <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         tailwind.config = { theme: { extend: { colors: { primary: '#f59e0b', dark: '#111827' } } } }
     </script>
