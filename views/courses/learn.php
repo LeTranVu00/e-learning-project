@@ -16,8 +16,11 @@
         }
         return htmlspecialchars($content);
     }
+    $completed_flags = array_map(function($mat) use ($completed_materials) {
+        return in_array($mat['id'], $completed_materials);
+    }, $all_materials);
 ?>
-<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8" x-data="learningPage(<?= $total_materials ?? 0 ?>, <?= $completed_count ?? 0 ?>)">
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8" x-data="learningPage(<?= $total_materials ?? 0 ?>, <?= $completed_count ?? 0 ?>, <?= htmlspecialchars(json_encode($completed_flags), ENT_QUOTES, 'UTF-8') ?>)">
     <!-- Header -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4" data-aos="fade-up">
         <div>
@@ -53,8 +56,8 @@
                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400 shrink-0">Lộ trình:</span>
                 <div class="flex gap-1 flex-wrap">
                     <?php foreach ($all_materials as $i => $mat): ?>
-                        <div class="w-2.5 h-2.5 rounded-full transition-all duration-300 hover:scale-150 cursor-pointer
-                                    <?= in_array($mat['id'], $completed_materials) ? 'bg-green-500 shadow-sm shadow-green-300 dark:shadow-green-900' : 'bg-gray-300 dark:bg-gray-600' ?>"
+                        <div class="w-2.5 h-2.5 rounded-full transition-all duration-300 hover:scale-150 cursor-pointer"
+                             :class="completedList[<?= $i ?>] ? 'bg-green-500 shadow-sm shadow-green-300 dark:shadow-green-900' : 'bg-gray-300 dark:bg-gray-600'"
                              title="<?= htmlspecialchars($mat['title']) ?>"
                              @click="scrollToMaterial(<?= $i ?>)"></div>
                     <?php endforeach; ?>
@@ -446,17 +449,23 @@ function triggerConfetti() {
 }
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('learningPage', (total, completed) => ({
+    Alpine.data('learningPage', (total, completed, initialCompletedList) => ({
         totalMaterials: total,
         completed: completed,
         progress: total > 0 ? Math.round((completed / total) * 100) : 0,
         currentMaterialIndex: 0,
+        completedList: initialCompletedList || [],
         
         init() {
             window.addEventListener('material-completed', (e) => {
                 this.completed += e.detail.increment;
                 if (e.detail.index !== undefined) {
                     this.currentMaterialIndex = e.detail.index;
+                    if (e.detail.increment > 0) {
+                        this.completedList[e.detail.index] = true;
+                    } else if (e.detail.increment < 0) {
+                        this.completedList[e.detail.index] = false;
+                    }
                 }
                 this.progress = this.totalMaterials > 0 ? Math.round((this.completed / this.totalMaterials) * 100) : 0;
                 window.dispatchEvent(new CustomEvent('progress-updated', { detail: { progress: this.progress } }));
