@@ -794,70 +794,83 @@ $topPosts = $forumModel->getFeaturedPosts(3);
                 hoặc cập nhật thông tin mới nhất trên các nền tảng mạng xã hội của E-Learning.</p>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-6 sm:gap-10">
+        <!-- Hàng 1: Các nút mạng xã hội -->
+        <div class="flex flex-wrap justify-center gap-6 sm:gap-10 mb-16" data-aos="fade-up">
             <!-- Phone -->
-            <a href="tel:0396870877" class="group flex flex-col items-center gap-4" data-aos="zoom-in"
-                data-aos-delay="50">
-                <div
-                    class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-blue-600 dark:text-blue-400 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-blue-500/20 group-hover:shadow-2xl">
+            <a href="tel:0396870877" class="group flex flex-col items-center gap-4" data-aos="zoom-in" data-aos-delay="50">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-blue-600 dark:text-blue-400 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-blue-500/20 group-hover:shadow-2xl">
                     <i class="fa-solid fa-phone"></i>
                 </div>
-                <span
-                    class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">0123
-                    456 789</span>
+                <span class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">0123 456 789</span>
             </a>
 
             <!-- Email -->
-            <a href="mailto:contact@e-learning.vn" class="group flex flex-col items-center gap-4" data-aos="zoom-in"
-                data-aos-delay="100">
-                <div
-                    class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-green-600 dark:text-green-400 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-green-500/20 group-hover:shadow-2xl">
+            <a href="mailto:contact@e-learning.vn" class="group flex flex-col items-center gap-4" data-aos="zoom-in" data-aos-delay="100">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-green-600 dark:text-green-400 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-green-500/20 group-hover:shadow-2xl">
                     <i class="fa-solid fa-envelope"></i>
                 </div>
-                <span
-                    class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Email</span>
+                <span class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Email</span>
             </a>
 
             <!-- Facebook -->
-            <a href="#" target="_blank" class="group flex flex-col items-center gap-4" data-aos="zoom-in"
-                data-aos-delay="150">
-                <div
-                    class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-[#1877F2] transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-[#1877F2]/20 group-hover:shadow-2xl">
+            <a href="#" target="_blank" class="group flex flex-col items-center gap-4" data-aos="zoom-in" data-aos-delay="150">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-[#1877F2] transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-[#1877F2]/20 group-hover:shadow-2xl">
                     <i class="fa-brands fa-facebook-f"></i>
                 </div>
-                <span
-                    class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-[#1877F2] transition-colors">Facebook</span>
+                <span class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-[#1877F2] transition-colors">Facebook</span>
             </a>
 
             <!-- YouTube -->
-            <a href="https://www.youtube.com/@sleepyboyy777" target="_blank"
-                class="group flex flex-col items-center gap-4" data-aos="zoom-in" data-aos-delay="200">
-                <div
-                    class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-[#FF0000] transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-[#FF0000]/20 group-hover:shadow-2xl">
+            <a href="https://www.youtube.com/@sleepyboyy777" target="_blank" class="group flex flex-col items-center gap-4" data-aos="zoom-in" data-aos-delay="200">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-[#FF0000] transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-[#FF0000]/20 group-hover:shadow-2xl">
                     <i class="fa-brands fa-youtube"></i>
                 </div>
-                <span
-                    class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-[#FF0000] transition-colors">YouTube</span>
+                <span class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-[#FF0000] transition-colors">YouTube</span>
             </a>
 
             <!-- Zalo -->
-            <a href="https://zalo.me/0396870877" target="_blank" class="group flex flex-col items-center gap-4"
-                data-aos="zoom-in" data-aos-delay="250">
-                <div
-                    class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-3xl sm:text-4xl font-black text-[#0068FF] transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-[#0068FF]/20 group-hover:shadow-2xl">
+            <a href="https://zalo.me/0396870877" target="_blank" class="group flex flex-col items-center gap-4" data-aos="zoom-in" data-aos-delay="250">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-3xl sm:text-4xl font-black text-[#0068FF] transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-[#0068FF]/20 group-hover:shadow-2xl">
                     Zalo
                 </div>
-                <span
-                    class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-[#0068FF] transition-colors">Zalo</span>
+                <span class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-[#0068FF] transition-colors">Zalo</span>
             </a>
+        </div>
 
-            <!-- Tiktok
-            <a href="#" target="_blank" class="group flex flex-col items-center gap-4" data-aos="zoom-in" data-aos-delay="300">
-                <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-4xl sm:text-5xl text-black dark:text-white transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:shadow-gray-500/20 group-hover:shadow-2xl">
-                    <i class="fa-brands fa-tiktok"></i>
-                </div>
-                <span class="font-bold text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors">TikTok</span>
-            </a> -->
+        <!-- Hàng 2: Bản đồ + Form -->
+        <div class="flex flex-col lg:flex-row gap-8 items-stretch justify-center">
+            
+            <!-- Left: Google Map -->
+            <div class="lg:w-5/12 w-full rounded-3xl overflow-hidden shadow-xl border border-gray-100 dark:border-gray-700 relative min-h-[400px]" data-aos="fade-right">
+                <iframe src="https://maps.google.com/maps?q=Trường%20Đại%20học%20Giao%20thông%20vận%20tải,%2025%20Võ%20Oanh,%20Bình%20Thạnh,%20Hồ%20Chí%20Minh&t=&z=16&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" style="border:0; position: absolute; top: 0; left: 0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+
+            <!-- Right: Contact Form -->
+            <div class="lg:w-7/12 w-full bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700" data-aos="fade-left">
+                <form action="?action=submit_contact" method="POST" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Họ và tên</label>
+                            <input type="text" name="name" required class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chủ đề</label>
+                        <input type="text" name="subject" required class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nội dung tin nhắn</label>
+                        <textarea name="message" rows="5" required class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-gray-900 dark:text-white resize-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-primary to-yellow-500 hover:from-yellow-500 hover:to-primary text-white font-bold py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        Gửi Tin Nhắn <i class="fa-solid fa-paper-plane ml-2"></i>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </section>

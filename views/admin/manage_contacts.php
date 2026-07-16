@@ -8,9 +8,9 @@
             </div>
 
             <!-- BẢNG DANH SÁCH LIÊN HỆ -->
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden" x-data="{ showMessageModal: false, activeMessage: {} }">
                 <div class="overflow-x-auto">
-                    <div class="overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1000px]">
+                    <table class="w-full text-left border-collapse min-w-[1000px]">
                         <thead>
                             <tr class="bg-gray-50/80 border-b border-gray-100 text-sm text-gray-500 uppercase">
                                 <th class="py-4 px-6 font-semibold">Khách hàng</th>
@@ -20,7 +20,7 @@
                                 <th class="py-4 px-6 font-semibold text-right">Hành động</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-50" x-data="{ showMessageModal: false, activeMessage: {} }">
+                        <tbody class="divide-y divide-gray-50">
                             <?php if (empty($contacts)): ?>
                                 <tr><td colspan="5" class="py-8 text-center text-gray-500">Chưa có liên hệ nào!</td></tr>
                             <?php else: ?>
@@ -62,39 +62,39 @@
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
-                            
-                            <!-- Modal: Đọc tin nhắn -->
-                            <div x-show="showMessageModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
-                                <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showMessageModal = false"></div>
-                                <div class="flex items-center justify-center min-h-screen px-4 py-8">
-                                    <div x-show="showMessageModal" class="relative bg-white rounded-3xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col overflow-hidden border border-gray-100">
-                                        <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
-                                            <h3 class="text-xl font-bold">Nội dung tin nhắn</h3>
-                                            <button @click="showMessageModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
-                                        </div>
-                                        <div class="px-6 py-6 space-y-4">
-                                            <div>
-                                                <span class="text-sm text-gray-500">Từ:</span>
-                                                <div class="font-bold text-gray-900" x-text="activeMessage.name"></div>
-                                                <div class="text-sm text-blue-600" x-text="activeMessage.email"></div>
-                                            </div>
-                                            <div>
-                                                <span class="text-sm text-gray-500">Chủ đề:</span>
-                                                <div class="font-bold text-gray-800" x-text="activeMessage.subject"></div>
-                                            </div>
-                                            <div>
-                                                <span class="text-sm text-gray-500">Nội dung:</span>
-                                                <div class="bg-gray-50 p-4 rounded-xl border mt-1 text-gray-700 whitespace-pre-wrap" x-text="activeMessage.message"></div>
-                                            </div>
-                                        </div>
-                                        <div class="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3 shrink-0">
-                                            <button @click="showMessageModal = false" class="px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition font-medium">Đóng</button>
-                                        </div>
-                                    </div>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Modal: Đọc tin nhắn -->
+                <div x-show="showMessageModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+                    <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" @click="showMessageModal = false" x-transition.opacity></div>
+                    <div class="flex items-center justify-center min-h-screen px-4 py-8">
+                        <div x-show="showMessageModal" x-transition.scale.origin.bottom class="relative bg-white rounded-3xl text-left shadow-2xl w-full max-w-lg z-50 flex flex-col overflow-hidden border border-gray-100">
+                            <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
+                                <h3 class="text-xl font-bold">Nội dung tin nhắn</h3>
+                                <button @click="showMessageModal = false" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                            </div>
+                            <div class="px-6 py-6 space-y-4">
+                                <div>
+                                    <span class="text-sm text-gray-500">Từ:</span>
+                                    <div class="font-bold text-gray-900" x-text="activeMessage.name"></div>
+                                    <div class="text-sm text-blue-600" x-text="activeMessage.email"></div>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Chủ đề:</span>
+                                    <div class="font-bold text-gray-800" x-text="activeMessage.subject"></div>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Nội dung:</span>
+                                    <div class="bg-gray-50 p-4 rounded-xl border mt-1 text-gray-700 whitespace-pre-wrap" x-text="activeMessage.message"></div>
                                 </div>
                             </div>
-                        </tbody>
-                    </table></div>
+                            <div class="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3 shrink-0">
+                                <button @click="showMessageModal = false" class="px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition font-medium">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

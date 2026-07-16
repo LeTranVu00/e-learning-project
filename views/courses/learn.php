@@ -142,17 +142,42 @@
                             <?php if (empty($chapter['materials'])): ?>
                                 <p class="text-gray-400 dark:text-gray-500 text-sm py-3 italic">Chưa có bài giảng.</p>
                             <?php else: ?>
+                                <?php 
+                                $grouped_materials = [];
+                                foreach ($chapter['materials'] as $mat) {
+                                    $last_idx = count($grouped_materials) - 1;
+                                    if ($last_idx >= 0 && !empty($mat['description']) && $grouped_materials[$last_idx]['description'] === $mat['description']) {
+                                        $grouped_materials[$last_idx]['items'][] = $mat;
+                                    } else {
+                                        $grouped_materials[] = [
+                                            'description' => $mat['description'],
+                                            'items' => [$mat]
+                                        ];
+                                    }
+                                }
+                                ?>
                                 <ul class="space-y-2 mt-2">
-                                    <?php foreach ($chapter['materials'] as $matIndex => $material): ?>
-                                        <?php $currentGlobalIndex = $globalIndex++; ?>
-                                        <li x-data="{ 
-                                                done: <?= in_array($material['id'], $completed_materials) ? 'true' : 'false' ?>, 
-                                                loading: false,
-                                                showQuiz: false,
-                                                quizResults: null,
-                                                quizScore: <?= isset($completed_materials_scores[$material['id']]) ? $completed_materials_scores[$material['id']] : 'null' ?>,
-                                                quizPassed: <?= isset($completed_materials_scores[$material['id']]) && $completed_materials_scores[$material['id']] > 0 ? 'true' : 'false' ?>,
-                                                materialIndex: <?= $currentGlobalIndex ?>,
+                                    <?php foreach ($grouped_materials as $group): ?>
+                                        <li class="flex flex-col border border-gray-100 dark:border-gray-700 p-3 rounded-xl hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-md bg-white dark:bg-gray-800 transition-all duration-200">
+                                            
+                                            <?php if (!empty($group['description'])): ?>
+                                            <!-- Group Description -->
+                                            <div class="w-full mb-2 pb-3 border-b border-gray-100 dark:border-gray-700 prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 px-1.5">
+                                                <?= $group['description'] ?>
+                                            </div>
+                                            <?php endif; ?>
+
+                                            <div class="space-y-1">
+                                            <?php foreach ($group['items'] as $material): ?>
+                                                <?php $currentGlobalIndex = $globalIndex++; ?>
+                                                <div x-data="{ 
+                                                        done: <?= in_array($material['id'], $completed_materials) ? 'true' : 'false' ?>, 
+                                                        loading: false,
+                                                        showQuiz: false,
+                                                        quizResults: null,
+                                                        quizScore: <?= isset($completed_materials_scores[$material['id']]) ? $completed_materials_scores[$material['id']] : 'null' ?>,
+                                                        quizPassed: <?= isset($completed_materials_scores[$material['id']]) && $completed_materials_scores[$material['id']] > 0 ? 'true' : 'false' ?>,
+                                                        materialIndex: <?= $currentGlobalIndex ?>,
                                                 submitQuiz(e, matId) {
                                                     this.loading = true;
                                                     let formData = new FormData(e.target);
@@ -221,11 +246,11 @@
                                                     })
                                                     .catch(() => { this.loading = false; });
                                                 }
-                                            }" 
-                                            id="material-<?= $currentGlobalIndex ?>"
-                                            class="flex flex-col border border-gray-100 dark:border-gray-700 p-3 rounded-xl hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 bg-white dark:bg-gray-800 group">
-                                            
-                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-3">
+                                                }" 
+                                                id="material-<?= $currentGlobalIndex ?>"
+                                                class="flex flex-col group rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1.5 -mx-1.5 transition-colors">
+                                                
+                                                <div class="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-3 px-1">
                                                 <!-- Material Link -->
                                                 <?php if($material['type'] === 'quiz'): ?>
                                                 <button type="button" @click="showQuiz = !showQuiz"
@@ -295,12 +320,7 @@
                                                 </div>
                                             </div>
                                             
-                                            <?php if (!empty($material['description'])): ?>
-                                            <!-- Material Description -->
-                                            <div class="w-full mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
-                                                <?= $material['description'] ?>
-                                            </div>
-                                            <?php endif; ?>
+
 
                                             <?php if ($material['type'] === 'quiz'): ?>
                                             <!-- Quiz Interface -->
@@ -375,8 +395,13 @@
                                                     </div>
                                                 </div>
                                             </template>
-                                            <?php endif; ?>
-                                            <?php endif; ?>
+                                                <?php endif; ?>
+                                                <?php endif; ?>
+                                                </div> <!-- End individual material wrapper -->
+                                            <?php endforeach; ?>
+                                            </div> <!-- End space-y-1 -->
+                                            
+
                                         </li>
                                     <?php endforeach; ?>
                                 </ul>

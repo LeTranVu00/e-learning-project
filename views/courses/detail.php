@@ -248,14 +248,14 @@ $contact_phone  = $course['contact_phone']  ?? null;
         <div class="detail-tabs" data-aos="fade-up" data-aos-delay="100" style="margin-bottom: 2.5rem;">
             <div class="flex gap-2 overflow-x-auto hide-scrollbar">
                 <button type="button" class="tab-btn active" onclick="switchTab('overview')" id="tab-overview">
-                    <i class="fa-solid fa-book-open"></i> Tổng quan
+                    Tổng quan
                 </button>
                 <button type="button" class="tab-btn" onclick="switchTab('curriculum')" id="tab-curriculum">
-                    <i class="fa-solid fa-list-ul"></i> Lộ trình
+                    Lộ trình
                     <span class="ml-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2 py-0.5 rounded-full"><?= $total_chapters ?></span>
                 </button>
                 <button type="button" class="tab-btn" onclick="switchTab('detail')" id="tab-detail">
-                    <i class="fa-solid fa-circle-info"></i> Chi tiết
+                    Chi tiết
                 </button>
             </div>
         </div>

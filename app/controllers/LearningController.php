@@ -104,7 +104,10 @@ class LearningController {
 
         foreach ($quizData as $index => $q) {
             $userAns = isset($_POST['ans_' . $index]) ? (int)$_POST['ans_' . $index] : -1;
-            $isCorrect = $userAns === (int)$q['correct_index'];
+            
+            // Hỗ trợ cả trường hợp dùng 'correct_index' hoặc 'answer' từ seeder
+            $correctIndex = isset($q['correct_index']) ? (int)$q['correct_index'] : (isset($q['answer']) ? (int)$q['answer'] : -1);
+            $isCorrect = $userAns === $correctIndex;
             
             if ($isCorrect) {
                 $correctAnswers++;
@@ -112,7 +115,7 @@ class LearningController {
             
             $results[$index] = [
                 'is_correct' => $isCorrect,
-                'correct_index' => (int)$q['correct_index'],
+                'correct_index' => $correctIndex,
                 'user_ans' => $userAns
             ];
         }

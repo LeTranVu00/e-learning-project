@@ -30,11 +30,11 @@
                 <button type="button" @click="open = !open" @click.away="open = false" 
                         class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-primary/50 transition text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                     <span x-text="{
-                        'latest': '📅 Mới nhất',
-                        'oldest': '📜 Cũ nhất',
-                        'price_low': '💰 Giá thấp → cao',
-                        'price_high': '💎 Giá cao → thấp'
-                    }[sort] || '📅 Mới nhất'"></span>
+                        'latest': 'Mới nhất',
+                        'oldest': 'Cũ nhất',
+                        'price_low': 'Giá thấp → cao',
+                        'price_high': 'Giá cao → thấp'
+                    }[sort] || 'Mới nhất'"></span>
                     <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
                 </button>
                 
@@ -49,16 +49,16 @@
                      style="display: none;">
                     
                     <button type="button" @click="sort = 'latest'; open = false" class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" :class="sort === 'latest' ? 'text-primary font-bold bg-primary/10 dark:bg-primary/20' : 'text-gray-700 dark:text-gray-300'">
-                        📅 Mới nhất
+                        Mới nhất
                     </button>
                     <button type="button" @click="sort = 'oldest'; open = false" class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" :class="sort === 'oldest' ? 'text-primary font-bold bg-primary/10 dark:bg-primary/20' : 'text-gray-700 dark:text-gray-300'">
-                        📜 Cũ nhất
+                        Cũ nhất
                     </button>
                     <button type="button" @click="sort = 'price_low'; open = false" class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" :class="sort === 'price_low' ? 'text-primary font-bold bg-primary/10 dark:bg-primary/20' : 'text-gray-700 dark:text-gray-300'">
-                        💰 Giá thấp → cao
+                        Giá thấp → cao
                     </button>
                     <button type="button" @click="sort = 'price_high'; open = false" class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" :class="sort === 'price_high' ? 'text-primary font-bold bg-primary/10 dark:bg-primary/20' : 'text-gray-700 dark:text-gray-300'">
-                        💎 Giá cao → thấp
+                        Giá cao → thấp
                     </button>
                 </div>
             </div>
@@ -143,10 +143,20 @@
                                 </div>
                             <?php endif; ?>
                         </div>
-                        <a href="?action=detail&id=<?= $course['id'] ?>" 
-                           class="bg-primary/10 dark:bg-primary/20 text-primary hover:bg-primary hover:text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5">
-                            Chi tiết
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <?php if (isset($course['price']) && $course['price'] > 0): ?>
+                                <?php $in_cart = isset($_SESSION['cart']) && in_array($course['id'], $_SESSION['cart']); ?>
+                                <button data-type="home" data-in-cart="<?= $in_cart ? 'true' : 'false' ?>" onclick="toggleCart(<?= $course['id'] ?>, this)" 
+                                    class="<?= $in_cart ? 'bg-primary text-white hover:bg-primary/90' : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-gray-200' ?> font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5"
+                                    title="<?= $in_cart ? 'Xóa khỏi giỏ hàng' : 'Thêm vào giỏ hàng' ?>">
+                                    <i class="fa-solid <?= $in_cart ? 'fa-cart-arrow-down' : 'fa-cart-plus' ?>"></i>
+                                </button>
+                            <?php endif; ?>
+                            <a href="?action=detail&id=<?= $course['id'] ?>" 
+                               class="bg-primary/10 dark:bg-primary/20 text-primary hover:bg-primary hover:text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5">
+                                Chi tiết
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

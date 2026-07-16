@@ -42,6 +42,12 @@ $currentAction = $_GET['action'] ?? 'admin_dashboard';
             <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Quản lý Bình luận</span>
         </a>
 
+        <a href="?action=admin_manage_contacts"
+            class="flex items-center px-5 py-3 <?= $currentAction == 'admin_manage_contacts' ? 'bg-gray-800 text-primary' : 'text-gray-400 hover:bg-gray-800 hover:text-white' ?> rounded-xl transition group overflow-hidden">
+            <i class="fa-solid fa-envelope-open-text w-6 text-center shrink-0"></i>
+            <span x-show="sidebarOpen" class="ml-3 font-medium whitespace-nowrap transition-opacity duration-300" x-transition.opacity.duration.300ms>Quản lý Liên hệ</span>
+        </a>
+
         <a href="?action=admin_manage_users"
             class="flex items-center px-5 py-3 <?= $currentAction == 'admin_manage_users' ? 'bg-gray-800 text-primary' : 'text-gray-400 hover:bg-gray-800 hover:text-white' ?> rounded-xl transition group overflow-hidden">
             <i class="fa-solid fa-users w-6 text-center shrink-0"></i>

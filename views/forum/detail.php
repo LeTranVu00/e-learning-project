@@ -153,7 +153,8 @@ if (!function_exists('timeAgo')) {
                 <div class="flex gap-3 items-start">
                     <img src="<?= htmlspecialchars($cmtAvatar) ?>" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 shrink-0 mt-1">
                     <div class="flex-1 min-w-0">
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl px-4 py-2.5 inline-block max-w-full">
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl px-4 py-2.5 max-w-full transition-all"
+                             :class="editCommentId === <?= $comment['id'] ?> ? 'block w-full' : 'inline-block'">
                             <div class="flex items-center justify-between gap-3 mb-1 min-w-0">
                                 <div class="flex items-center gap-1.5 min-w-0 flex-wrap">
                                     <span class="font-bold text-sm text-gray-900 dark:text-white truncate max-w-[120px]"><?= htmlspecialchars($comment['author_name']) ?></span>
@@ -192,7 +193,7 @@ if (!function_exists('timeAgo')) {
                             
                             <!-- Nội dung bình luận -->
                             <div x-show="editCommentId !== <?= $comment['id'] ?>">
-                                <p class="text-gray-700 dark:text-gray-300 text-sm break-words whitespace-pre-wrap"><?= htmlspecialchars($comment['content']) ?></p>
+                                <div class="text-gray-700 dark:text-gray-300 text-sm break-words whitespace-pre-wrap prose dark:prose-invert max-w-none"><?= $comment['content'] ?></div>
                             </div>
 
                             <!-- Form sửa bình luận -->
@@ -200,7 +201,7 @@ if (!function_exists('timeAgo')) {
                             <div x-show="editCommentId === <?= $comment['id'] ?>" x-cloak>
                                 <form action="?action=forum_update_comment<?= !empty($isAdminMode) ? '&admin=1' : '' ?>" method="POST">
                                     <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
-                                    <textarea name="content" required rows="2" maxlength="2000"
+                                    <textarea name="content" required rows="5" maxlength="2000"
                                         class="w-full px-3 py-2 bg-white dark:bg-gray-600 border border-primary/40 dark:border-gray-500 rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition text-sm resize-none mt-1 text-gray-900 dark:text-white"
                                     ><?= htmlspecialchars($comment['content']) ?></textarea>
                                     <div class="flex gap-2 mt-2">

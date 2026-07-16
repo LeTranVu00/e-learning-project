@@ -97,6 +97,11 @@ class AdminController {
         ")->fetchAll(PDO::FETCH_ASSOC);
 
         $chart_course_labels = [];
+        $chart_course_series = [];
+        foreach ($top_courses as $tc) {
+            $chart_course_labels[] = $tc['title'];
+            $chart_course_series[] = (int) $tc['count'];
+        }
         
         require_once __DIR__ . '/../../views/admin/dashboard.php';
     }
